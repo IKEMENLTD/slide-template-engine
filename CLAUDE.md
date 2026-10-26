@@ -13,7 +13,12 @@ npm run typecheck                                                       # 型の
 python3 scripts/build-provisional-template.py                           # 仮テンプレートを作り直す
 npx tsx src/cli.ts catalog --template templates/provisional.pptx        # 型カタログ（out/catalog/）
 npx tsx scripts/phase0/check-structure.ts <a.pptx>                      # PPTX_REPAIR の構造検査
+npx tsx src/cli.ts build --template templates/provisional.pptx --input samples/manuscript-01-short.md --slides 5 [--ai anthropic|claude-cli]
+npx tsx src/cli.ts build --resume out/<実行ID>                            # 途中から再開
+npx tsx src/cli.ts check out/<実行ID>                                     # 検査だけやり直す
 ```
+
+AI の呼び出し口は `--ai anthropic`（本番。`ANTHROPIC_API_KEY`）と `--ai claude-cli`（検証用。Claude Code の `claude -p`）。D-019。
 
 Python 側は `python-pptx`・`PyMuPDF`・`Pillow` を使う（テンプレート生成と PDF の読み取り）。
 
@@ -32,3 +37,18 @@ Python 側は `python-pptx`・`PyMuPDF`・`Pillow` を使う（テンプレー�
 - 先方 PDF は Illustrator でカナを詰めて組んである（palt）。PowerPoint は詰めないので 5〜14% 広くなる。PDF の字幅を正にして枠を決めない（D-015）。
 - 文字の欄は `p:txBody`（presentationml の名前空間）。`a:` で探すと見つからない。
 - 行間はテンプレートで固定値（pt）にする。行数の計算がそれで決まる（D-013）。
+
+## AI 呼び出しで守ること（AirLog から移植した教訓の要約。REQUIREMENTS 13-4）
+
+- **必ずストリーミングで呼ぶ**（`src/ai/model-failover.ts`）。非ストリーミングだと SDK の timeout が生成時間そのものを縛り、完成間際に切れる。
+- **時間の見積りはモデルの速度の関数**（`src/ai/time-budget.ts`）。定数をいじって直さない。モデルを足すときは `outputTokensPerSec` を必ず埋める。
+- **出力の上限は常にプロンプトで伝える**。上限で切れた出力（stop_reason が max_tokens）は保存しない。ただし長さの問題なのでやり直しは可（終端にしない）。
+- **system は「材料（原稿・カタログ）→ 段ごとの指示」の順**。順序を入れ替えるとキャッシュが黙って効かなくなる（エラーは出ない）。材料の文字列は段をまたいで同じにする。
+- **原稿は信用できない入力**。囲いのタグ（`src/ai/fence.ts` の一覧1か所）を潰してから入れる。タグを増やしたらそこだけ直す。
+- 新しい AI の段は `callForJson`（`src/ai/call-json.ts`）を通す。
+
+## 検査で守ること（Phase 2 で分かったこと）
+
+- 検査は設計図ではなく **出来上がった .pptx を読み直して** 測る（`src/check/deck-check.ts`）。B段の書き直しと同じ関数（`src/check/slots.ts`）を使う。
+- 折り返せない語（「4,800」）は1行と予測されても枠より広いことがある。行ごとの幅も測る（D-024）。
+- 見本の文言は「ダミー」「Dummy」と分かる形にする。実在しそうな語を見本に置くと、AI が同じ語を書いたときに DUMMY_LEFT が誤って止まる。

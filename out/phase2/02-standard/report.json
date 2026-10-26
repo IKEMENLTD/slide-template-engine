@@ -1,0 +1,178 @@
+{
+  "run": {
+    "id": "20261026-145511-manuscript-02-standard",
+    "createdAt": "2026-10-26T05:55:12.065Z",
+    "input": "samples/manuscript-02-standard.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 10,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:03:33.426Z",
+  "slides": 9,
+  "ok": true,
+  "errors": 0,
+  "warnings": 3,
+  "byCode": {
+    "NAME_NOT_IN_SOURCE": 3
+  },
+  "issues": [
+    {
+      "code": "NAME_NOT_IN_SOURCE",
+      "level": "warning",
+      "page": 1,
+      "slot": "txt.point.2.main",
+      "message": "txt.point.2.main に原稿に無い語 スマホ がある（固有名詞なら要確認）"
+    },
+    {
+      "code": "NAME_NOT_IN_SOURCE",
+      "level": "warning",
+      "page": 4,
+      "slot": "txt.headline",
+      "message": "txt.headline に原稿に無い語 スマホ がある（固有名詞なら要確認）"
+    },
+    {
+      "code": "NAME_NOT_IN_SOURCE",
+      "level": "warning",
+      "page": 8,
+      "slot": "txt.headline",
+      "message": "txt.headline に原稿に無い語 スマホ がある（固有名詞なら要確認）"
+    }
+  ],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 5,
+    "failedAttempts": 1,
+    "inputTokens": 10,
+    "outputTokens": 6894,
+    "cacheReadTokens": 16805,
+    "cacheWriteTokens": 18812,
+    "costUsdEstimate": 0.1194,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 6081,
+        "outputTokens": 2206,
+        "ms": 17043
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 3,
+        "inputTokens": 23035,
+        "outputTokens": 4566,
+        "ms": 37191
+      },
+      {
+        "stage": "B段 書き直し",
+        "calls": 1,
+        "inputTokens": 6511,
+        "outputTokens": 122,
+        "ms": 5321
+      }
+    ]
+  },
+  "timingsMs": {
+    "A段": 17050,
+    "B段": 43645,
+    "C段": 1980,
+    "D段": 1338
+  },
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "toc/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 3,
+      "type": "issues/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.3.title",
+        "txt.item.4.title"
+      ]
+    },
+    {
+      "page": 4,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.1",
+        "txt.item.2",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 6,
+      "type": "steps/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption",
+        "txt.item.4.caption"
+      ]
+    },
+    {
+      "page": 7,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 8,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 9,
+      "type": "collage",
+      "rewrites": 1,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}

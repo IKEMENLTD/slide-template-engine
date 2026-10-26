@@ -1,0 +1,442 @@
+{
+  "version": 1,
+  "deckTitle": "部品加工工場のデジタル化計画 2026",
+  "template": {
+    "file": "templates/provisional.pptx",
+    "sha256": "91f87896c67f634bb79414982be5f50d09478115b3af15322bd3863ad66c4604"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "slots": {
+        "txt.point.1.lead": "受注と指示書",
+        "txt.point.1.main": "デジタル化",
+        "txt.point.2.lead": "機械の稼働",
+        "txt.point.2.main": "見える化",
+        "txt.point.3.lead": "日程づくり",
+        "txt.point.3.main": "誰でもできる",
+        "txt.headline": "部品加工工場の\n[[デジタル化]]計画 2026",
+        "txt.subtitle": "紙と勘に頼る仕事を、データで\n回る仕事に変える3年間の計画"
+      },
+      "photos": {
+        "img.hero": "金属部品を加工する機械と、タブレットを見る作業者のいる工場内の様子"
+      },
+      "outlinePage": 1,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p01-img.hero.jpg"
+      }
+    },
+    {
+      "type": "toc/5",
+      "slots": {
+        "txt.eyebrow": "CONTENTS",
+        "txt.item.1": "工場の現状と課題",
+        "txt.item.2": "目指す姿",
+        "txt.item.3": "3つの取り組み",
+        "txt.item.4": "進め方と体制",
+        "txt.item.5": "投資と効果"
+      },
+      "photos": {
+        "img.side": "工場の加工ラインを広く写した写真"
+      },
+      "outlinePage": 2,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.side": "p02-img.side.jpg"
+      }
+    },
+    {
+      "type": "section",
+      "slots": {
+        "txt.headline": "工場の現状と課題"
+      },
+      "photos": {},
+      "outlinePage": 3,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {}
+    },
+    {
+      "type": "photo-text/a",
+      "slots": {
+        "txt.headline": "受注から\n出荷まで紙で回る",
+        "txt.body": "受注は電話とファクスで受け、営業担当が[[紙の指示書]]を作ります。指示書は工場に回り、班長が手書きで日程を組みます。"
+      },
+      "photos": {
+        "img.right": "紙の指示書を手に確認する工場の班長",
+        "img.left": "ファクスと書類が並ぶ事務所の机"
+      },
+      "outlinePage": 4,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.right": "p04-img.right.jpg",
+        "img.left": "p04-img.left.jpg"
+      }
+    },
+    {
+      "type": "issues/4",
+      "slots": {
+        "txt.eyebrow": "PROBLEMS",
+        "txt.headline": "現場で起きている問題",
+        "txt.item.1.title": "段取り替えに\n時間がかかる",
+        "txt.item.1.body": "機械の設定変更に平均45分",
+        "txt.item.2.title": "不良の原因が\n分からない",
+        "txt.item.2.body": "どの条件で作ったか追えない",
+        "txt.item.3.title": "[[熟練者に頼っている]]",
+        "txt.item.3.body": "日程を組めるのは班長2人だけ",
+        "txt.item.4.title": "在庫が多すぎる",
+        "txt.item.4.body": "必要な量の2倍近くある"
+      },
+      "photos": {
+        "img.item.1": "機械の設定を調整する作業者の手元",
+        "img.item.2": "検査台に並んだ不良の金属部品",
+        "img.item.3": "手書きの日程表を前に考える班長",
+        "img.item.4": "材料が山積みになった倉庫の棚"
+      },
+      "outlinePage": 5,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title",
+        "txt.item.2.title"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p05-img.item.1.jpg",
+        "img.item.2": "p05-img.item.2.jpg",
+        "img.item.3": "p05-img.item.3.jpg",
+        "img.item.4": "p05-img.item.4.jpg"
+      }
+    },
+    {
+      "type": "numbers/3",
+      "slots": {
+        "txt.eyebrow": "CURRENT\nSTATUS",
+        "txt.headline": "数字で見る現状",
+        "txt.label.1": "設備の稼働率",
+        "num.value.1": "62",
+        "txt.unit.1": "%",
+        "txt.note.1": "設備が動いている割合",
+        "txt.label.2": "不良率",
+        "num.value.2": "3.8",
+        "txt.unit.2": "%",
+        "txt.note.2": "不良品が出る割合",
+        "txt.label.3": "納期遅れ",
+        "num.value.3": "14",
+        "txt.unit.3": "件／月",
+        "txt.note.3": "月あたりの\n納期遅れの件数",
+        "txt.footnote": "数値は現状（検証用の架空の数字）。"
+      },
+      "photos": {
+        "img.side": "稼働中の加工機械と作業者を縦長に写した写真"
+      },
+      "outlinePage": 6,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.3"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.side": "p06-img.side.jpg"
+      }
+    },
+    {
+      "type": "section",
+      "slots": {
+        "txt.headline": "目指す姿"
+      },
+      "photos": {},
+      "outlinePage": 7,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {}
+    },
+    {
+      "type": "numbers/3",
+      "slots": {
+        "txt.eyebrow": "Our\nTargets",
+        "txt.headline": "3年後の目標",
+        "txt.label.1": "設備の稼働率",
+        "num.value.1": "80",
+        "txt.unit.1": "%",
+        "txt.note.1": "62%から[[80%]]へ向上",
+        "txt.label.2": "不良率",
+        "num.value.2": "1.5",
+        "txt.unit.2": "%",
+        "txt.note.2": "3.8%から1.5%へ低減",
+        "txt.label.3": "納期遅れ",
+        "num.value.3": "2",
+        "txt.unit.3": "件/月",
+        "txt.note.3": "月14件から月2件へ削減",
+        "txt.footnote": "受注から出荷までの情報が1つの仕組みでつながり、誰でも工場の状態を確認できる姿を目指します。"
+      },
+      "photos": {
+        "img.side": "整然とした工場の生産ラインと、画面で状況を確認する作業者"
+      },
+      "outlinePage": 8,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.side": "p08-img.side.jpg"
+      }
+    },
+    {
+      "type": "photo-text/b",
+      "slots": {
+        "txt.headline": "[[3つの取り組み]]",
+        "txt.item.1": "受注と指示書をデジタル化する",
+        "txt.item.2": "機械の稼働を見える化する",
+        "txt.item.3": "日程づくりを誰でもできるようにする"
+      },
+      "photos": {
+        "img.hero": "金属部品を加工する機械と、タブレットを持つ作業者"
+      },
+      "outlinePage": 9,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p09-img.hero.jpg"
+      }
+    },
+    {
+      "type": "photo-text/a",
+      "slots": {
+        "txt.headline": "受注と指示書の\nデジタル化",
+        "txt.body": "受注の内容を画面で入力し、指示書を[[自動で作ります]]。ファクスで届いた注文も、読み取って入力の手間を減らします。"
+      },
+      "photos": {
+        "img.right": "パソコンで受注内容を入力する事務担当者",
+        "img.left": "ファクスと紙の注文書、指示書"
+      },
+      "outlinePage": 10,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.right": "p10-img.right.jpg",
+        "img.left": "p10-img.left.jpg"
+      }
+    },
+    {
+      "type": "attention",
+      "slots": {
+        "txt.eyebrow": "Visualize",
+        "txt.headline": "機械の稼働を見える化する",
+        "txt.body": "各機械に[[センサー]]を付け、動いているか止まっているかを記録します。止まった理由を現場で選んで入力し、改善の材料にします。"
+      },
+      "photos": {
+        "img.hero": "加工機械に取り付けたセンサーと稼働状況を示す現場の様子"
+      },
+      "outlinePage": 11,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p11-img.hero.jpg"
+      }
+    },
+    {
+      "type": "attention",
+      "slots": {
+        "txt.eyebrow": "Schedule",
+        "txt.headline": "日程づくりを誰でも",
+        "txt.body": "班長が頭の中で組んでいた日程の決め方を、[[ルール]]として書き出します。そのルールで仕組みが日程の案を作り、人が確認して決めます。"
+      },
+      "photos": {
+        "img.hero": "ホワイトボードの日程表を囲んで確認する工場の班長と作業者"
+      },
+      "outlinePage": 12,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p12-img.hero.jpg"
+      }
+    },
+    {
+      "type": "section",
+      "slots": {
+        "txt.headline": "進め方と体制"
+      },
+      "photos": {},
+      "outlinePage": 13,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {}
+    },
+    {
+      "type": "steps/3",
+      "slots": {
+        "txt.eyebrow": "Roadmap",
+        "txt.headline": "3年間の進め方",
+        "txt.item.1.caption": "[[1年目]]：受注と\n指示書のデジタル化",
+        "txt.item.2.caption": "2年目：全20台に\nセンサーを付ける",
+        "txt.item.3.caption": "3年目：班長以外でも\n日程を組める"
+      },
+      "photos": {
+        "img.item.1": "パソコンで受注内容を入力している事務所の担当者",
+        "img.item.2": "加工機械に取り付けられたセンサー",
+        "img.item.3": "日程表を見ながら相談する工場の作業者たち"
+      },
+      "outlinePage": 14,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p14-img.item.1.jpg",
+        "img.item.2": "p14-img.item.2.jpg",
+        "img.item.3": "p14-img.item.3.jpg"
+      }
+    },
+    {
+      "type": "photo-text/b",
+      "slots": {
+        "txt.headline": "推進の体制",
+        "txt.item.1": "社長を責任者に、\n製造部・営業部・総務部から\n1名ずつ集めた[[推進チーム]]を作る",
+        "txt.item.2": "外部の専門家にも、月に1回助言をもらう",
+        "txt.item.3": "各段階で現場の作業者に試して\nもらい、直してから広げる"
+      },
+      "photos": {
+        "img.hero": "会議室で話し合う推進チームのメンバー"
+      },
+      "outlinePage": 15,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1",
+        "txt.item.3"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p15-img.hero.jpg"
+      }
+    },
+    {
+      "type": "attention",
+      "slots": {
+        "txt.eyebrow": "Purpose",
+        "txt.headline": "目的は熟練者に頼らない工場",
+        "txt.body": "仕組みを入れることが目的ではありません。目的は、[[熟練者に頼らなくても]]工場が回るようにすることです。現場の知恵を書き出してみんなのものにします。"
+      },
+      "photos": {
+        "img.hero": "熟練者が若手に加工機械の操作を教えている工場の風景"
+      },
+      "outlinePage": 16,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p16-img.hero.jpg"
+      }
+    },
+    {
+      "type": "section",
+      "slots": {
+        "txt.headline": "投資と効果"
+      },
+      "photos": {},
+      "outlinePage": 17,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {}
+    },
+    {
+      "type": "numbers/3",
+      "slots": {
+        "txt.eyebrow": "Investment\nPlan",
+        "txt.headline": "3年間の[[投資額]]",
+        "txt.label.1": "投資期間",
+        "num.value.1": "3",
+        "txt.unit.1": "年間",
+        "txt.note.1": "小さく始めて\n段階的に進める",
+        "txt.label.2": "投資額合計",
+        "num.value.2": "4,800",
+        "txt.unit.2": "万円",
+        "txt.note.2": "うち1,600万円は\n国の補助金を予定",
+        "txt.label.3": "センサー",
+        "num.value.3": "20",
+        "txt.unit.3": "台",
+        "txt.note.3": "2年目に全台へ\n取り付ける",
+        "txt.footnote": "3年間の投資額は合計で4,800万円。うち1,600万円は国の補助金の活用を予定しています。"
+      },
+      "photos": {
+        "img.side": "工場で機械を前に計画を確認する作業者と責任者"
+      },
+      "outlinePage": 18,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.2",
+        "txt.note.3"
+      ],
+      "rewrites": 2,
+      "photoFiles": {
+        "img.side": "p18-img.side.jpg"
+      }
+    },
+    {
+      "type": "photo-text/b",
+      "slots": {
+        "txt.headline": "期待する効果",
+        "txt.item.1": "段取り替えの時間は、\n平均[[45分から20分]]へ短縮します。",
+        "txt.item.2": "材料の在庫は今の半分へ。残業は\n月1人20時間から10時間へ減らします。",
+        "txt.item.3": "浮いた時間は若手の育成に。\n熟練者が毎週2時間教えます。"
+      },
+      "photos": {
+        "img.hero": "熟練の作業者が若手に機械の操作を教えている工場の場面"
+      },
+      "outlinePage": 19,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1",
+        "txt.item.2",
+        "txt.item.3"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p19-img.hero.jpg"
+      }
+    },
+    {
+      "type": "collage",
+      "slots": {
+        "txt.headline": "全員でつくる工場の計画",
+        "txt.subtitle": "小さく始めて、\n[[一歩ずつ]]進めます"
+      },
+      "photos": {
+        "img.hero": "工場で働く人たちが笑顔で並んでいる集合写真風の場面"
+      },
+      "outlinePage": 20,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p20-img.hero.jpg"
+      }
+    }
+  ]
+}

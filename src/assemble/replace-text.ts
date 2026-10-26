@@ -38,7 +38,10 @@ function insertUFill(rpr: XmlElement, uFill: XmlElement) {
   rpr.appendChild(uFill);
 }
 
-export function replaceText(text: string, emphasis: EmphasisStyle) {
+/** 字体を差し替えるとき（設定 headline.mincho が false の大見出し）。テーマの字体の参照（+mn-ea など）を入れる */
+export type FontOverride = { ea: string; latin: string };
+
+export function replaceText(text: string, emphasis: EmphasisStyle, font?: FontOverride) {
   return (el: XmlElement) => {
     const doc = el.ownerDocument!;
     const txBody = el.getElementsByTagNameNS(P, 'txBody').item(0);
@@ -66,6 +69,17 @@ export function replaceText(text: string, emphasis: EmphasisStyle) {
         } else r.appendChild(rpr);
         const runPr = r.firstChild as XmlElement;
         runPr.removeAttribute('dirty');
+        if (font) {
+          for (const [tag, face] of [['latin', font.latin], ['ea', font.ea]] as const) {
+            const el = runPr.getElementsByTagNameNS(A, tag).item(0);
+            if (el) el.setAttribute('typeface', face);
+            else {
+              const add = doc.createElementNS(A, `a:${tag}`);
+              add.setAttribute('typeface', face);
+              runPr.appendChild(add);
+            }
+          }
+        }
         if (part.emphasis) {
           if (emphasis.bold) runPr.setAttribute('b', '1');
           runPr.setAttribute('u', 'heavy');

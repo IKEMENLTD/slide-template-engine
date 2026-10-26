@@ -6,4 +6,5 @@ node_modules/
 out/*
 !out/phase0/
 !out/phase1/
+!out/phase2/
 out/phase0/automizer/photos/

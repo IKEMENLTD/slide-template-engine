@@ -1,6 +1,9 @@
 /**
- * slidegen の入口（REQUIREMENTS 12章）。いまは catalog だけ。build・check は Phase 2 以降。
- *   npx tsx src/cli.ts catalog --template templates/provisional.pptx [--out out/catalog/provisional.catalog.json]
+ * slidegen の入口（REQUIREMENTS 12章）。
+ *   slidegen catalog --template templates/provisional.pptx [--out <catalog.json>] [--config <config.json>]
+ *   slidegen build   --template templates/provisional.pptx --input samples/manuscript-01.md [--photos assets/photos] [--out out/] [--slides 10] [--ai anthropic|claude-cli] [--model <id>]
+ *   slidegen build   --resume out/<実行ID> [--ai ...]
+ *   slidegen check   out/<実行ID>
  */
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -11,6 +14,8 @@ import { buildCatalog } from './catalog/build-catalog.js';
 import { configExists, configPathFor, loadConfig, scaffoldConfig } from './catalog/config.js';
 import { readTemplate } from './catalog/read-template.js';
 import { fitSlot } from './fit/fit-slot.js';
+import { AnthropicTransport, ClaudeCliTransport, type AiTransport } from './ai/transport.js';
+import { build, recheck } from './run/build.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 
@@ -63,9 +68,51 @@ async function catalog(args: string[]) {
   if (errors) process.exitCode = 1;
 }
 
+function transportFor(name: string | undefined): AiTransport {
+  const n = name ?? process.env.SLIDEGEN_AI ?? 'anthropic';
+  if (n === 'anthropic') {
+    return new AnthropicTransport({ refusalFallback: true });
+  }
+  if (n === 'claude-cli') return new ClaudeCliTransport();
+  throw new Error(`--ai は anthropic か claude-cli（いま: ${n}）`);
+}
+
+async function buildCmd(args: string[]) {
+  const { values } = parseArgs({
+    args,
+    options: {
+      template: { type: 'string' }, input: { type: 'string' }, photos: { type: 'string' }, 'no-photos': { type: 'boolean' },
+      out: { type: 'string' }, config: { type: 'string' }, slides: { type: 'string' }, resume: { type: 'string' },
+      ai: { type: 'string' }, model: { type: 'string' }, 'stop-after': { type: 'string' },
+    },
+  });
+  const res = await build({
+    root: ROOT,
+    outDir: path.resolve(values.out ?? path.join(ROOT, 'out')),
+    input: values.input && path.resolve(values.input),
+    template: values.template && path.resolve(values.template),
+    config: values.config && path.resolve(values.config),
+    photos: values['no-photos'] ? null : values.photos && path.resolve(values.photos),
+    targetSlides: values.slides ? Number(values.slides) : undefined,
+    resume: values.resume,
+    transport: transportFor(values.ai),
+    model: values.model,
+    stopAfter: values['stop-after'] as never,
+  });
+  report(res);
+}
+
+function report(res: { dir: string; errors: number; warnings: number; stoppedAfter?: string }) {
+  if (res.stoppedAfter) return console.log(`${res.stoppedAfter} の段で止めた: ${path.relative(ROOT, res.dir)}`);
+  console.log(`止める ${res.errors}・注意 ${res.warnings} → ${path.relative(ROOT, res.dir)}/report.md`);
+  if (res.errors) process.exitCode = 1;
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 if (cmd === 'catalog') await catalog(rest);
+else if (cmd === 'build') await buildCmd(rest);
+else if (cmd === 'check') report(await recheck(rest[0], ROOT));
 else {
-  console.error('使い方: slidegen catalog --template <テンプレート.pptx> [--out <catalog.json>] [--config <config.json>]');
+  console.error('使い方: slidegen catalog|build|check（src/cli.ts の先頭を見る）');
   process.exitCode = 2;
 }

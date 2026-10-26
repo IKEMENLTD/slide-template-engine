@@ -4,7 +4,7 @@
  * 字数の上限はここで1回だけ決め、AI への指示（B段）と検査（OVERFLOW）の両方がこの値を読む（2-3 原則7）。
  */
 import { loadFont } from '../fit/measure.js';
-import type { TemplateConfig } from './config.js';
+import { slotPattern, type TemplateConfig } from './config.js';
 import type { RawSlot, RawTemplate, RawType } from './read-template.js';
 
 export type CatalogSlot = {
@@ -20,6 +20,9 @@ export type CatalogSlot = {
     /** 文字幅を測るフォントファイル（和文用・英数字用。リポジトリからの相対パス） */
     fontFile: string;
     latinFontFile: string;
+    /** 強調語（太字）を測る実フォント（D-009。強調が太字でないなら上と同じ） */
+    emphasisFontFile: string;
+    emphasisLatinFontFile: string;
     spacingPt: number;
     align: string;
     wrap: boolean;
@@ -70,7 +73,7 @@ export type Catalog = {
 
 export type CatalogProblem = { level: 'error' | 'warning'; where: string; message: string };
 
-const globToRe = (g: string) => new RegExp('^' + g.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+const globToRe = slotPattern;
 
 function overrideFor(cfg: TemplateConfig, t: CatalogType, slotName: string) {
   // 「型ID/変種」を「型ID」より優先する
@@ -133,7 +136,8 @@ export function buildCatalog(raw: RawTemplate, cfg: TemplateConfig, ctx: { file:
         continue;
       }
 
-      const tx = s.text;
+      // 設定 headline.mincho が false なら、大見出しはテーマの本文用の字体（ゴシック）で組む（D段で差し替える。16章 #3）
+      const tx = s.text && s.name === 'txt.headline' && !cfg.headline.mincho ? { ...s.text, ea: raw.theme.fonts.minorEa, latin: raw.theme.fonts.minorLatin } : s.text;
       if (!tx) {
         problems.push({ level: 'error', where: sw, message: '文字の欄なのに文字枠が無い' });
         continue;
@@ -141,7 +145,10 @@ export function buildCatalog(raw: RawTemplate, cfg: TemplateConfig, ctx: { file:
       if (tx.autofit === 'shrink') problems.push({ level: 'error', where: sw, message: '自動縮小（文字を縮めて収める）が有効。原則4に反するので「自動調整しない」にする' });
       const fontFile = fontFor(tx.ea, tx.bold, sw);
       const latinFontFile = fontFor(tx.latin, tx.bold, sw);
-      if (!fontFile || !latinFontFile) continue;
+      const emBold = tx.bold || cfg.emphasis.bold;
+      const emphasisFontFile = emBold ? fontFor(tx.ea, true, `${sw}（強調）`) : fontFile;
+      const emphasisLatinFontFile = emBold ? fontFor(tx.latin, true, `${sw}（強調）`) : latinFontFile;
+      if (!fontFile || !latinFontFile || !emphasisFontFile || !emphasisLatinFontFile) continue;
 
       const lineHeightPt =
         tx.lineSpacing.kind === 'pt' ? tx.lineSpacing.value : tx.lineSpacing.kind === 'pct' ? tx.sizePt * tx.lineSpacing.value * cfg.fit.defaultLineHeight : tx.sizePt * cfg.fit.defaultLineHeight;
@@ -171,7 +178,7 @@ export function buildCatalog(raw: RawTemplate, cfg: TemplateConfig, ctx: { file:
         slot.override = o;
       }
       slot.style = {
-        sizePt: tx.sizePt, bold: tx.bold, latin: tx.latin, ea: tx.ea, fontFile, latinFontFile,
+        sizePt: tx.sizePt, bold: tx.bold, latin: tx.latin, ea: tx.ea, fontFile, latinFontFile, emphasisFontFile, emphasisLatinFontFile,
         spacingPt: tx.spacingPt, align: tx.align, wrap: tx.wrap, innerWidthPt: Math.round(innerW * 100) / 100,
         lineHeightPt: Math.round(lineHeightPt * 100) / 100, lineHeightSource,
       };
