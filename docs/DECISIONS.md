@@ -54,7 +54,8 @@
 
 **PPTX のライブラリは pptx-automizer 0.9.4 に決める**（python-pptx には切り替えない）。ただし出力をそのまま使わず、必ず D-004 の掃除と構造検査を通す。
 
-**PowerPoint で「修復」が出ないかは未確認**（人が確認する。`out/phase0/README.md`）。
+**PowerPoint での開封確認（2026-10-26・佐藤さん・PowerPoint for the web）**：`probe-out.pptx` と `probe-out-green.pptx` は、エラーも「修復」も出ずに開けた。見出しの文字は直せて、写真は図として選べた。緑のほうは、青が緑に、黄色が橙に変わっていた。**Phase 0 の受け入れ条件はすべて満たした。**
+（デスクトップ版 PowerPoint はこの PC に無いので、デスクトップ版での確認は未実施）
 
 ---
 
@@ -177,7 +178,7 @@
 
 ## Phase 1 に持ち越すこと
 
-1. 佐藤さんの PowerPoint での確認結果（修復の有無・文字と写真が直せるか・色の差し替え）を見て、D-004 を確定する。Medium の名前（D-005）と Noto の文字幅（D-006）は、PowerPoint のデスクトップ版が使えるまで未確認
+1. Medium の名前（D-005）と Noto の文字幅（D-006）は、PowerPoint のデスクトップ版が使えるまで未確認（ブラウザ版は Noto を持たない）
 2. 仮テンプレートの図形から、python-pptx の既定の「影」を外す（`p:style` の effectRef。検証テンプレートでは図形に影が出ていた）
 3. 設定の雛形：`headline.mincho: true`（D-008）、`emphasis` の形（D-009）、折り返しの規則と 3% の余裕（D-006）
 4. 写真の切り抜きの中心（D-003）は Phase 3
