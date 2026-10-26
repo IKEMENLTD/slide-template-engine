@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+!.env.example
+# 実行結果は残さない。Phase 0 の確認用だけは人が開くので版管理する
+out/*
+!out/phase0/
+out/phase0/automizer/photos/
