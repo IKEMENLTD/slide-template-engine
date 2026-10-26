@@ -9,7 +9,8 @@
  *
  * 使い方: npx tsx scripts/phase0/probe-automizer.ts <写真1> <写真2>
  */
-import { Automizer, ModifyImageHelper, type XmlElement } from 'pptx-automizer';
+import { Automizer, type XmlElement } from 'pptx-automizer';
+import { replaceImage } from '../../src/assemble/replace-image.js';
 import JSZip from 'jszip';
 import sharp from 'sharp';
 import { sanitizePptx } from '../../src/assemble/sanitize.js';
@@ -96,7 +97,7 @@ async function build(photo1: string, photo2: string, outName: string) {
     slide.modifyElement('txt.item.2', replaceKeepingFormat('人件費が厳しい', emphasis));
     slide.modifyElement('txt.body', replaceKeepingFormat('業務が属人化しており、自分がいないと回らない。採用コストも教育コストも高騰している。', emphasis));
     slide.modifyElement('num.rate', replaceKeepingFormat('70', emphasis));
-    slide.modifyElement('img.hero', [ModifyImageHelper.setRelationTarget(path.basename(photo1))]);
+    slide.modifyElement('img.hero', [replaceImage(path.basename(photo1))]);
   });
   pres.addSlide('tpl', 1, (slide) => {
     slide.modifyElement('txt.headline', replaceKeepingFormat('同じ見本の2枚目（複製の確認）', emphasis));
@@ -104,7 +105,7 @@ async function build(photo1: string, photo2: string, outName: string) {
     slide.modifyElement('txt.item.2', replaceKeepingFormat('補助金は[[難しそう]]', emphasis));
     slide.modifyElement('txt.body', replaceKeepingFormat('見積もりを取ったら数百万〜数千万と言われた。', emphasis));
     slide.modifyElement('num.rate', replaceKeepingFormat('2/3', emphasis));
-    slide.modifyElement('img.hero', [ModifyImageHelper.setRelationTarget(path.basename(photo2))]);
+    slide.modifyElement('img.hero', [replaceImage(path.basename(photo2))]);
   });
   pres.addSlide('tpl', 2, (slide) => {
     slide.modifyElement('txt.headline', replaceKeepingFormat('制度の核心', emphasis));

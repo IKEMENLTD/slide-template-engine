@@ -1,0 +1,42 @@
+{
+  "_note": "先方 PDF（docs/source/0925_資料.pdf）p1〜p3 に実際に入っている文言。仮テンプレートの欄に収まるかの確認と、流し込みの見比べに使う。PDF の文字の抽出結果から写した（字間を空けた英字の空白は詰めた）。",
+  "cover": {
+    "txt.headline": "業務システム導入で、\n会社が変わる。",
+    "txt.subtitle": "省力化投資補助金 × オーダーメイドシステム開発\n活用ガイド（中小企業・個人事業主向け / 2025年度対応版）",
+    "txt.point.1.lead": "最大",
+    "txt.point.1.main": "2,000万円を\n国が補助",
+    "txt.point.2.lead": "業務に\n完全フィットする",
+    "txt.point.2.main": "フルスクラッチ\n開発",
+    "txt.point.3.lead": "丸投げOK・\n不採択時0円",
+    "txt.point.3.main": "申請代行\n費用ゼロ"
+  },
+  "issues/4": {
+    "txt.eyebrow": "Company Issues",
+    "txt.headline": "経営の現場で、こんな限界を感じていませんか？",
+    "txt.item.1.title": "社長が現場から\n離れられない",
+    "txt.item.1.body": "業務が属人化しており、自分がいないと回らない",
+    "txt.item.2.title": "人件費が厳しい",
+    "txt.item.2.body": "採用コストも教育コストも高騰している",
+    "txt.item.3.title": "開発費が高すぎる",
+    "txt.item.3.body": "見積もりを取ったら数百万～数千万と言われた",
+    "txt.item.4.title": "補助金は難しそう",
+    "txt.item.4.body": "書類が多く、何が自社に使えるか分からない"
+  },
+  "numbers/3": {
+    "txt.eyebrow": "The core\nof the system",
+    "txt.headline": "省力化投資補助金　制度の核心",
+    "txt.label.1": "補助率",
+    "num.value.1": "2/3",
+    "txt.unit.1": "",
+    "txt.note.1": "融資ではなく、\n返済不要の公制度",
+    "txt.label.2": "最大補助額",
+    "num.value.2": "2,000",
+    "txt.unit.2": "万円",
+    "txt.note.2": "中小企業庁管轄の\n信頼できる制度",
+    "txt.label.3": "採択率",
+    "num.value.3": "70",
+    "txt.unit.3": "%+",
+    "txt.note.3": "2024年実績・全国平均。\n今が最も狙い目",
+    "txt.footnote": "管轄：中小企業庁 対象：業務省力化のためのシステム導入費用（オーダーメイド開発も対象）\n時期：2024年新設。"
+  }
+}
