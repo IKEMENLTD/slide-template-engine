@@ -9,6 +9,9 @@ npm ci
 npx vitest run                                    # テスト
 docker build -f docker/render/Dockerfile -t slidegen-render:phase0 .   # 描画用イメージ（初回だけ）
 python3 scripts/phase0/render.py <in.pptx> <出力dir>                    # PDF と PNG
+npm run typecheck                                                       # 型の検査
+python3 scripts/build-provisional-template.py                           # 仮テンプレートを作り直す
+npx tsx src/cli.ts catalog --template templates/provisional.pptx        # 型カタログ（out/catalog/）
 npx tsx scripts/phase0/check-structure.ts <a.pptx>                      # PPTX_REPAIR の構造検査
 ```
 
@@ -26,3 +29,6 @@ Python 側は `python-pptx`・`PyMuPDF`・`Pillow` を使う（テンプレー�
 - gpt-image-2.5-flare に `input_fidelity` を送ると 400 になる（D-007）。
 - 検査は両側のテストを持つ（違反で落ちる／正しいものは通る）。足したら、わざと壊して落ちることを一度確かめる。
 - AirLog（IKEMENLTD/airlog）は読むだけ。書き込まない。
+- 先方 PDF は Illustrator でカナを詰めて組んである（palt）。PowerPoint は詰めないので 5〜14% 広くなる。PDF の字幅を正にして枠を決めない（D-015）。
+- 文字の欄は `p:txBody`（presentationml の名前空間）。`a:` で探すと見つからない。
+- 行間はテンプレートで固定値（pt）にする。行数の計算がそれで決まる（D-013）。

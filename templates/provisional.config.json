@@ -1,0 +1,63 @@
+{
+  "fonts": {
+    "Noto Sans JP Medium": "fonts/NotoSansJP-Medium.otf",
+    "Barlow Medium": "fonts/Barlow-Medium.ttf",
+    "Noto Serif JP": "fonts/NotoSerifJP-Regular.otf",
+    "Noto Sans JP:bold": "fonts/NotoSansJP-Bold.otf",
+    "Barlow:bold": "fonts/Barlow-Bold.ttf",
+    "Noto Sans JP": "fonts/NotoSansJP-Regular.otf",
+    "Barlow": "fonts/Barlow-Regular.ttf"
+  },
+  "emphasis": {
+    "underline": "accent2",
+    "bold": true,
+    "maxPerSlide": 2
+  },
+  "headline": {
+    "maxLines": 2,
+    "mincho": true
+  },
+  "images": {
+    "img.hero": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.1": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.2": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.3": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.4": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.side": {
+      "mono": true,
+      "multiply": null
+    }
+  },
+  "slots": {},
+  "fit": {
+    "autospaceEm": 0.25,
+    "hangingPunct": true,
+    "slackRatio": 0.03,
+    "defaultLineHeight": 1.2
+  },
+  "deck": {
+    "maxSameTypeInRow": 2,
+    "minSlides": 4,
+    "maxSlides": 20
+  },
+  "lightDarkRatio": {
+    "enabled": false,
+    "target": 1.5,
+    "tolerance": 0.3
+  }
+}

@@ -1,0 +1,71 @@
+/**
+ * slidegen の入口（REQUIREMENTS 12章）。いまは catalog だけ。build・check は Phase 2 以降。
+ *   npx tsx src/cli.ts catalog --template templates/provisional.pptx [--out out/catalog/provisional.catalog.json]
+ */
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { parseArgs } from 'node:util';
+import * as fontkit from 'fontkit';
+import { buildCatalog } from './catalog/build-catalog.js';
+import { configExists, configPathFor, loadConfig, scaffoldConfig } from './catalog/config.js';
+import { readTemplate } from './catalog/read-template.js';
+import { fitSlot } from './fit/fit-slot.js';
+
+const ROOT = path.resolve(import.meta.dirname, '..');
+
+function fontFiles() {
+  const dir = path.join(ROOT, 'fonts');
+  return readdirSync(dir)
+    .filter((f) => /\.(otf|ttf)$/i.test(f))
+    .map((f) => {
+      const font = fontkit.openSync(path.join(dir, f)) as unknown as { familyName: string; subfamilyName: string; name: { records: { preferredFamily?: { en?: string }; preferredSubfamily?: { en?: string } } } };
+      const pf = font.name.records.preferredFamily?.en;
+      return { file: `fonts/${f}`, legacyFamily: font.familyName, family: pf ?? font.familyName, subfamily: font.name.records.preferredSubfamily?.en ?? font.subfamilyName };
+    });
+}
+
+async function catalog(args: string[]) {
+  const { values } = parseArgs({ args, options: { template: { type: 'string' }, out: { type: 'string' }, config: { type: 'string' } } });
+  if (!values.template) throw new Error('--template が要る');
+  const tpl = path.resolve(values.template);
+  const buf = readFileSync(tpl);
+  const raw = await readTemplate(buf);
+  const cfgPath = path.resolve(values.config ?? configPathFor(tpl));
+  if (!configExists(cfgPath)) {
+    const typefaces = raw.types.flatMap((t) => t.slots.flatMap((s) => (s.text ? [{ name: s.text.ea, bold: s.text.bold }, { name: s.text.latin, bold: s.text.bold }] : [])));
+    const imageSlots = [...new Set(raw.types.flatMap((t) => t.slots.filter((s) => s.kind === 'img').map((s) => s.name)))].sort();
+    const { config, unresolved } = scaffoldConfig({ typefaces, imageSlots, fontFiles: fontFiles() });
+    writeFileSync(cfgPath, JSON.stringify(config, null, 2) + '\n');
+    console.log(`設定の雛形を作った: ${path.relative(ROOT, cfgPath)}（中身を確認して直してください）`);
+    if (unresolved.length) console.log(`  実フォントが見つからない字体: ${unresolved.join(', ')}`);
+  }
+  const cfg = loadConfig(cfgPath);
+  const { catalog: cat, problems } = buildCatalog(raw, cfg, {
+    file: path.relative(ROOT, tpl),
+    sha256: createHash('sha256').update(buf).digest('hex'),
+    resolveFile: (p) => (path.isAbsolute(p) ? p : path.join(ROOT, p)),
+  });
+  // 自己点検：テンプレートの見本の文言が、自分の欄に収まるか（収まらないなら欄の作りか測り方がおかしい）
+  const resolveFile = (p: string) => (path.isAbsolute(p) ? p : path.join(ROOT, p));
+  for (const t of cat.types)
+    for (const s of t.slots)
+      if (s.style && s.sample) {
+        const r = fitSlot(s, s.sample, cat.fit, resolveFile);
+        if (!r.ok) problems.push({ level: 'error', where: `${t.key} の ${s.name}`, message: `見本の文言が欄に収まらない：${r.reason}` });
+      }
+  const out = path.resolve(values.out ?? path.join(ROOT, 'out/catalog', path.basename(tpl).replace(/\.pptx$/i, '.catalog.json')));
+  mkdirSync(path.dirname(out), { recursive: true });
+  writeFileSync(out, JSON.stringify(cat, null, 2) + '\n');
+  for (const p of problems) console.log(`${p.level === 'error' ? '止める' : '注意'}: ${p.where}: ${p.message}`);
+  const errors = problems.filter((p) => p.level === 'error').length;
+  console.log(`型 ${cat.types.length}・欄 ${cat.types.reduce((n, t) => n + t.slots.length, 0)}・止める ${errors}・注意 ${problems.length - errors} → ${path.relative(ROOT, out)}`);
+  if (errors) process.exitCode = 1;
+}
+
+const [cmd, ...rest] = process.argv.slice(2);
+if (cmd === 'catalog') await catalog(rest);
+else {
+  console.error('使い方: slidegen catalog --template <テンプレート.pptx> [--out <catalog.json>] [--config <config.json>]');
+  process.exitCode = 2;
+}

@@ -46,6 +46,8 @@ export type WrapOptions = {
   rounding?: 'none' | 'lo-100mm';
   /** 英数字に別の字体が当たる場合（PowerPoint は latin と ea に別の字体を使う）。無ければ fontFile */
   latinFontFile?: string;
+  /** 字間（pt）。1字ごとに足す */
+  spacingPt?: number;
 };
 const HANG = new Set([...'、。，．,.」』）】'])
 
@@ -67,10 +69,11 @@ export function wrapLines(text: string, o: WrapOptions): string[] {
   const w = (s: string) => {
     const font = isWestern(s[0]) ? latinFont : cjkFont;
     const scale = o.sizePt / font.unitsPerEm;
-    if (o.rounding !== 'lo-100mm') return font.layout(s).advanceWidth * scale;
+    const tracking = (o.spacingPt ?? 0) * [...s].length;
+    if (o.rounding !== 'lo-100mm') return font.layout(s).advanceWidth * scale + tracking;
     let sum = 0;
     for (const ch of s) sum += Math.round((font.layout(ch).advanceWidth * scale) / PT_PER_100MM);
-    return sum * PT_PER_100MM;
+    return sum * PT_PER_100MM + tracking;
   };
   const toks = tokens(text);
   const lines: string[][] = [[]];
@@ -99,4 +102,19 @@ export function wrapLines(text: string, o: WrapOptions): string[] {
     prev = t;
   }
   return lines.map((l) => l.join(''));
+}
+
+/** 1行の幅（折り返さずに並べたとき）。折り返さない欄（wrap=none）の判定に使う */
+export function lineWidth(text: string, o: Pick<WrapOptions, 'fontFile' | 'latinFontFile' | 'sizePt' | 'autospaceEm'> & { spacingPt?: number }): number {
+  const cjk = loadFont(o.fontFile);
+  const latin = loadFont(o.latinFontFile ?? o.fontFile);
+  let sum = 0;
+  let prev = '';
+  for (const t of tokens(text)) {
+    const f = isWestern(t[0]) ? latin : cjk;
+    sum += (f.layout(t).advanceWidth * o.sizePt) / f.unitsPerEm + (o.spacingPt ?? 0) * [...t].length;
+    if (prev && isWestern(prev.slice(-1)) !== isWestern(t[0])) sum += o.autospaceEm * o.sizePt;
+    prev = t;
+  }
+  return sum;
 }
