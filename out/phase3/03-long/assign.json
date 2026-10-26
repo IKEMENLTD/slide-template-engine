@@ -1,0 +1,113 @@
+{
+  "cast": "Japanese metalworking factory with CNC machines, concrete floor and bright lighting. Workers wear light-gray zip-up work jackets, matching trousers and safety glasses; a veteran man in his 50s and a young man in his 20s. Office staff wear navy jackets.",
+  "assignments": [
+    {
+      "id": "p01/img.hero",
+      "use": "gen:1",
+      "scene": "A worker in a gray work jacket loads a metal part into a running CNC machine while a colleague watches nearby."
+    },
+    {
+      "id": "p02/img.side",
+      "use": "gen:2",
+      "scene": "Wide view of a metal machining line with several CNC machines running and workers tending them along the aisle."
+    },
+    {
+      "id": "p04/img.item.1",
+      "use": "gen:6",
+      "scene": "Close-up of a worker's gloved hands adjusting the settings and fixture on a machine."
+    },
+    {
+      "id": "p04/img.item.2",
+      "use": "gen:9",
+      "scene": "Defective metal parts lined up on an inspection table while a worker's hands examine one."
+    },
+    {
+      "id": "p04/img.item.3",
+      "use": "gen:10",
+      "scene": "A veteran foreman in a gray work jacket writes a production schedule by hand on paper at a desk in the factory."
+    },
+    {
+      "id": "p04/img.item.4",
+      "use": "gen:11",
+      "scene": "Warehouse shelves piled high with raw metal materials and boxes, a worker walking past."
+    },
+    {
+      "id": "p05/img.side",
+      "use": "gen:4",
+      "scene": "Vertical view of an aisle between running machine tools, with a worker walking along it checking the machines."
+    },
+    {
+      "id": "p06/img.right",
+      "use": "gen:10"
+    },
+    {
+      "id": "p06/img.left",
+      "use": "gen:12",
+      "scene": "An office desk with a fax machine and a telephone, a staff member in a navy jacket reading a received sheet."
+    },
+    {
+      "id": "p08/img.hero",
+      "use": "gen:3",
+      "scene": "A worker in a gray jacket checks machine status on a tablet beside a running machine, a colleague next to him."
+    },
+    {
+      "id": "p09/img.side",
+      "use": "gen:4"
+    },
+    {
+      "id": "p11/img.hero",
+      "use": "gen:3"
+    },
+    {
+      "id": "p12/img.right",
+      "use": "gen:7",
+      "scene": "Close-up of a small sensor mounted on a machining machine, with a worker's hand adjusting it."
+    },
+    {
+      "id": "p12/img.left",
+      "use": "gen:8",
+      "scene": "A worker in a gray jacket operates a handheld terminal in front of a machine."
+    },
+    {
+      "id": "p13/img.hero",
+      "use": "03.jpg"
+    },
+    {
+      "id": "p15/img.item.1",
+      "use": "01.jpg"
+    },
+    {
+      "id": "p15/img.item.2",
+      "use": "gen:7"
+    },
+    {
+      "id": "p15/img.item.3",
+      "use": "02.jpg"
+    },
+    {
+      "id": "p16/img.right",
+      "use": "03.jpg"
+    },
+    {
+      "id": "p16/img.left",
+      "use": "gen:8"
+    },
+    {
+      "id": "p17/img.hero",
+      "use": "gen:5",
+      "scene": "A veteran worker shows a young worker how to operate a machine, pointing at the controls while the young man watches."
+    },
+    {
+      "id": "p18/img.hero",
+      "use": "gen:11"
+    },
+    {
+      "id": "p19/img.side",
+      "use": "gen:5"
+    },
+    {
+      "id": "p20/img.hero",
+      "use": "gen:1"
+    }
+  ]
+}

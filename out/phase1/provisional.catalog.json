@@ -1,0 +1,1906 @@
+{
+  "version": 1,
+  "template": {
+    "file": "templates/provisional.pptx",
+    "sha256": "f2dc0819abda24023643984d2ab31427d209080e5d32dc652e4c9ca58b877611",
+    "slideSize": {
+      "w": 960,
+      "h": 540
+    }
+  },
+  "theme": {
+    "colors": {
+      "dk1": "000000",
+      "lt1": "FFFFFF",
+      "dk2": "3D3D3D",
+      "lt2": "ECECEC",
+      "accent1": "0064D6",
+      "accent2": "E4E74D",
+      "accent3": "8FBDF0",
+      "accent4": "003F8A",
+      "accent5": "F7F8D0",
+      "accent6": "9E9E9E",
+      "hlink": "0000FF",
+      "folHlink": "800080"
+    },
+    "fonts": {
+      "majorLatin": "Barlow",
+      "majorEa": "Noto Serif JP",
+      "minorLatin": "Barlow",
+      "minorEa": "Noto Sans JP"
+    }
+  },
+  "fit": {
+    "autospaceEm": 0.25,
+    "hangingPunct": true,
+    "slackRatio": 0.03,
+    "defaultLineHeight": 1.2
+  },
+  "emphasis": {
+    "underline": "accent2",
+    "bold": true,
+    "maxPerSlide": 2
+  },
+  "roles": [
+    "cover",
+    "number",
+    "problem"
+  ],
+  "types": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "variant": null,
+      "role": [
+        "cover"
+      ],
+      "label": "表紙（写真＋要点3つ）",
+      "slideNumber": 1,
+      "order": 1,
+      "slots": [
+        {
+          "name": "txt.point.1.lead",
+          "kind": "txt",
+          "box": {
+            "x": 454,
+            "y": 337,
+            "w": 125,
+            "h": 36,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 16
+          },
+          "style": {
+            "sizePt": 13.5,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 125,
+            "lineHeightPt": 18,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 8,
+          "maxChars": 16,
+          "maxCharsLatin": 30,
+          "sample": "ダミー小見出し"
+        },
+        {
+          "name": "txt.point.1.main",
+          "kind": "txt",
+          "box": {
+            "x": 454,
+            "y": 377,
+            "w": 125,
+            "h": 50,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 14
+          },
+          "style": {
+            "sizePt": 17,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 125,
+            "lineHeightPt": 23,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 7,
+          "maxChars": 14,
+          "maxCharsLatin": 24,
+          "sample": "ダミー要点"
+        },
+        {
+          "name": "txt.point.2.lead",
+          "kind": "txt",
+          "box": {
+            "x": 616.5,
+            "y": 337,
+            "w": 125,
+            "h": 36,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 16
+          },
+          "style": {
+            "sizePt": 13.5,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 125,
+            "lineHeightPt": 18,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 8,
+          "maxChars": 16,
+          "maxCharsLatin": 30,
+          "sample": "ダミー小見出し"
+        },
+        {
+          "name": "txt.point.2.main",
+          "kind": "txt",
+          "box": {
+            "x": 616.5,
+            "y": 377,
+            "w": 125,
+            "h": 50,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 14
+          },
+          "style": {
+            "sizePt": 17,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 125,
+            "lineHeightPt": 23,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 7,
+          "maxChars": 14,
+          "maxCharsLatin": 24,
+          "sample": "ダミー要点"
+        },
+        {
+          "name": "txt.point.3.lead",
+          "kind": "txt",
+          "box": {
+            "x": 778.5,
+            "y": 337,
+            "w": 125,
+            "h": 36,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 16
+          },
+          "style": {
+            "sizePt": 13.5,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 125,
+            "lineHeightPt": 18,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 8,
+          "maxChars": 16,
+          "maxCharsLatin": 30,
+          "sample": "ダミー小見出し"
+        },
+        {
+          "name": "txt.point.3.main",
+          "kind": "txt",
+          "box": {
+            "x": 778.5,
+            "y": 377,
+            "w": 125,
+            "h": 50,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 14
+          },
+          "style": {
+            "sizePt": 17,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 125,
+            "lineHeightPt": 23,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 7,
+          "maxChars": 14,
+          "maxCharsLatin": 24,
+          "sample": "ダミー要点"
+        },
+        {
+          "name": "txt.headline",
+          "kind": "txt",
+          "box": {
+            "x": 95.5,
+            "y": 131,
+            "w": 345,
+            "h": 80,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 32.5,
+            "bold": false,
+            "latin": "Noto Serif JP",
+            "ea": "Noto Serif JP",
+            "fontFile": "fonts/NotoSerifJP-Regular.otf",
+            "latinFontFile": "fonts/NotoSerifJP-Regular.otf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 345,
+            "lineHeightPt": 40,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 36,
+          "sample": "ダミー大見出し\nダミー大見出し"
+        },
+        {
+          "name": "txt.subtitle",
+          "kind": "txt",
+          "box": {
+            "x": 525.5,
+            "y": 150,
+            "w": 432,
+            "h": 52,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 54
+          },
+          "style": {
+            "sizePt": 15,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 432,
+            "lineHeightPt": 25.5,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 27,
+          "maxChars": 54,
+          "maxCharsLatin": 98,
+          "sample": "ダミー副題\nダミー副題"
+        },
+        {
+          "name": "img.hero",
+          "kind": "img",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 815,
+            "h": 539.5,
+            "rotDeg": 0
+          },
+          "aspect": 1.5107,
+          "geometry": "custom",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        }
+      ],
+      "decorations": 7
+    },
+    {
+      "key": "issues/2",
+      "type": "issues",
+      "variant": "2",
+      "role": [
+        "problem"
+      ],
+      "label": "課題提示（2項目）",
+      "slideNumber": 2,
+      "order": 2,
+      "slots": [
+        {
+          "name": "txt.eyebrow",
+          "kind": "txt",
+          "box": {
+            "x": -32,
+            "y": 72,
+            "w": 240,
+            "h": 26,
+            "rotDeg": -45
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 9
+          },
+          "style": {
+            "sizePt": 20.5,
+            "bold": false,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Regular.otf",
+            "latinFontFile": "fonts/Barlow-Regular.ttf",
+            "spacingPt": 4,
+            "align": "ctr",
+            "wrap": false,
+            "innerWidthPt": 240,
+            "lineHeightPt": 26,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 9,
+          "maxChars": 9,
+          "maxCharsLatin": 14,
+          "sample": "Company Issues"
+        },
+        {
+          "name": "txt.headline",
+          "kind": "txt",
+          "box": {
+            "x": 185.5,
+            "y": 52,
+            "w": 740,
+            "h": 62,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 32.5,
+            "bold": false,
+            "latin": "Noto Serif JP",
+            "ea": "Noto Serif JP",
+            "fontFile": "fonts/NotoSerifJP-Regular.otf",
+            "latinFontFile": "fonts/NotoSerifJP-Regular.otf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 740,
+            "lineHeightPt": 40,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 39,
+          "sample": "ダミー見出し"
+        },
+        {
+          "name": "txt.item.1.title",
+          "kind": "txt",
+          "box": {
+            "x": 250,
+            "y": 251,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.1.body",
+          "kind": "txt",
+          "box": {
+            "x": 250,
+            "y": 324,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.item.2.title",
+          "kind": "txt",
+          "box": {
+            "x": 644,
+            "y": 251,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.2.body",
+          "kind": "txt",
+          "box": {
+            "x": 644,
+            "y": 324,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "img.item.1",
+          "kind": "img",
+          "box": {
+            "x": 160,
+            "y": 266,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        },
+        {
+          "name": "img.item.2",
+          "kind": "img",
+          "box": {
+            "x": 554,
+            "y": 266,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        }
+      ],
+      "decorations": 6
+    },
+    {
+      "key": "issues/3",
+      "type": "issues",
+      "variant": "3",
+      "role": [
+        "problem"
+      ],
+      "label": "課題提示（3項目）",
+      "slideNumber": 3,
+      "order": 3,
+      "slots": [
+        {
+          "name": "txt.eyebrow",
+          "kind": "txt",
+          "box": {
+            "x": -32,
+            "y": 72,
+            "w": 240,
+            "h": 26,
+            "rotDeg": -45
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 9
+          },
+          "style": {
+            "sizePt": 20.5,
+            "bold": false,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Regular.otf",
+            "latinFontFile": "fonts/Barlow-Regular.ttf",
+            "spacingPt": 4,
+            "align": "ctr",
+            "wrap": false,
+            "innerWidthPt": 240,
+            "lineHeightPt": 26,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 9,
+          "maxChars": 9,
+          "maxCharsLatin": 14,
+          "sample": "Company Issues"
+        },
+        {
+          "name": "txt.headline",
+          "kind": "txt",
+          "box": {
+            "x": 185.5,
+            "y": 52,
+            "w": 740,
+            "h": 62,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 32.5,
+            "bold": false,
+            "latin": "Noto Serif JP",
+            "ea": "Noto Serif JP",
+            "fontFile": "fonts/NotoSerifJP-Regular.otf",
+            "latinFontFile": "fonts/NotoSerifJP-Regular.otf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 740,
+            "lineHeightPt": 40,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 39,
+          "sample": "ダミー見出し"
+        },
+        {
+          "name": "txt.item.1.title",
+          "kind": "txt",
+          "box": {
+            "x": 390,
+            "y": 145,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.1.body",
+          "kind": "txt",
+          "box": {
+            "x": 390,
+            "y": 218,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.item.2.title",
+          "kind": "txt",
+          "box": {
+            "x": 390,
+            "y": 250,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.2.body",
+          "kind": "txt",
+          "box": {
+            "x": 390,
+            "y": 323,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.item.3.title",
+          "kind": "txt",
+          "box": {
+            "x": 390,
+            "y": 355,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.3.body",
+          "kind": "txt",
+          "box": {
+            "x": 390,
+            "y": 428,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "img.item.1",
+          "kind": "img",
+          "box": {
+            "x": 300,
+            "y": 160,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        },
+        {
+          "name": "img.item.2",
+          "kind": "img",
+          "box": {
+            "x": 300,
+            "y": 265,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        },
+        {
+          "name": "img.item.3",
+          "kind": "img",
+          "box": {
+            "x": 300,
+            "y": 370,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        }
+      ],
+      "decorations": 7
+    },
+    {
+      "key": "issues/4",
+      "type": "issues",
+      "variant": "4",
+      "role": [
+        "problem"
+      ],
+      "label": "課題提示（4項目）",
+      "slideNumber": 4,
+      "order": 4,
+      "slots": [
+        {
+          "name": "txt.eyebrow",
+          "kind": "txt",
+          "box": {
+            "x": -32,
+            "y": 72,
+            "w": 240,
+            "h": 26,
+            "rotDeg": -45
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 9
+          },
+          "style": {
+            "sizePt": 20.5,
+            "bold": false,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Regular.otf",
+            "latinFontFile": "fonts/Barlow-Regular.ttf",
+            "spacingPt": 4,
+            "align": "ctr",
+            "wrap": false,
+            "innerWidthPt": 240,
+            "lineHeightPt": 26,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 9,
+          "maxChars": 9,
+          "maxCharsLatin": 14,
+          "sample": "Company Issues"
+        },
+        {
+          "name": "txt.headline",
+          "kind": "txt",
+          "box": {
+            "x": 185.5,
+            "y": 52,
+            "w": 740,
+            "h": 62,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 32.5,
+            "bold": false,
+            "latin": "Noto Serif JP",
+            "ea": "Noto Serif JP",
+            "fontFile": "fonts/NotoSerifJP-Regular.otf",
+            "latinFontFile": "fonts/NotoSerifJP-Regular.otf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 740,
+            "lineHeightPt": 40,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 39,
+          "sample": "ダミー見出し"
+        },
+        {
+          "name": "txt.item.1.title",
+          "kind": "txt",
+          "box": {
+            "x": 250,
+            "y": 178,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.1.body",
+          "kind": "txt",
+          "box": {
+            "x": 250,
+            "y": 251,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.item.2.title",
+          "kind": "txt",
+          "box": {
+            "x": 644,
+            "y": 178,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.2.body",
+          "kind": "txt",
+          "box": {
+            "x": 644,
+            "y": 251,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.item.3.title",
+          "kind": "txt",
+          "box": {
+            "x": 250,
+            "y": 325,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.3.body",
+          "kind": "txt",
+          "box": {
+            "x": 250,
+            "y": 398,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.item.4.title",
+          "kind": "txt",
+          "box": {
+            "x": 644,
+            "y": 325,
+            "w": 274,
+            "h": 61,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 20
+          },
+          "style": {
+            "sizePt": 21,
+            "bold": false,
+            "latin": "Barlow Medium",
+            "ea": "Noto Sans JP Medium",
+            "fontFile": "fonts/NotoSansJP-Medium.otf",
+            "latinFontFile": "fonts/Barlow-Medium.ttf",
+            "spacingPt": 3.5,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 29,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 10,
+          "maxChars": 20,
+          "maxCharsLatin": 34,
+          "sample": "ダミー課題"
+        },
+        {
+          "name": "txt.item.4.body",
+          "kind": "txt",
+          "box": {
+            "x": 644,
+            "y": 398,
+            "w": 274,
+            "h": 20,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 12,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 274,
+            "lineHeightPt": 17,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 22,
+          "maxChars": 22,
+          "maxCharsLatin": 38,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "img.item.1",
+          "kind": "img",
+          "box": {
+            "x": 160,
+            "y": 193,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        },
+        {
+          "name": "img.item.2",
+          "kind": "img",
+          "box": {
+            "x": 554,
+            "y": 193,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        },
+        {
+          "name": "img.item.3",
+          "kind": "img",
+          "box": {
+            "x": 160,
+            "y": 340,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        },
+        {
+          "name": "img.item.4",
+          "kind": "img",
+          "box": {
+            "x": 554,
+            "y": 340,
+            "w": 78,
+            "h": 78,
+            "rotDeg": 0
+          },
+          "aspect": 1,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        }
+      ],
+      "decorations": 8
+    },
+    {
+      "key": "numbers/3",
+      "type": "numbers",
+      "variant": "3",
+      "role": [
+        "number"
+      ],
+      "label": "数値訴求（3つの数字）",
+      "slideNumber": 5,
+      "order": 5,
+      "slots": [
+        {
+          "name": "txt.eyebrow",
+          "kind": "txt",
+          "box": {
+            "x": -34,
+            "y": 58,
+            "w": 240,
+            "h": 56,
+            "rotDeg": -45
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 18
+          },
+          "style": {
+            "sizePt": 20.5,
+            "bold": false,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Regular.otf",
+            "latinFontFile": "fonts/Barlow-Regular.ttf",
+            "spacingPt": 4,
+            "align": "ctr",
+            "wrap": false,
+            "innerWidthPt": 240,
+            "lineHeightPt": 26,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 9,
+          "maxChars": 18,
+          "maxCharsLatin": 28,
+          "sample": "The core\nof the system"
+        },
+        {
+          "name": "txt.headline",
+          "kind": "txt",
+          "box": {
+            "x": 269,
+            "y": 52,
+            "w": 660,
+            "h": 62,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 19
+          },
+          "style": {
+            "sizePt": 32.5,
+            "bold": false,
+            "latin": "Noto Serif JP",
+            "ea": "Noto Serif JP",
+            "fontFile": "fonts/NotoSerifJP-Regular.otf",
+            "latinFontFile": "fonts/NotoSerifJP-Regular.otf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 660,
+            "lineHeightPt": 40,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 19,
+          "maxChars": 19,
+          "maxCharsLatin": 35,
+          "sample": "ダミー見出し"
+        },
+        {
+          "name": "txt.label.1",
+          "kind": "txt",
+          "box": {
+            "x": 296.5,
+            "y": 180,
+            "w": 180,
+            "h": 32,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 7
+          },
+          "style": {
+            "sizePt": 23,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 180,
+            "lineHeightPt": 30,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 7,
+          "maxChars": 7,
+          "maxCharsLatin": 13,
+          "sample": "ダミー"
+        },
+        {
+          "name": "num.value.1",
+          "kind": "num",
+          "box": {
+            "x": 296.5,
+            "y": 212,
+            "w": 196,
+            "h": 104,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 3
+          },
+          "style": {
+            "sizePt": 99,
+            "bold": false,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Regular.otf",
+            "latinFontFile": "fonts/Barlow-Regular.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 196,
+            "lineHeightPt": 104,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 3,
+          "maxChars": 3,
+          "maxCharsLatin": 3,
+          "sample": "00"
+        },
+        {
+          "name": "txt.unit.1",
+          "kind": "txt",
+          "box": {
+            "x": 296.5,
+            "y": 312,
+            "w": 141.5,
+            "h": 28,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 5
+          },
+          "style": {
+            "sizePt": 23,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "r",
+            "wrap": true,
+            "innerWidthPt": 141.5,
+            "lineHeightPt": 28,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 5,
+          "maxChars": 5,
+          "maxCharsLatin": 10,
+          "sample": "単位"
+        },
+        {
+          "name": "txt.note.1",
+          "kind": "txt",
+          "box": {
+            "x": 302.5,
+            "y": 344,
+            "w": 180,
+            "h": 46,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 15,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 180,
+            "lineHeightPt": 22,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 11,
+          "maxChars": 22,
+          "maxCharsLatin": 40,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.label.2",
+          "kind": "txt",
+          "box": {
+            "x": 497.5,
+            "y": 180,
+            "w": 180,
+            "h": 32,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 7
+          },
+          "style": {
+            "sizePt": 23,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 180,
+            "lineHeightPt": 30,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 7,
+          "maxChars": 7,
+          "maxCharsLatin": 13,
+          "sample": "ダミー"
+        },
+        {
+          "name": "num.value.2",
+          "kind": "num",
+          "box": {
+            "x": 497.5,
+            "y": 212,
+            "w": 258,
+            "h": 104,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 4
+          },
+          "style": {
+            "sizePt": 99,
+            "bold": false,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Regular.otf",
+            "latinFontFile": "fonts/Barlow-Regular.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 258,
+            "lineHeightPt": 104,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 4,
+          "maxChars": 4,
+          "maxCharsLatin": 4,
+          "sample": "00"
+        },
+        {
+          "name": "txt.unit.2",
+          "kind": "txt",
+          "box": {
+            "x": 497.5,
+            "y": 312,
+            "w": 141.5,
+            "h": 28,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 5
+          },
+          "style": {
+            "sizePt": 23,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "r",
+            "wrap": true,
+            "innerWidthPt": 141.5,
+            "lineHeightPt": 28,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 5,
+          "maxChars": 5,
+          "maxCharsLatin": 10,
+          "sample": "単位"
+        },
+        {
+          "name": "txt.note.2",
+          "kind": "txt",
+          "box": {
+            "x": 503.5,
+            "y": 344,
+            "w": 180,
+            "h": 46,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 15,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 180,
+            "lineHeightPt": 22,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 11,
+          "maxChars": 22,
+          "maxCharsLatin": 40,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.label.3",
+          "kind": "txt",
+          "box": {
+            "x": 762.5,
+            "y": 180,
+            "w": 180,
+            "h": 32,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 7
+          },
+          "style": {
+            "sizePt": 23,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 180,
+            "lineHeightPt": 30,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 7,
+          "maxChars": 7,
+          "maxCharsLatin": 13,
+          "sample": "ダミー"
+        },
+        {
+          "name": "num.value.3",
+          "kind": "num",
+          "box": {
+            "x": 762.5,
+            "y": 212,
+            "w": 190,
+            "h": 104,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 3
+          },
+          "style": {
+            "sizePt": 99,
+            "bold": false,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Regular.otf",
+            "latinFontFile": "fonts/Barlow-Regular.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 190,
+            "lineHeightPt": 104,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 3,
+          "maxChars": 3,
+          "maxCharsLatin": 3,
+          "sample": "00"
+        },
+        {
+          "name": "txt.unit.3",
+          "kind": "txt",
+          "box": {
+            "x": 762.5,
+            "y": 312,
+            "w": 141.5,
+            "h": 28,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 1,
+            "maxChars": 5
+          },
+          "style": {
+            "sizePt": 23,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "r",
+            "wrap": true,
+            "innerWidthPt": 141.5,
+            "lineHeightPt": 28,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 1,
+          "maxCharsPerLine": 5,
+          "maxChars": 5,
+          "maxCharsLatin": 10,
+          "sample": "単位"
+        },
+        {
+          "name": "txt.note.3",
+          "kind": "txt",
+          "box": {
+            "x": 768.5,
+            "y": 344,
+            "w": 180,
+            "h": 46,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 22
+          },
+          "style": {
+            "sizePt": 15,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 180,
+            "lineHeightPt": 22,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 11,
+          "maxChars": 22,
+          "maxCharsLatin": 40,
+          "sample": "ダミー説明"
+        },
+        {
+          "name": "txt.footnote",
+          "kind": "txt",
+          "box": {
+            "x": 300.5,
+            "y": 462,
+            "w": 600,
+            "h": 44,
+            "rotDeg": 0
+          },
+          "measured": {
+            "maxLines": 2,
+            "maxChars": 88
+          },
+          "style": {
+            "sizePt": 13,
+            "bold": true,
+            "latin": "Barlow",
+            "ea": "Noto Sans JP",
+            "fontFile": "fonts/NotoSansJP-Bold.otf",
+            "latinFontFile": "fonts/Barlow-Bold.ttf",
+            "spacingPt": 0,
+            "align": "l",
+            "wrap": true,
+            "innerWidthPt": 600,
+            "lineHeightPt": 22,
+            "lineHeightSource": "template"
+          },
+          "maxLines": 2,
+          "maxCharsPerLine": 44,
+          "maxChars": 88,
+          "maxCharsLatin": 156,
+          "sample": "ダミー注記"
+        },
+        {
+          "name": "img.side",
+          "kind": "img",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 239,
+            "h": 540,
+            "rotDeg": 0
+          },
+          "aspect": 0.4426,
+          "geometry": "rect",
+          "process": {
+            "mono": true,
+            "multiply": null
+          }
+        }
+      ],
+      "decorations": 11
+    }
+  ]
+}

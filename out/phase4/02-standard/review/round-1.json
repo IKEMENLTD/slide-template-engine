@@ -1,0 +1,83 @@
+{
+  "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "review": [
+    {
+      "page": 1,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 2,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 3,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 4,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 5,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "num.value.2",
+          "message": "1つ目と3つ目の大きな数字（6件・5件）は導入後の結果です。2つ目の「3日」は従来の値なので、基準が揃っていません。「従来の集計 3日」は効果ではなく改善前の数字に見えます。導入後の「半日」を大きな数字にするか、ラベルと数字を「集計にかかる時間 半日」のように導入後の値で揃えてください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "注記が、見出しや各欄の補足（月○件から減少）と重なっています。「月あたりの件数」は各補足にすでに書かれているので、注記は短くまとめてください。"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 7,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 8,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 9,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 10,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.subtitle",
+          "message": "欄が狭く、「勤怠切り替え」が「勤怠切/り替え」と語の途中で改行されて読みにくい。文を短くするか、意味の切れ目（「総務部の勤怠担当か/「勤怠切り替え」チャットへ」など）で改行する。"
+        }
+      ]
+    }
+  ]
+}

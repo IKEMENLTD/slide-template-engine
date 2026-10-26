@@ -1,0 +1,208 @@
+{
+  "run": {
+    "id": "20261026-145511-manuscript-03-long",
+    "createdAt": "2026-10-26T05:55:12.263Z",
+    "input": "samples/manuscript-03-long.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 20,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T05:56:48.594Z",
+  "slides": 16,
+  "ok": true,
+  "errors": 0,
+  "warnings": 0,
+  "byCode": {},
+  "issues": [],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 4,
+    "failedAttempts": 0,
+    "inputTokens": 8,
+    "outputTokens": 8873,
+    "cacheReadTokens": 20580,
+    "cacheWriteTokens": 9615,
+    "costUsdEstimate": 0.1169,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 6574,
+        "outputTokens": 2985,
+        "ms": 20858
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 3,
+        "inputTokens": 23629,
+        "outputTokens": 5888,
+        "ms": 50624
+      }
+    ]
+  },
+  "timingsMs": {
+    "A段": 20864,
+    "B段": 40465,
+    "C段": 2364,
+    "D段": 1421
+  },
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "toc/5",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 3,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 4,
+      "type": "issues/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title",
+        "txt.item.2.title"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 6,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 7,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 8,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 9,
+      "type": "steps/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 10,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 11,
+      "type": "steps/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 12,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.1",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 13,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 14,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 15,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.2",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 16,
+      "type": "collage",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}

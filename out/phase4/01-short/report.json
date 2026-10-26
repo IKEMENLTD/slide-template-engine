@@ -1,0 +1,251 @@
+{
+  "run": {
+    "id": "20261026-153557-manuscript-01-short",
+    "createdAt": "2026-10-26T06:35:58.027Z",
+    "input": "samples/manuscript-01-short.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 5,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:40:08.698Z",
+  "slides": 5,
+  "ok": true,
+  "errors": 0,
+  "warnings": 2,
+  "byCode": {
+    "VISUAL_REVIEW": 2
+  },
+  "issues": [
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 3,
+      "slot": "txt.note.1",
+      "message": "txt.note.1: 改行が語の途中で入っています（「かかってい/た月あたり」）。文も長く、ほかの2つの注記と長さや改行位置が揃っていません。「請求書づくりに\\n月あたりかかっていた時間」のように、意味の切れ目で改行した短い文にしてください。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 3,
+      "slot": "photo",
+      "message": "写真: photo: 人物の顔が画面左上で青い図形と見出し帯に重なり、目元から上が見えづらく切れて見えます。人物が小さめに入った写真にするか、切り抜きの位置を調整してください。"
+    }
+  ],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 11,
+    "failedAttempts": 0,
+    "inputTokens": 28,
+    "outputTokens": 13230,
+    "cacheReadTokens": 50520,
+    "cacheWriteTokens": 30752,
+    "costUsdEstimate": 0.2193,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 5649,
+        "outputTokens": 1218,
+        "ms": 16179
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 1,
+        "inputTokens": 7132,
+        "outputTokens": 2527,
+        "ms": 20124
+      },
+      {
+        "stage": "C段 写真の割り当て",
+        "calls": 1,
+        "inputTokens": 2193,
+        "outputTokens": 1294,
+        "ms": 16155
+      },
+      {
+        "stage": "E段 見た目の採点 r1",
+        "calls": 1,
+        "inputTokens": 13423,
+        "outputTokens": 1161,
+        "ms": 13333
+      },
+      {
+        "stage": "E段 書き直し",
+        "calls": 5,
+        "inputTokens": 34154,
+        "outputTokens": 5072,
+        "ms": 62260
+      },
+      {
+        "stage": "E段 見た目の採点 r2",
+        "calls": 1,
+        "inputTokens": 10272,
+        "outputTokens": 1179,
+        "ms": 14208
+      },
+      {
+        "stage": "E段 見た目の採点 r3",
+        "calls": 1,
+        "inputTokens": 8477,
+        "outputTokens": 779,
+        "ms": 12123
+      }
+    ]
+  },
+  "photos": {
+    "slots": 9,
+    "supplied": 4,
+    "generatedUses": 5,
+    "templateLeft": 0,
+    "generated": 5,
+    "generationCostUsd": 0.1297,
+    "generationMs": 58860,
+    "records": [
+      {
+        "id": "p01/img.hero",
+        "page": 1,
+        "slot": "img.hero",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p02/img.item.1",
+        "page": 2,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:1",
+        "scene": "The owner in a light gray work jacket stands on the workshop floor and watches the work closely with his arms folded. Employees are busy at their tasks around him."
+      },
+      {
+        "id": "p02/img.item.2",
+        "page": 2,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:2",
+        "scene": "In the office, the owner points at a laptop screen while a young newcomer in a navy polo leans in and listens. The newcomer is taking in the explanation."
+      },
+      {
+        "id": "p02/img.item.3",
+        "page": 2,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:3",
+        "scene": "The owner sits at an office desk with a hand on his forehead, looking down at several papers spread in front of him. There is no readable text on the papers."
+      },
+      {
+        "id": "p03/img.side",
+        "page": 3,
+        "slot": "img.side",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p04/img.item.1",
+        "page": 4,
+        "slot": "img.item.1",
+        "source": "supplied",
+        "file": "02.jpg"
+      },
+      {
+        "id": "p04/img.item.2",
+        "page": 4,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:4",
+        "scene": "Close-up of a hand holding a pen and sketching a simple flow of boxes and arrows in a notebook on a desk. No letters or numbers are visible."
+      },
+      {
+        "id": "p04/img.item.3",
+        "page": 4,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:5",
+        "scene": "The woman in a navy blazer sits at a desk and checks results on a laptop, with her eyes on the screen and one hand on the trackpad. The screen content is not legible."
+      },
+      {
+        "id": "p05/img.hero",
+        "page": 5,
+        "slot": "img.hero",
+        "source": "supplied",
+        "file": "03.jpg"
+      }
+    ]
+  },
+  "totalCostUsdEstimate": 0.349,
+  "timingsMs": {
+    "A段": 16187,
+    "B段": 20584,
+    "C段": 76685,
+    "D段": 3209,
+    "E段 描画": 30988,
+    "E段 採点": 39670,
+    "E段 作り直し": 62868
+  },
+  "totalMs": 250191,
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 1,
+      "retypedFrom": null,
+      "revisedByReview": 1,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.point.1.lead",
+        "txt.point.2.lead",
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "issues/3",
+      "rewrites": 2,
+      "retypedFrom": null,
+      "revisedByReview": 2,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title"
+      ]
+    },
+    {
+      "page": 3,
+      "type": "numbers/3",
+      "rewrites": 2,
+      "retypedFrom": null,
+      "revisedByReview": 2,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.2",
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 4,
+      "type": "steps/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "collage",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}

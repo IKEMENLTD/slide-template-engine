@@ -5,4 +5,9 @@ node_modules/
 # 実行結果は残さない。Phase 0 の確認用だけは人が開くので版管理する
 out/*
 !out/phase0/
+!out/phase1/
+!out/phase2/
+!out/phase3/
+!out/phase4/
+!out/phase5/
 out/phase0/automizer/photos/

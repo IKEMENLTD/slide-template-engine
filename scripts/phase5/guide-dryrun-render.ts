@@ -1,0 +1,24 @@
+/** Phase 5：手順書の例「引用」の型で1ページを組み立てて描く（scripts/phase5/guide-dryrun.py の後に実行） */
+import { readFileSync, mkdirSync } from 'node:fs';
+import path from 'node:path';
+import { assembleDeck } from '../../src/assemble/build-deck.js';
+import { loadConfig } from '../../src/catalog/config.js';
+import { checkPage } from '../../src/check/slots.js';
+import { sourceNumbers } from '../../src/check/content.js';
+import { processPhoto } from '../../src/photos/prepare.js';
+import { renderDeck, renderIssues } from '../../src/render/render.js';
+const D = path.resolve('out/phase5/guide-dryrun');
+const ROOT = path.resolve('.');
+const catalog = JSON.parse(readFileSync(path.join(D, 'catalog.json'), 'utf8'));
+const cfg = loadConfig(path.join(D, 'provisional+quote.config.json'));
+const t = catalog.types.find((x: any) => x.key === 'quote');
+const slots = { 'txt.headline': '現場の声', 'txt.quote': '日程づくりを[[班長以外でも]]できるようになり、休みが取りやすくなった。', 'txt.source': '製造部・入社3年目の作業者' };
+const m = '日程づくりを班長以外でもできるようにする。製造部。3年';
+const issues = checkPage(1, t, slots, { catalog, headlineMaxLines: 2, manuscript: m, sourceNumbers: sourceNumbers(m), nameIgnoreSlots: [], unitSlots: [], resolveFile: (p) => path.join(ROOT, p) });
+console.log('検査', issues.map((i) => i.code + ' ' + i.message));
+mkdirSync(path.join(D, 'photos'), { recursive: true });
+await processPhoto(path.join(ROOT, 'assets/photos/03.jpg'), path.join(D, 'photos/q.jpg'), t.slots.find((s: any) => s.name === 'img.photo').aspect, { mono: true, multiply: null }, null);
+const plan = { version: 1 as const, deckTitle: 'x', template: { file: 'x', sha256: 'x' }, pages: [{ type: 'quote', slots, photos: {}, outlinePage: 1, trimmed: [], phraseBroken: [], rewrites: 0, photoFiles: { 'img.photo': 'q.jpg' } }] };
+const { buffer, structure } = await assembleDeck({ templatePath: path.join(D, 'provisional+quote.pptx'), catalog, cfg, plan, photoDir: path.join(D, 'photos'), outFile: path.join(D, 'quote.pptx') });
+const r = await renderDeck(buffer, D);
+console.log('構造の問題', structure.length, '描画の問題', renderIssues(r, 1).length, r.pages);

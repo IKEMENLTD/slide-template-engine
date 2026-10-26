@@ -1,0 +1,206 @@
+{
+  "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "review": [
+    {
+      "page": 1,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 2,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 3,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 4,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 5,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 6,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "左の写真の上に重なった「CURRENT STATUS」が、青い図形と写真に紛れて読めません。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.note.1",
+          "message": "強調の下線が、補足文の「62%」に付いています。62%は上の大きな数字と同じ内容なので、この文は繰り返しです。強調するなら大きな数字に付けるか、補足を別の内容にしてください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.note.2",
+          "message": "「不良品が出ている」は、不良率の数字が何を示すかを言い直しただけで、情報がありません。他の2つの補足とも書き方がそろっていません。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "「稼働率は低く、不良と納期遅れが出ています。」は、3つの数字が示すことの繰り返しです。"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 8,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 9,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "左の写真の上に重なった「Three Year Goals」が、青い図形と写真に紛れてほとんど読めません。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "「稼働率を上げ、不良と納期遅れを減らします。」は、見出しと各補足文の繰り返しです。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.note.1",
+          "message": "3つの補足文は、どれも数字をもう一度書いているだけです。大きな数字を目立たせるなら、補足は「どう変えるか」だけに短くしてください。"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 11,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 12,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 13,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 14,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.item.1.caption",
+          "message": "「1年目」に強調が付いているが、年の数字はこのページでいちばん見てほしい語ではない。伝えたい中身は「デジタル化」「見える化」「仕組み化」のほうである。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.item.3.caption",
+          "message": "「3年目」にだけ強調が付いている。2年目には付いておらず、3つの並びとして不揃いである。強調は、各年の取り組みの核になる語に付けるか、1つに絞るか、付けないほうがよい。"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 16,
+      "verdict": "ok",
+      "problems": [
+        {
+          "kind": "photo",
+          "message": "左上の男性の頭が写真の上端で切れている。顔が不自然に見えるなら、切り抜き位置の調整を検討してください。"
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 18,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.body",
+          "message": "本文の「3年間の投資額は合計で4,800万円です」が見出しの「3年間の投資は合計4,800万円」と同じ内容の繰り返しになっている。本文は補助金1,600万円の説明や自己負担額など、見出しにない情報に絞ってください。"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.note.2",
+          "message": "「1人あたり月20時間から」は、大きな数字「10時間」とのつながりが読み取りにくい。「月20時間から10時間へ」のように変化を書いてください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.note.1",
+          "message": "強調が「20分へ」だけに付いていて、大きな数字の20と重複している。他の2つの欄には強調がなく、そろっていない。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "「材料の在庫は今の半分へ」は3つの数字と関係のない新しい効果で、情報の詰め込み。浮いた時間の使い道の話とも内容がつながっていない。在庫の話は削るか、数字の欄に入れてください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "「Expected Effects」が写真と青・黄の斜線に重なっていて、特に「Effects」が読みにくい。"
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "verdict": "ok",
+      "problems": []
+    }
+  ]
+}

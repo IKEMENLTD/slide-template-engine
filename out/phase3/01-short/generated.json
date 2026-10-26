@@ -1,0 +1,134 @@
+[
+  {
+    "key": "gen:1",
+    "file": "generated/gen-1.jpg",
+    "scene": "The president in a gray work jacket carries cardboard boxes in a small warehouse while checking his phone, busy and hurried.",
+    "size": "1024x1024",
+    "costUsd": 0.014155,
+    "ms": 10433,
+    "withReferences": 0,
+    "usage": {
+      "input_tokens": 197,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 197
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 636
+    }
+  },
+  {
+    "key": "gen:2",
+    "file": "generated/gen-2.jpg",
+    "scene": "A veteran employee patiently shows a young new hire how to work at a computer, while a middle-aged manager stands behind them with a hand on his forehead, troubled.",
+    "size": "1024x1024",
+    "costUsd": 0.022572,
+    "ms": 11825,
+    "withReferences": 1,
+    "usage": {
+      "input_tokens": 1266,
+      "input_tokens_details": {
+        "image_tokens": 1024,
+        "text_tokens": 242
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 1705
+    }
+  },
+  {
+    "key": "gen:3",
+    "file": "generated/gen-3.jpg",
+    "scene": "The president sits at his office desk, holding a sheet of paper and frowning with a hand on his forehead, deep in thought.",
+    "size": "1024x1024",
+    "costUsd": 0.030784,
+    "ms": 14510,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2294,
+      "input_tokens_details": {
+        "image_tokens": 2048,
+        "text_tokens": 246
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 2733
+    }
+  },
+  {
+    "key": "gen:4",
+    "file": "generated/gen-4.jpg",
+    "scene": "The staff woman in her navy blazer listens to the seated president and writes notes in a notebook at a table.",
+    "size": "1024x1024",
+    "costUsd": 0.030759,
+    "ms": 12529,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2289,
+      "input_tokens_details": {
+        "image_tokens": 2048,
+        "text_tokens": 241
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 2728
+    }
+  },
+  {
+    "key": "gen:5",
+    "file": "generated/gen-5.jpg",
+    "scene": "The staff woman sits at an office desk, looking at a laptop screen and checking results with a focused expression.",
+    "size": "1024x1024",
+    "costUsd": 0.030759,
+    "ms": 11928,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2289,
+      "input_tokens_details": {
+        "image_tokens": 2048,
+        "text_tokens": 241
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 2728
+    }
+  },
+  {
+    "key": "gen:6",
+    "file": "generated/gen-6.jpg",
+    "scene": "The president and the staff woman sit across a desk, looking at papers and a laptop while talking in a friendly way.",
+    "size": "1536x1024",
+    "costUsd": 0.027889,
+    "ms": 11234,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2291,
+      "input_tokens_details": {
+        "image_tokens": 2048,
+        "text_tokens": 243
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 2634
+    }
+  }
+]

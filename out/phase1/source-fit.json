@@ -1,0 +1,421 @@
+{
+ "catalog": {
+  "file": "templates/provisional.pptx",
+  "sha256": "91f87896c67f634bb79414982be5f50d09478115b3af15322bd3863ad66c4604",
+  "slideSize": {
+   "w": 960,
+   "h": 540
+  }
+ },
+ "rows": [
+  {
+   "type": "cover",
+   "slot": "txt.headline",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 17,
+   "maxChars": 20,
+   "wrapped": [
+    "業務システム導入で、",
+    "会社が変わる。"
+   ]
+  },
+  {
+   "type": "cover",
+   "slot": "txt.subtitle",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 55,
+   "maxChars": 54,
+   "wrapped": [
+    "省力化投資補助金 × オーダーメイドシステム開発",
+    "活用ガイド（中小企業・個人事業主向け / 2025年度対応版）"
+   ]
+  },
+  {
+   "type": "cover",
+   "slot": "txt.point.1.lead",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 2,
+   "chars": 2,
+   "maxChars": 16,
+   "wrapped": [
+    "最大"
+   ]
+  },
+  {
+   "type": "cover",
+   "slot": "txt.point.1.main",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 12,
+   "maxChars": 14,
+   "wrapped": [
+    "2,000万円を",
+    "国が補助"
+   ]
+  },
+  {
+   "type": "cover",
+   "slot": "txt.point.2.lead",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 11,
+   "maxChars": 16,
+   "wrapped": [
+    "業務に",
+    "完全フィットする"
+   ]
+  },
+  {
+   "type": "cover",
+   "slot": "txt.point.2.main",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 9,
+   "maxChars": 14,
+   "wrapped": [
+    "フルスクラッチ",
+    "開発"
+   ]
+  },
+  {
+   "type": "cover",
+   "slot": "txt.point.3.lead",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 12,
+   "maxChars": 16,
+   "wrapped": [
+    "丸投げOK・",
+    "不採択時0円"
+   ]
+  },
+  {
+   "type": "cover",
+   "slot": "txt.point.3.main",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 8,
+   "maxChars": 14,
+   "wrapped": [
+    "申請代行",
+    "費用ゼロ"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.eyebrow",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 14,
+   "maxChars": 9,
+   "wrapped": [
+    "Company Issues"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.headline",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 22,
+   "maxChars": 22,
+   "wrapped": [
+    "経営の現場で、こんな限界を感じていませんか？"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.1.title",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 13,
+   "maxChars": 20,
+   "wrapped": [
+    "社長が現場から",
+    "離れられない"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.1.body",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 22,
+   "maxChars": 22,
+   "wrapped": [
+    "業務が属人化しており、自分がいないと回らない"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.2.title",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 2,
+   "chars": 7,
+   "maxChars": 20,
+   "wrapped": [
+    "人件費が厳しい"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.2.body",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 18,
+   "maxChars": 22,
+   "wrapped": [
+    "採用コストも教育コストも高騰している"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.3.title",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 2,
+   "chars": 8,
+   "maxChars": 20,
+   "wrapped": [
+    "開発費が高すぎる"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.3.body",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 21,
+   "maxChars": 22,
+   "wrapped": [
+    "見積もりを取ったら数百万～数千万と言われた"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.4.title",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 2,
+   "chars": 8,
+   "maxChars": 20,
+   "wrapped": [
+    "補助金は難しそう"
+   ]
+  },
+  {
+   "type": "issues/4",
+   "slot": "txt.item.4.body",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 20,
+   "maxChars": 22,
+   "wrapped": [
+    "書類が多く、何が自社に使えるか分からない"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.eyebrow",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 21,
+   "maxChars": 18,
+   "wrapped": [
+    "The core",
+    "of the system"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.headline",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 14,
+   "maxChars": 19,
+   "wrapped": [
+    "省力化投資補助金　制度の核心"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.label.1",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 3,
+   "maxChars": 7,
+   "wrapped": [
+    "補助率"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "num.value.1",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 3,
+   "maxChars": 3,
+   "wrapped": [
+    "2/3"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.unit.1",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 0,
+   "maxChars": 5,
+   "wrapped": [
+    ""
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.note.1",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 15,
+   "maxChars": 22,
+   "wrapped": [
+    "融資ではなく、",
+    "返済不要の公制度"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.label.2",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 5,
+   "maxChars": 7,
+   "wrapped": [
+    "最大補助額"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "num.value.2",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 5,
+   "maxChars": 4,
+   "wrapped": [
+    "2,000"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.unit.2",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 2,
+   "maxChars": 5,
+   "wrapped": [
+    "万円"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.note.2",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 15,
+   "maxChars": 22,
+   "wrapped": [
+    "中小企業庁管轄の",
+    "信頼できる制度"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.label.3",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 3,
+   "maxChars": 7,
+   "wrapped": [
+    "採択率"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "num.value.3",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 2,
+   "maxChars": 3,
+   "wrapped": [
+    "70"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.unit.3",
+   "ok": true,
+   "lines": 1,
+   "maxLines": 1,
+   "chars": 2,
+   "maxChars": 5,
+   "wrapped": [
+    "%+"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.note.3",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 20,
+   "maxChars": 22,
+   "wrapped": [
+    "2024年実績・全国平均。",
+    "今が最も狙い目"
+   ]
+  },
+  {
+   "type": "numbers/3",
+   "slot": "txt.footnote",
+   "ok": true,
+   "lines": 2,
+   "maxLines": 2,
+   "chars": 54,
+   "maxChars": 88,
+   "wrapped": [
+    "管轄：中小企業庁 対象：業務省力化のためのシステム導入費用（オーダーメイド開発も対象）",
+    "時期：2024年新設。"
+   ]
+  }
+ ]
+}

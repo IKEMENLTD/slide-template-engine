@@ -1,0 +1,388 @@
+{
+  "run": {
+    "id": "20261026-154839-manuscript-02-standard",
+    "createdAt": "2026-10-26T06:48:41.034Z",
+    "input": "samples/manuscript-02-standard.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 10,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:55:52.885Z",
+  "slides": 10,
+  "ok": true,
+  "errors": 0,
+  "warnings": 5,
+  "byCode": {
+    "NAME_NOT_IN_SOURCE": 1,
+    "VISUAL_REVIEW": 4
+  },
+  "issues": [
+    {
+      "code": "NAME_NOT_IN_SOURCE",
+      "level": "warning",
+      "page": 4,
+      "slot": "txt.headline",
+      "message": "txt.headline に原稿に無い語 スマホ がある（固有名詞なら要確認）"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 5,
+      "slot": "num.value.2",
+      "message": "num.value.2: 大きな数字が「3日」ですが、注記は「3日から半日に短縮」で、結果は半日です。大きな数字が短縮前の値になっていて、効果と合いません。「半日」にするか、数字を「0.5」にして単位を「日」にしてください。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 5,
+      "slot": "txt.note.1",
+      "message": "txt.note.1: 強調の下線が注記の「月120件から月6件」に付いています。このページでいちばん見てほしいのは大きな数字(6件)の効果です。また、注記が折り返されて「減少」だけが2行目に残っています。「月120件から月6件に減少」のように短くまとめてください。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 5,
+      "slot": "txt.note.3",
+      "message": "txt.note.3: 注記3つで言い回しと改行位置がそろっていません。「3日から半日に短縮」は改行なし、他の2つは改行ありです。表記を統一してください。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 5,
+      "slot": "txt.footnote",
+      "message": "txt.footnote: 見出しの「営業部30名の試験導入」と同じ内容の繰り返しです。削るか、集計期間などの新しい情報に置き換えてください。"
+    }
+  ],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 20,
+    "failedAttempts": 3,
+    "inputTokens": 52,
+    "outputTokens": 19184,
+    "cacheReadTokens": 79418,
+    "cacheWriteTokens": 80346,
+    "costUsdEstimate": 0.4087,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 6100,
+        "outputTokens": 2357,
+        "ms": 15926
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 3,
+        "inputTokens": 23219,
+        "outputTokens": 3308,
+        "ms": 29110
+      },
+      {
+        "stage": "B段 書き直し",
+        "calls": 3,
+        "inputTokens": 20799,
+        "outputTokens": 1716,
+        "ms": 33588
+      },
+      {
+        "stage": "C段 写真の割り当て",
+        "calls": 1,
+        "inputTokens": 2976,
+        "outputTokens": 2129,
+        "ms": 21848
+      },
+      {
+        "stage": "E段 見た目の採点 r1",
+        "calls": 3,
+        "inputTokens": 39118,
+        "outputTokens": 2803,
+        "ms": 45417
+      },
+      {
+        "stage": "E段 書き直し",
+        "calls": 6,
+        "inputTokens": 42819,
+        "outputTokens": 4310,
+        "ms": 56460
+      },
+      {
+        "stage": "E段 見た目の採点 r2",
+        "calls": 1,
+        "inputTokens": 8253,
+        "outputTokens": 1099,
+        "ms": 12743
+      },
+      {
+        "stage": "E段 見た目の採点 r3",
+        "calls": 2,
+        "inputTokens": 16532,
+        "outputTokens": 1462,
+        "ms": 22746
+      }
+    ]
+  },
+  "photos": {
+    "slots": 16,
+    "supplied": 3,
+    "generatedUses": 13,
+    "templateLeft": 0,
+    "generated": 11,
+    "generationCostUsd": 0.3519,
+    "generationMs": 130909,
+    "records": [
+      {
+        "id": "p01/img.hero",
+        "page": 1,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:1",
+        "scene": "Close view of an office worker's hand tapping a smartphone to clock in at a desk, with a bright office softly blurred behind."
+      },
+      {
+        "id": "p02/img.side",
+        "page": 2,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:2",
+        "scene": "Employees sit in a bright office meeting area, listening to a presenter off-frame and taking notes."
+      },
+      {
+        "id": "p03/img.item.1",
+        "page": 3,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:3",
+        "scene": "A general affairs staff member at a desk goes through a stack of paper time cards, checking them one by one with a calculator."
+      },
+      {
+        "id": "p03/img.item.2",
+        "page": 3,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:4",
+        "scene": "Close view of a hand correcting a paper form with a pen on an office desk. The sheet is blank or blurred, with no readable text."
+      },
+      {
+        "id": "p03/img.item.3",
+        "page": 3,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:5",
+        "scene": "An employee works alone at a laptop in a dim office at night, with only a desk lamp and monitor light."
+      },
+      {
+        "id": "p03/img.item.4",
+        "page": 3,
+        "slot": "img.item.4",
+        "source": "generated",
+        "file": "gen:6",
+        "scene": "An employee stands at a general affairs desk and asks a staff member a question, while the staff member listens and looks at a computer."
+      },
+      {
+        "id": "p04/img.hero",
+        "page": 4,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:7",
+        "scene": "A businessperson outdoors at a client site uses a smartphone, standing near a plain building entrance."
+      },
+      {
+        "id": "p05/img.side",
+        "page": 5,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:8",
+        "scene": "A sales rep in a suit, walking outdoors, holds a smartphone and taps the screen to clock in."
+      },
+      {
+        "id": "p07/img.item.1",
+        "page": 7,
+        "slot": "img.item.1",
+        "source": "supplied",
+        "file": "02.jpg"
+      },
+      {
+        "id": "p07/img.item.2",
+        "page": 7,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:9",
+        "scene": "A paper time card and a smartphone sit side by side on an office desk, with a pen nearby. No text is visible."
+      },
+      {
+        "id": "p07/img.item.3",
+        "page": 7,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:1"
+      },
+      {
+        "id": "p07/img.item.4",
+        "page": 7,
+        "slot": "img.item.4",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p08/img.hero",
+        "page": 8,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:9"
+      },
+      {
+        "id": "p09/img.right",
+        "page": 9,
+        "slot": "img.right",
+        "source": "generated",
+        "file": "gen:10",
+        "scene": "A shared kiosk terminal stands on a stand beside the entrance of a company office, and an employee walks up to it."
+      },
+      {
+        "id": "p09/img.left",
+        "page": 9,
+        "slot": "img.left",
+        "source": "generated",
+        "file": "gen:11",
+        "scene": "Close view of a hand holding an employee ID card against a terminal reader. The card and device show no text."
+      },
+      {
+        "id": "p10/img.hero",
+        "page": 10,
+        "slot": "img.hero",
+        "source": "supplied",
+        "file": "02.jpg"
+      }
+    ]
+  },
+  "totalCostUsdEstimate": 0.7606,
+  "timingsMs": {
+    "A段": 15931,
+    "B段": 43528,
+    "C段": 160543,
+    "D段": 15584,
+    "E段 描画": 58077,
+    "E段 採点": 80920,
+    "E段 作り直し": 56756
+  },
+  "totalMs": 431339,
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.point.1.main",
+        "txt.point.3.main",
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "toc/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 3,
+      "type": "issues/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.3.title",
+        "txt.item.4.title"
+      ]
+    },
+    {
+      "page": 4,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.1",
+        "txt.item.2",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "numbers/3",
+      "rewrites": 5,
+      "retypedFrom": null,
+      "revisedByReview": 2,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 6,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 7,
+      "type": "steps/4",
+      "rewrites": 1,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.4.caption"
+      ]
+    },
+    {
+      "page": 8,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 9,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 10,
+      "type": "collage",
+      "rewrites": 3,
+      "retypedFrom": null,
+      "revisedByReview": 2,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "run": {
+    "id": "20261026-151227-manuscript-02-standard",
+    "createdAt": "2026-10-26T06:12:32.358Z",
+    "input": "samples/manuscript-02-standard.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 10,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:16:35.928Z",
+  "slides": 10,
+  "ok": true,
+  "errors": 0,
+  "warnings": 3,
+  "byCode": {
+    "NAME_NOT_IN_SOURCE": 3
+  },
+  "issues": [
+    {
+      "code": "NAME_NOT_IN_SOURCE",
+      "level": "warning",
+      "page": 1,
+      "slot": "txt.point.2.main",
+      "message": "txt.point.2.main に原稿に無い語 スマホ がある（固有名詞なら要確認）"
+    },
+    {
+      "code": "NAME_NOT_IN_SOURCE",
+      "level": "warning",
+      "page": 4,
+      "slot": "txt.headline",
+      "message": "txt.headline に原稿に無い語 スマホ がある（固有名詞なら要確認）"
+    },
+    {
+      "code": "NAME_NOT_IN_SOURCE",
+      "level": "warning",
+      "page": 9,
+      "slot": "txt.headline",
+      "message": "txt.headline に原稿に無い語 スマホ がある（固有名詞なら要確認）"
+    }
+  ],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 6,
+    "failedAttempts": 1,
+    "inputTokens": 12,
+    "outputTokens": 9427,
+    "cacheReadTokens": 10758,
+    "cacheWriteTokens": 27931,
+    "costUsdEstimate": 0.1663,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 6100,
+        "outputTokens": 2387,
+        "ms": 28860
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 3,
+        "inputTokens": 23097,
+        "outputTokens": 4543,
+        "ms": 41595
+      },
+      {
+        "stage": "B段 書き直し",
+        "calls": 1,
+        "inputTokens": 6504,
+        "outputTokens": 445,
+        "ms": 8895
+      },
+      {
+        "stage": "C段 写真の割り当て",
+        "calls": 1,
+        "inputTokens": 3000,
+        "outputTokens": 2052,
+        "ms": 23032
+      }
+    ]
+  },
+  "photos": {
+    "slots": 16,
+    "supplied": 4,
+    "generatedUses": 12,
+    "templateLeft": 0,
+    "generated": 11,
+    "generationCostUsd": 0.3539,
+    "generationMs": 132525,
+    "records": [
+      {
+        "id": "p01/img.hero",
+        "page": 1,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:1",
+        "scene": "Close view of an office worker's hand holding a smartphone to clock in just inside a bright office entrance, with colleagues walking in behind."
+      },
+      {
+        "id": "p02/img.side",
+        "page": 2,
+        "slot": "img.side",
+        "source": "supplied",
+        "file": "02.jpg"
+      },
+      {
+        "id": "p03/img.item.1",
+        "page": 3,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:2",
+        "scene": "Stacks of blank paper time cards and a calculator on a cluttered desk, with a hand tallying them."
+      },
+      {
+        "id": "p03/img.item.2",
+        "page": 3,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:3",
+        "scene": "Close view of a hand correcting a paper form with a pen at a desk, with a blank sheet beside it."
+      },
+      {
+        "id": "p03/img.item.3",
+        "page": 3,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:4",
+        "scene": "An employee works alone at a computer in a dim office at night, lit by the monitor and a desk lamp, with city lights outside."
+      },
+      {
+        "id": "p03/img.item.4",
+        "page": 3,
+        "slot": "img.item.4",
+        "source": "supplied",
+        "file": "03.jpg"
+      },
+      {
+        "id": "p04/img.right",
+        "page": 4,
+        "slot": "img.right",
+        "source": "generated",
+        "file": "gen:5",
+        "scene": "A field worker in a grey work jacket and navy cap stands in front of a work site and checks a smartphone."
+      },
+      {
+        "id": "p04/img.left",
+        "page": 4,
+        "slot": "img.left",
+        "source": "generated",
+        "file": "gen:6",
+        "scene": "Close view of hands holding a smartphone and looking at its screen, with a blurred office in the background."
+      },
+      {
+        "id": "p05/img.side",
+        "page": 5,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:7",
+        "scene": "Sales team members talk and smile around a meeting table in a bright office, looking at a laptop together."
+      },
+      {
+        "id": "p07/img.item.1",
+        "page": 7,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:8",
+        "scene": "Two coworkers lean in and look at an app on a smartphone together at an office desk."
+      },
+      {
+        "id": "p07/img.item.2",
+        "page": 7,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:9",
+        "scene": "A desk with a blank paper time card and a smartphone side by side, with a hand resting near them."
+      },
+      {
+        "id": "p07/img.item.3",
+        "page": 7,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:1"
+      },
+      {
+        "id": "p07/img.item.4",
+        "page": 7,
+        "slot": "img.item.4",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p08/img.hero",
+        "page": 8,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:11",
+        "scene": "Close view of one hand holding a blank paper time card at a time clock while the other hand taps a smartphone to clock in."
+      },
+      {
+        "id": "p09/img.hero",
+        "page": 9,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:10",
+        "scene": "An employee holds an ID card up to a shared terminal mounted at a workplace entrance."
+      },
+      {
+        "id": "p10/img.hero",
+        "page": 10,
+        "slot": "img.hero",
+        "source": "supplied",
+        "file": "02.jpg"
+      }
+    ]
+  },
+  "totalCostUsdEstimate": 0.5202,
+  "timingsMs": {
+    "A段": 28868,
+    "B段": 51139,
+    "C段": 160397,
+    "D段": 2873
+  },
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "toc/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 3,
+      "type": "issues/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.3.title",
+        "txt.item.4.title"
+      ]
+    },
+    {
+      "page": 4,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.2",
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 6,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 7,
+      "type": "steps/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption",
+        "txt.item.4.caption"
+      ]
+    },
+    {
+      "page": 8,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 9,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 10,
+      "type": "collage",
+      "rewrites": 1,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}
