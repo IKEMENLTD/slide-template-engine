@@ -1,7 +1,10 @@
-"""仮テンプレート（templates/provisional.pptx）を作る。Phase 1。
+"""仮テンプレート（templates/provisional.pptx）を作る。Phase 1・Phase 5（D-018）。
 
-先方 PDF（docs/source/0925_資料.pdf）の p1 表紙・p2 課題提示・p3 数値訴求を、
-PowerPoint 標準ワイド（960x540pt）に 0.5 倍で写す（D-002）。座標は PDF から抜き出した値の半分。
+先方 PDF（docs/source/0925_資料.pdf）の各ページを、PowerPoint 標準ワイド（960x540pt）に
+0.5 倍で写す（D-002）。座標は PDF から抜き出した値の半分。
+  p1 表紙／p2 課題提示／p3 数値訴求／p5 注意・強調／p6 中扉／p7 画像が並ぶ（手順）／
+  p8 写真コラージュ（結び）／p9 目次／p10 写真＋本文A／p11 写真＋本文B（p4 は説明のページなので型にしない）
+p5〜p11 は文言の欄が見本に無い（または見出しだけ）なので、欄の位置は空いている面に当方が置いた（D-018）。
 
 守っていること（REQUIREMENTS 6章・DECISIONS）
 - 1 スライド＝1 つの型。ノート欄の先頭に型の情報（YAML）を書く
@@ -139,19 +142,37 @@ def rect(slide, ids, name, x, y, w, h, scheme, alpha=None):
     return poly(slide, ids, name, [(x, y), (x + w, y), (x + w, y + h), (x, y + h)], scheme, alpha)
 
 
-def picture(slide, ids, name, img, x, y, w, h, pts=None, descr=""):
-    """写真枠。pts を渡すと、その多角形で写真を切り抜く（custGeom）。"""
+def _custgeom_multi(sppr, shapes, x0, y0, w, h):
+    """いくつかの多角形を1つの形にする（写真コラージュの菱形）。"""
+    geom = sub(sppr, "a:custGeom")
+    for t in ("a:avLst", "a:gdLst", "a:ahLst", "a:cxnLst"):
+        sub(geom, t)
+    sub(geom, "a:rect", l="l", t="t", r="r", b="b")
+    pl = sub(geom, "a:pathLst")
+    for pts in shapes:
+        path = sub(pl, "a:path", w=E(w), h=E(h))
+        for i, (x, y) in enumerate(pts):
+            el = sub(path, "a:moveTo" if i == 0 else "a:lnTo")
+            sub(el, "a:pt", x=E(x - x0), y=E(y - y0))
+        sub(path, "a:close")
+
+
+def picture(slide, ids, name, img, x, y, w, h, pts=None, descr="", multi=None):
+    """写真枠。pts を渡すと、その多角形で写真を切り抜く（custGeom）。multi は多角形の並び。"""
     pic = slide.shapes.add_picture(str(img), Emu(E(x)), Emu(E(y)), Emu(E(w)), Emu(E(h)))
     pic.name = name
     if descr:
         pic._element.find(f".//{q('p:cNvPr')}").set("descr", descr)
-    if pts:
+    if pts or multi:
         sppr = pic._element.spPr
         geom = sppr.find(q("a:prstGeom"))
         idx = list(sppr).index(geom)
         sppr.remove(geom)
         tmp = etree.Element(q("a:tmp"))
-        _custgeom(tmp, pts, x, y, w, h)
+        if multi:
+            _custgeom_multi(tmp, multi, x, y, w, h)
+        else:
+            _custgeom(tmp, pts, x, y, w, h)
         sppr.insert(idx, tmp[0])
     # 縦横比を変えずに枠を埋める（中央で切り抜く）
     from PIL import Image
@@ -237,7 +258,7 @@ def cover(prs):
 
 
 # ---------------------------------------------------------------- 型：課題提示（PDF p2）
-def issues_frame(s, ids, eyebrow="Company Issues"):
+def issues_frame(s, ids, eyebrow="Dummy Label"):
     poly(s, ids, "deco.corner", [(0, 0), (214, 0), (0, 214)], "accent1")
     poly(s, ids, "deco.corner-line", [(4.5, 219), (15, 219), (102.5, 131.5), (92, 131.5)], "accent1")
     poly(s, ids, "deco.title-band", [(108.5, 125.5), (192.5, 41), (953.5, 41), (953.5, 125.5)], "bg2")
@@ -289,7 +310,7 @@ def numbers(prs):
     poly(s, ids, "deco.slant-plate", [(379.5, 399.5), (646, 133), (879.5, 133), (613, 399.5)], "bg2", alpha=70)
     poly(s, ids, "deco.title-band", [(108.5, 125.5), (192.5, 41), (953.5, 41), (953.5, 125.5)], "bg2", alpha=92)
     poly(s, ids, "deco.end-triangle", [(939.5, 449), (939.5, 522.5), (866, 522.5)], "accent2")
-    text(s, ids, "txt.eyebrow", -34, 58, 240, 56, "The core\nof the system", ea=GOTHIC, latin=LATIN, size=20.5, color="bg1",
+    text(s, ids, "txt.eyebrow", -34, 58, 240, 56, "Dummy\nLabel", ea=GOTHIC, latin=LATIN, size=20.5, color="bg1",
          spc=4, line=26, rot=-45, anchor="ctr", align="ctr", wrap=False)
     text(s, ids, "txt.headline", 269, 52, 660, 62, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="ctr")
     # 数字の列の幅は PDF に合わせて真ん中を広く取る（2/3・2,000・70 の並び）。
@@ -305,6 +326,139 @@ def numbers(prs):
     notes(s, "type: numbers\nvariant: \"3\"\nrole: [number]\nlabel: 数値訴求（3つの数字）")
 
 
+# ---------------------------------------------------------------- 型：注意・強調（PDF p5）
+def attention(prs):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    picture(s, ids, "img.hero", ASSETS / "cover.jpg", 0, 0, 656, 540,
+            pts=[(418, 0), (656, 0), (116, 540), (0, 540), (0, 417.5)], descr="注意のページの写真")
+    poly(s, ids, "deco.line-yellow", [(126.5, 263.5), (226, 164), (238.2, 164), (138.7, 263.5)], "accent2")
+    poly(s, ids, "deco.line-blue", [(166.7, 514.8), (330, 351.5), (350, 351.5), (186.7, 514.8)], "accent1")
+    poly(s, ids, "deco.band", [(290.3, 258.3), (374.6, 174), (973.8, 174), (973.8, 258.3)], "accent2")
+    poly(s, ids, "deco.end-triangle", [(939.5, 449), (939.5, 522.5), (866, 522.5)], "accent2")
+    text(s, ids, "txt.eyebrow", -28, 79, 240, 26, "Dummy Label", ea=GOTHIC, latin=LATIN, size=20.5, color="tx1",
+         spc=4, line=26, rot=-45, anchor="ctr", align="ctr", wrap=False)
+    # 見出しは黄色の帯の中に1行（PDF p5 の位置）
+    text(s, ids, "txt.headline", 392, 186, 560, 60, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="ctr")
+    # 説明は帯の下の白い面（PDF には無い。写真の斜めの辺より右に置く）
+    text(s, ids, "txt.body", 412, 300, 500, 104, "ダミー説明", ea=GOTHIC_M, latin=LATIN_M, size=16, line=26)
+    notes(s, "type: attention\nrole: [emphasis]\nlabel: 注意・強調（重要なことを改めて言う）")
+
+
+# ---------------------------------------------------------------- 型：中扉（PDF p6）
+def section(prs):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    poly(s, ids, "deco.tri-left", [(0, 316.1), (92.7, 316.1), (0, 408.7)], "accent2")
+    poly(s, ids, "deco.tri-right", [(963.7, 115), (963.7, 438.1), (640.6, 438.1)], "accent2")
+    poly(s, ids, "deco.plate", [(85.3, 389.6), (302.6, 172.2), (833.4, 172.2), (615.1, 390.5)], "accent1")
+    poly(s, ids, "deco.line", [(397.4, 540), (451.7, 485.7), (526.6, 485.7), (472.3, 540)], "accent1")
+    text(s, ids, "txt.headline", 250, 251, 440, 60, "ダミー中扉", ea=GOTHIC, latin=LATIN, size=40, bold=True, line=50,
+         color="bg1", anchor="ctr", align="ctr")
+    notes(s, "type: section\nrole: [section]\nlabel: 中扉（章の見出し）")
+
+
+# ---------------------------------------------------------------- 型：画像が並ぶ（手順）（PDF p7）
+def steps(prs, n):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    poly(s, ids, "deco.corner", [(0, 0), (430.7, 0), (0, 430.7)], "accent1")
+    poly(s, ids, "deco.end-triangle", [(939.3, 449.2), (939.3, 522.7), (865.8, 522.7)], "accent2")
+    text(s, ids, "txt.eyebrow", -34, 58, 240, 56, "Dummy Label", ea=GOTHIC_M, latin=LATIN, size=20.5, color="bg1",
+         spc=4, line=26, rot=-45, anchor="ctr", align="ctr", wrap=False)
+    # 見出しは PDF に無い。三角の右の白い面に置く
+    text(s, ids, "txt.headline", 452, 64, 480, 56, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="ctr")
+    imgs = [ASSETS / f"item{k}.jpg" for k in (1, 2, 3, 4)]
+    if n == 4:
+        size, xs, y = 163.6, [161.4, 349.2, 537.0, 724.8], 168.3
+    else:
+        size, xs, y = 200, [161.4, 424.9, 688.4], 150
+    for i, x in enumerate(xs, 1):
+        picture(s, ids, f"img.item.{i}", imgs[i - 1], x, y, size, size, descr=f"手順{i}の写真")
+        rect(s, ids, f"deco.item-{i}-rule", x, y + size + 8, 28, 3, "accent1")
+        text(s, ids, f"txt.item.{i}.caption", x, y + size + 18, size, 44, "ダミー説明", ea=GOTHIC, latin=LATIN, size=15, bold=True, line=21)
+    notes(s, f'type: steps\nvariant: "{n}"\nrole: [steps]\nlabel: 画像が並ぶ（手順 {n}つ）')
+
+
+# ---------------------------------------------------------------- 型：写真コラージュ（PDF p8）
+DIAMONDS = [
+    [(253.2, 169.3), (335.6, 86.8), (418.1, 169.3), (335.6, 251.8)],
+    [(423.4, 169.4), (505.9, 87.0), (588.4, 169.4), (505.9, 251.9)],
+    [(338.4, 254.5), (420.8, 172.0), (503.3, 254.5), (420.8, 337.0)],
+    [(84.2, 339.5), (250.6, 173.1), (417.0, 339.5), (250.6, 506.0)],
+    [(423.4, 339.5), (543.6, 219.3), (663.8, 339.5), (543.6, 459.8)],
+    [(337.7, 425.2), (420.2, 342.7), (502.7, 425.2), (420.2, 507.7)],
+]
+
+
+def collage(prs):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    poly(s, ids, "deco.band", [(546.6, 216.8), (763.4, 0), (960, 0), (960, 43.8), (666.8, 337)], "bg2")
+    poly(s, ids, "deco.tri", [(716.4, 547.5), (969.7, 294.2), (969.7, 547.5)], "accent2")
+    poly(s, ids, "deco.line-blue", [(632.4, 540), (708.3, 464.1), (726.1, 464.1), (650.2, 540)], "accent1")
+    poly(s, ids, "deco.line-yellow", [(576.9, 136.2), (683.1, 30), (700.9, 30), (594.7, 136.2)], "accent2")
+    picture(s, ids, "img.hero", ASSETS / "side.jpg", 84.2, 86.8, 579.6, 420.9, multi=DIAMONDS, descr="菱形のコラージュ")
+    # 見出しは PDF では2行（6字ずつ）。菱形にかからないよう、上の白い面に1行で置く
+    text(s, ids, "txt.headline", 48, 22, 520, 56, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="ctr")
+    text(s, ids, "txt.subtitle", 50, 92, 196, 46, "ダミー副題", ea=GOTHIC, latin=LATIN, size=15, bold=True, line=21)
+    notes(s, "type: collage\nrole: [closing]\nlabel: 写真コラージュ（結び・表紙の別案）")
+
+
+# ---------------------------------------------------------------- 型：目次（PDF p9）
+def toc(prs, n):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    poly(s, ids, "deco.corner", [(0, 0), (339.5, 0), (0, 339.5)], "accent1")
+    poly(s, ids, "deco.tri", [(413.2, 545.7), (961.1, -2.2), (961.1, 545.7)], "accent2")
+    poly(s, ids, "deco.line", [(752.5, 540), (899.3, 393.2), (919.3, 393.2), (772.5, 540)], "accent1")
+    picture(s, ids, "img.side", ASSETS / "cover.jpg", 496.3, 208.2, 422.3, 218.3,
+            pts=[(496.3, 426.5), (714.6, 208.2), (918.6, 208.2), (700.3, 426.5)], descr="目次の写真")
+    text(s, ids, "txt.eyebrow", -28, 79, 240, 26, "Dummy Label", ea=GOTHIC, latin=LATIN, size=20.5, color="bg1",
+         spc=4, line=26, rot=-45, anchor="ctr", align="ctr", wrap=False)
+    # 項目は 45 度の流れに沿って左へずらす（青と黄の三角の間の白い面に収まる位置）
+    y0 = 170 + (5 - n) * 31
+    for k in range(n):
+        y, x = y0 + k * 62, 230 - k * 40
+        text(s, ids, f"deco.toc-no-{k + 1}", x, y, 52, 40, f"{k + 1:02d}", ea=GOTHIC, latin=LATIN_M, size=24, color="accent1", line=30, anchor="ctr")
+        rect(s, ids, f"deco.toc-rule-{k + 1}", x + 60, y + 38, 300, 1.1, "accent2")
+        text(s, ids, f"txt.item.{k + 1}", x + 60, y, 300, 36, "ダミー項目", ea=GOTHIC_M, latin=LATIN_M, size=18, line=24, anchor="ctr")
+    notes(s, f'type: toc\nvariant: "{n}"\nrole: [toc]\nlabel: 目次（{n}項目）')
+
+
+# ---------------------------------------------------------------- 型：写真＋本文A（PDF p10）
+def photo_text_a(prs):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    picture(s, ids, "img.right", ASSETS / "cover.jpg", 208.5, 0, 262.5, 540, descr="右の写真")
+    picture(s, ids, "img.left", ASSETS / "item1.jpg", 31, 0, 177.5, 540, descr="左の写真")
+    poly(s, ids, "deco.tri-top", [(208.5, 0), (470.4, 0), (208.5, 261.1)], "accent1", alpha=88)
+    poly(s, ids, "deco.tri-bottom", [(75.5, 533.7), (208.5, 400.8), (208.5, 533.7)], "accent1", alpha=88)
+    poly(s, ids, "deco.end-triangle", [(939.5, 449), (939.5, 522.5), (866, 522.5)], "accent2")
+    text(s, ids, "txt.headline", 520, 70, 400, 80, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="b")
+    rect(s, ids, "deco.rule", 520, 166, 60, 4, "accent2")
+    text(s, ids, "txt.body", 520, 196, 400, 182, "ダミー本文", ea=GOTHIC, latin=LATIN, size=15, line=26)
+    notes(s, 'type: photo-text\nvariant: "a"\nrole: [photo-text]\nlabel: 写真＋本文A（見出しと説明文）')
+
+
+# ---------------------------------------------------------------- 型：写真＋本文B（PDF p11）
+def photo_text_b(prs):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    picture(s, ids, "img.hero", ASSETS / "side.jpg", 0, 0, 506, 540, descr="左の写真")
+    for name, pts in [("deco.tri-1", [(243.8, 6.2), (243.8, 268.3), (-18.3, 268.3)]),
+                      ("deco.tri-2", [(-18.3, 529.2), (-18.3, 267.1), (243.8, 267.1)]),
+                      ("deco.tri-3", [(506.4, 8.4), (506.4, 270.4), (244.3, 270.4)]),
+                      ("deco.tri-4", [(244.3, 531.3), (244.3, 269.3), (506.4, 269.3)])]:
+        poly(s, ids, name, pts, "accent1", alpha=88)
+    text(s, ids, "txt.headline", 556, 70, 370, 80, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="b")
+    for k in range(3):
+        y = 200 + k * 92
+        rect(s, ids, f"deco.point-{k + 1}", 556, y + 5, 12, 12, "accent2")
+        text(s, ids, f"txt.item.{k + 1}", 580, y, 346, 66, "ダミー要点", ea=GOTHIC_M, latin=LATIN_M, size=16, line=22)
+    notes(s, 'type: photo-text\nvariant: "b"\nrole: [photo-text]\nlabel: 写真＋本文B（見出しと要点3つ）')
+
+
 def main(out: Path):
     prs = Presentation()
     prs.slide_width = Emu(12192000)
@@ -314,6 +468,15 @@ def main(out: Path):
     for n in (2, 3, 4):
         issues(prs, n)
     numbers(prs)
+    attention(prs)
+    section(prs)
+    for n in (3, 4):
+        steps(prs, n)
+    collage(prs)
+    for n in (3, 4, 5):
+        toc(prs, n)
+    photo_text_a(prs)
+    photo_text_b(prs)
     prs.save(str(out))
     print(out)
 

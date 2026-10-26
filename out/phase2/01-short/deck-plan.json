@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "deckTitle": "中小企業のための業務自動化サービスのご案内",
+  "template": {
+    "file": "templates/provisional.pptx",
+    "sha256": "91f87896c67f634bb79414982be5f50d09478115b3af15322bd3863ad66c4604"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "slots": {
+        "txt.point.1.lead": "請求書の時間",
+        "txt.point.1.main": "月40時間\n→月8時間",
+        "txt.point.2.lead": "入力ミスに\nよる差し戻し",
+        "txt.point.2.main": "ほぼ0件",
+        "txt.point.3.lead": "導入まで",
+        "txt.point.3.main": "平均2週間",
+        "txt.headline": "[[業務自動化]]で\n本来の仕事へ",
+        "txt.subtitle": "毎日の事務作業に追われる中小企業の経営者の\n方へ、業務の自動化サービスをご案内します。"
+      },
+      "photos": {
+        "img.hero": "事務所でパソコンに向かい、笑顔で働く中小企業の経営者とスタッフ"
+      },
+      "outlinePage": 1,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.point.1.main",
+        "txt.point.2.lead",
+        "txt.headline",
+        "txt.subtitle"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p01-img.hero.jpg"
+      }
+    },
+    {
+      "type": "issues/3",
+      "slots": {
+        "txt.eyebrow": "Issues",
+        "txt.headline": "こんなお悩みはありませんか",
+        "txt.item.1.title": "[[属人化]]で\n社長が動けない",
+        "txt.item.1.body": "自分がいないと回らない",
+        "txt.item.2.title": "人件費が厳しい",
+        "txt.item.2.body": "教育に時間がかかり、すぐ辞める",
+        "txt.item.3.title": "開発費が高い",
+        "txt.item.3.body": "見積もりが数百万〜数千万円"
+      },
+      "photos": {
+        "img.item.1": "現場で忙しく対応する社長の姿",
+        "img.item.2": "新人に仕事を教える職場の場面",
+        "img.item.3": "見積書を前に悩む経営者"
+      },
+      "outlinePage": 2,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p02-img.item.1.jpg",
+        "img.item.2": "p02-img.item.2.jpg",
+        "img.item.3": "p02-img.item.3.jpg"
+      }
+    },
+    {
+      "type": "numbers/3",
+      "slots": {
+        "txt.eyebrow": "Results",
+        "txt.headline": "導入企業で出ている成果",
+        "txt.label.1": "請求書づくり",
+        "num.value.1": "8",
+        "txt.unit.1": "時間/月",
+        "txt.note.1": "月40時間から\n減りました",
+        "txt.label.2": "差し戻し",
+        "num.value.2": "0",
+        "txt.unit.2": "件",
+        "txt.note.2": "入力ミスによる\n差し戻しはほぼ0件",
+        "txt.label.3": "導入期間",
+        "num.value.3": "2",
+        "txt.unit.3": "週間",
+        "txt.note.3": "導入までの平均期間",
+        "txt.footnote": "導入いただいた企業での結果です。"
+      },
+      "photos": {
+        "img.side": "請求書を確認して笑顔で話すオフィスの担当者"
+      },
+      "outlinePage": 3,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.2"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.side": "p03-img.side.jpg"
+      }
+    },
+    {
+      "type": "steps/3",
+      "slots": {
+        "txt.eyebrow": "Flow",
+        "txt.headline": "導入の流れ",
+        "txt.item.1.caption": "無料のヒアリングでいまの\n業務の流れを伺います",
+        "txt.item.2.caption": "自動化の設計で任せる\n作業を一緒に決めます",
+        "txt.item.3.caption": "試験運用で[[小さく]]\n始め効果を確認"
+      },
+      "photos": {
+        "img.item.1": "打ち合わせで業務について話し合う場面",
+        "img.item.2": "ホワイトボードで業務の流れを整理する様子",
+        "img.item.3": "パソコンで試験運用の結果を確認する様子"
+      },
+      "outlinePage": 4,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p04-img.item.1.jpg",
+        "img.item.2": "p04-img.item.2.jpg",
+        "img.item.3": "p04-img.item.3.jpg"
+      }
+    },
+    {
+      "type": "collage",
+      "slots": {
+        "txt.headline": "まずはご相談ください",
+        "txt.subtitle": "ヒアリングは[[無料]]です。\n一緒に見つけます。"
+      },
+      "photos": {
+        "img.hero": "和やかに相談する経営者と担当者、明るいオフィスの風景"
+      },
+      "outlinePage": 5,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p05-img.hero.jpg"
+      }
+    }
+  ]
+}

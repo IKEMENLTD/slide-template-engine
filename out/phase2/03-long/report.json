@@ -1,0 +1,250 @@
+{
+  "run": {
+    "id": "20261026-145825-manuscript-03-long",
+    "createdAt": "2026-10-26T05:58:25.457Z",
+    "input": "samples/manuscript-03-long.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 20,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:04:30.448Z",
+  "slides": 20,
+  "ok": true,
+  "errors": 0,
+  "warnings": 0,
+  "byCode": {},
+  "issues": [],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 7,
+    "failedAttempts": 0,
+    "inputTokens": 14,
+    "outputTokens": 14765,
+    "cacheReadTokens": 23568,
+    "cacheWriteTokens": 29249,
+    "costUsdEstimate": 0.2255,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 6593,
+        "outputTokens": 5041,
+        "ms": 31599
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 4,
+        "inputTokens": 30966,
+        "outputTokens": 6363,
+        "ms": 63091
+      },
+      {
+        "stage": "B段 書き直し",
+        "calls": 2,
+        "inputTokens": 15272,
+        "outputTokens": 3361,
+        "ms": 40539
+      }
+    ]
+  },
+  "timingsMs": {
+    "A段": 31604,
+    "B段": 107508,
+    "C段": 21015,
+    "D段": 9141
+  },
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "toc/5",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 3,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 4,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "issues/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title",
+        "txt.item.2.title"
+      ]
+    },
+    {
+      "page": 6,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 7,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 8,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 9,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 10,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 11,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 12,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 13,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 14,
+      "type": "steps/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 15,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 16,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 17,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 18,
+      "type": "numbers/3",
+      "rewrites": 2,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.2",
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 19,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1",
+        "txt.item.2",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 20,
+      "type": "collage",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}

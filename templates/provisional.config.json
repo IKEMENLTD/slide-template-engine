@@ -6,7 +6,10 @@
     "Noto Sans JP:bold": "fonts/NotoSansJP-Bold.otf",
     "Barlow:bold": "fonts/Barlow-Bold.ttf",
     "Noto Sans JP": "fonts/NotoSansJP-Regular.otf",
-    "Barlow": "fonts/Barlow-Regular.ttf"
+    "Barlow": "fonts/Barlow-Regular.ttf",
+    "Noto Serif JP:bold": "fonts/NotoSerifJP-Bold.otf",
+    "Noto Sans JP Medium:bold": "fonts/NotoSansJP-Bold.otf",
+    "Barlow Medium:bold": "fonts/Barlow-Bold.ttf"
   },
   "emphasis": {
     "underline": "accent2",
@@ -38,6 +41,14 @@
       "mono": true,
       "multiply": null
     },
+    "img.left": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.right": {
+      "mono": true,
+      "multiply": null
+    },
     "img.side": {
       "mono": true,
       "multiply": null
@@ -59,5 +70,30 @@
     "enabled": false,
     "target": 1.5,
     "tolerance": 0.3
+  },
+  "ai": {
+    "model": "claude-sonnet-5-5",
+    "effort": "medium",
+    "refusalFallback": true,
+    "maxRewrites": 2,
+    "callBudgetMs": 600000
+  },
+  "phraseBreak": [
+    "txt.headline",
+    "txt.subtitle",
+    "txt.*.title",
+    "txt.*.lead",
+    "txt.*.main",
+    "txt.*.caption",
+    "txt.item.*",
+    "txt.note.*"
+  ],
+  "checks": {
+    "nameIgnoreSlots": [
+      "txt.eyebrow"
+    ],
+    "noNumberSlots": [
+      "txt.unit.*"
+    ]
   }
 }

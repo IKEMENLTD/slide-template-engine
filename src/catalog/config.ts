@@ -33,10 +33,43 @@ export const ConfigSchema = z
       .strict(),
     deck: z.object({ maxSameTypeInRow: z.number().int().positive(), minSlides: z.number().int().positive(), maxSlides: z.number().int().positive() }).strict(),
     lightDarkRatio: z.object({ enabled: z.boolean(), target: z.number(), tolerance: z.number() }).strict(),
+    /** AI の呼び出し（9章）。model は models.ts にあるもの */
+    ai: z
+      .object({
+        model: z.string(),
+        effort: z.enum(['low', 'medium', 'high', 'xhigh', 'max']),
+        /** 安全の判定で断られたときに、サーバー側で別のモデルにやり直させる */
+        refusalFallback: z.boolean(),
+        /** 欄に入らないときに書き直させる回数（7章B-3：最大2回） */
+        maxRewrites: z.number().int().nonnegative(),
+        /** 1回の呼び出しに使える壁時計（ms） */
+        callBudgetMs: z.number().int().positive(),
+      })
+      .strict()
+      .default({ model: 'claude-sonnet-5-5', effort: 'medium', refusalFallback: true, maxRewrites: 2, callBudgetMs: 600000 }),
+    /**
+     * 文節（budoux）の切れ目で改行を入れる欄（7章B-4）。PowerPoint は語の途中で折り返すため。
+     * 本文のように長く流れる欄は入れない（後で人が直すとき、固定の改行が邪魔になる）
+     */
+    phraseBreak: z.array(z.string()).default(['txt.headline', 'txt.subtitle', 'txt.*.title', 'txt.*.lead', 'txt.*.main', 'txt.*.caption', 'txt.item.*', 'txt.note.*']),
+    /** 検査（11章）の細かい決め。 */
+    checks: z
+      .object({
+        /** 固有名詞らしき語を調べない欄（英字の飾りの見出しなど） */
+        nameIgnoreSlots: z.array(z.string()),
+        /** 数字を入れない欄（単位の欄。数字は num.* に入れる） */
+        noNumberSlots: z.array(z.string()).default(['txt.unit.*']),
+      })
+      .strict()
+      .default({ nameIgnoreSlots: ['txt.eyebrow'], noNumberSlots: ['txt.unit.*'] }),
   })
   .strict();
 
 export type TemplateConfig = z.infer<typeof ConfigSchema>;
+
+/** 欄の名前のパターン（* は任意の文字列）に当たるか */
+export const slotPattern = (g: string) => new RegExp('^' + g.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+export const matchesAny = (patterns: string[], name: string) => patterns.some((p) => slotPattern(p).test(name));
 
 export const configPathFor = (templatePath: string) => templatePath.replace(/\.pptx$/i, '.config.json');
 
@@ -78,6 +111,9 @@ export function scaffoldConfig(opts: {
       fit: { autospaceEm: 0.25, hangingPunct: true, slackRatio: 0.03, defaultLineHeight: 1.2 },
       deck: { maxSameTypeInRow: 2, minSlides: 4, maxSlides: 20 },
       lightDarkRatio: { enabled: false, target: 1.5, tolerance: 0.3 },
+      ai: { model: 'claude-sonnet-5-5', effort: 'medium', refusalFallback: true, maxRewrites: 2, callBudgetMs: 600000 },
+      phraseBreak: ['txt.headline', 'txt.subtitle', 'txt.*.title', 'txt.*.lead', 'txt.*.main', 'txt.*.caption', 'txt.item.*', 'txt.note.*'],
+      checks: { nameIgnoreSlots: ['txt.eyebrow'], noNumberSlots: ['txt.unit.*'] },
     },
     unresolved,
   };

@@ -1,0 +1,10 @@
+{
+  "id": "20261026-145511-manuscript-01-short",
+  "createdAt": "2026-10-26T05:55:12.222Z",
+  "input": "samples/manuscript-01-short.md",
+  "template": "templates/provisional.pptx",
+  "photos": "assets/photos",
+  "targetSlides": 5,
+  "transport": "claude-cli",
+  "model": "claude-sonnet-5-5"
+}

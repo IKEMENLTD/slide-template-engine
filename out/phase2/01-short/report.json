@@ -1,0 +1,110 @@
+{
+  "run": {
+    "id": "20261026-145511-manuscript-01-short",
+    "createdAt": "2026-10-26T05:55:12.222Z",
+    "input": "samples/manuscript-01-short.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 5,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:03:27.595Z",
+  "slides": 5,
+  "ok": true,
+  "errors": 0,
+  "warnings": 0,
+  "byCode": {},
+  "issues": [],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 2,
+    "failedAttempts": 0,
+    "inputTokens": 4,
+    "outputTokens": 2394,
+    "cacheReadTokens": 5628,
+    "cacheWriteTokens": 7175,
+    "costUsdEstimate": 0.043,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 5630,
+        "outputTokens": 1273,
+        "ms": 12832
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 1,
+        "inputTokens": 7177,
+        "outputTokens": 1121,
+        "ms": 9488
+      }
+    ]
+  },
+  "timingsMs": {
+    "A段": 12838,
+    "B段": 10107,
+    "C段": 1767,
+    "D段": 989
+  },
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.point.1.main",
+        "txt.point.2.lead",
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "issues/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title"
+      ]
+    },
+    {
+      "page": 3,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.2"
+      ]
+    },
+    {
+      "page": 4,
+      "type": "steps/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "collage",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}
