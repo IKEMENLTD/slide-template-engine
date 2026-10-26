@@ -1,0 +1,181 @@
+{
+  "frameAspect": 1,
+  "photos": [
+    "out/phase0/automizer/photos/01.jpg",
+    "out/phase0/automizer/photos/03.jpg"
+  ],
+  "raw": {
+    "file": "out/phase0/automizer/probe-out.raw.pptx",
+    "issues": [
+      {
+        "code": "RELS_WITHOUT_OWNER",
+        "part": "ppt/slides/_rels/slide1.xml.rels",
+        "detail": "ppt/slides/slide1.xml が無い"
+      },
+      {
+        "code": "REL_TARGET_MISSING",
+        "part": "ppt/notesSlides/_rels/notesSlide1.xml.rels",
+        "detail": "rId2 → ppt/slides/slide1.xml"
+      },
+      {
+        "code": "RELS_WITHOUT_OWNER",
+        "part": "ppt/slides/_rels/slide2.xml.rels",
+        "detail": "ppt/slides/slide2.xml が無い"
+      },
+      {
+        "code": "REL_TARGET_MISSING",
+        "part": "ppt/notesSlides/_rels/notesSlide2.xml.rels",
+        "detail": "rId2 → ppt/slides/slide2.xml"
+      },
+      {
+        "code": "REL_TARGET_MISSING",
+        "part": "ppt/slides/_rels/slide3.xml.rels",
+        "detail": "rId2 → ppt/media/image1.png"
+      },
+      {
+        "code": "REL_TARGET_MISSING",
+        "part": "ppt/slides/_rels/slide4.xml.rels",
+        "detail": "rId2 → ppt/media/image1.png"
+      },
+      {
+        "code": "ORPHAN_PART",
+        "part": "ppt/notesSlides/notesSlide1.xml",
+        "detail": "ルートからたどり着けない"
+      },
+      {
+        "code": "ORPHAN_PART",
+        "part": "ppt/notesSlides/notesSlide2.xml",
+        "detail": "ルートからたどり着けない"
+      }
+    ]
+  },
+  "sanitize": {
+    "removed": [
+      "ppt/notesSlides/notesSlide1.xml",
+      "ppt/notesSlides/notesSlide2.xml",
+      "ppt/notesSlides/notesSlide3.xml",
+      "ppt/notesSlides/notesSlide4.xml",
+      "ppt/notesSlides/notesSlide5.xml",
+      "ppt/slides/_rels/slide1.xml.rels",
+      "ppt/slides/_rels/slide2.xml.rels"
+    ]
+  },
+  "final": {
+    "issues": [],
+    "file": "out/phase0/automizer/probe-out.pptx",
+    "slides": 3,
+    "perSlide": [
+      {
+        "slide": "ppt/slides/slide3.xml",
+        "dummyLeft": false,
+        "srgbClr": 0,
+        "schemeClr": [
+          "bg2",
+          "accent1",
+          "lt1",
+          "accent2",
+          "tx1"
+        ],
+        "parallelogramPictures": 1,
+        "srcRect": [],
+        "emphasisRuns": 1,
+        "fontsInRuns": [
+          "Noto Serif JP",
+          "Noto Sans JP",
+          "Barlow"
+        ],
+        "sizes": [
+          20,
+          16,
+          12,
+          60
+        ],
+        "imageTargets": [
+          "Target=\"../media/01.jpg\""
+        ],
+        "shapeNames": [
+          "deco.title-band",
+          "deco.corner-triangle",
+          "deco.eyebrow-band",
+          "txt.headline",
+          "img.hero",
+          "txt.item.1",
+          "txt.item.2",
+          "txt.body",
+          "num.rate"
+        ]
+      },
+      {
+        "slide": "ppt/slides/slide4.xml",
+        "dummyLeft": false,
+        "srgbClr": 0,
+        "schemeClr": [
+          "bg2",
+          "accent1",
+          "lt1",
+          "accent2",
+          "tx1"
+        ],
+        "parallelogramPictures": 1,
+        "srcRect": [],
+        "emphasisRuns": 1,
+        "fontsInRuns": [
+          "Noto Serif JP",
+          "Noto Sans JP",
+          "Barlow"
+        ],
+        "sizes": [
+          20,
+          16,
+          12,
+          60
+        ],
+        "imageTargets": [
+          "Target=\"../media/03.jpg\""
+        ],
+        "shapeNames": [
+          "deco.title-band",
+          "deco.corner-triangle",
+          "deco.eyebrow-band",
+          "txt.headline",
+          "img.hero",
+          "txt.item.1",
+          "txt.item.2",
+          "txt.body",
+          "num.rate"
+        ]
+      },
+      {
+        "slide": "ppt/slides/slide5.xml",
+        "dummyLeft": false,
+        "srgbClr": 0,
+        "schemeClr": [
+          "accent1",
+          "lt1",
+          "bg1"
+        ],
+        "parallelogramPictures": 0,
+        "srcRect": [],
+        "emphasisRuns": 0,
+        "fontsInRuns": [
+          "Noto Sans JP"
+        ],
+        "sizes": [
+          28
+        ],
+        "imageTargets": [],
+        "shapeNames": [
+          "deco.section-band",
+          "txt.headline"
+        ]
+      }
+    ],
+    "media": [
+      "ppt/media/",
+      "ppt/media/01.jpg",
+      "ppt/media/03.jpg"
+    ],
+    "notes": 0
+  },
+  "green": "out/phase0/automizer/probe-out-green.pptx"
+}

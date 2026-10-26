@@ -1,0 +1,93 @@
+{
+  "model": "gpt-image-2.5-flare",
+  "size": "1536x1024",
+  "quality": "medium",
+  "price": {
+    "imageIn": 8,
+    "textIn": 5,
+    "imageOut": 30
+  },
+  "results": [
+    {
+      "id": "01",
+      "ok": true,
+      "mode": "generate",
+      "refs": [],
+      "ms": 7348,
+      "isJpeg": true,
+      "width": 1536,
+      "height": 1024,
+      "usage": {
+        "input_tokens": 142,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 142
+        },
+        "output_tokens": 343,
+        "output_tokens_details": {
+          "image_tokens": 343,
+          "text_tokens": 0
+        },
+        "total_tokens": 485
+      },
+      "costUsd": 0.011,
+      "revisedPrompt": null
+    },
+    {
+      "id": "02",
+      "ok": true,
+      "mode": "edit",
+      "refs": [
+        "01"
+      ],
+      "ms": 11172,
+      "isJpeg": true,
+      "width": 1536,
+      "height": 1024,
+      "usage": {
+        "input_tokens": 1721,
+        "input_tokens_details": {
+          "image_tokens": 1536,
+          "text_tokens": 185
+        },
+        "output_tokens": 343,
+        "output_tokens_details": {
+          "image_tokens": 343,
+          "text_tokens": 0
+        },
+        "total_tokens": 2064
+      },
+      "costUsd": 0.023503,
+      "revisedPrompt": null
+    },
+    {
+      "id": "03",
+      "ok": true,
+      "mode": "edit",
+      "refs": [
+        "01",
+        "02"
+      ],
+      "ms": 10553,
+      "isJpeg": true,
+      "width": 1536,
+      "height": 1024,
+      "usage": {
+        "input_tokens": 3265,
+        "input_tokens_details": {
+          "image_tokens": 3072,
+          "text_tokens": 193
+        },
+        "output_tokens": 343,
+        "output_tokens_details": {
+          "image_tokens": 343,
+          "text_tokens": 0
+        },
+        "total_tokens": 3608
+      },
+      "costUsd": 0.035831,
+      "revisedPrompt": null
+    }
+  ],
+  "totalUsd": 0.07033400000000001
+}
