@@ -7,9 +7,9 @@
 - 作り直し方：`npx tsx scripts/phase5/palette-gallery.ts`
 
 ## 20枚の資料（`final-20-pages/`）
-- 工場のデジタル化計画（`samples/manuscript-03-long.md`）を最初から通したもの。20枚・止める指摘 0・同じ型の連続の注意 0・637秒・実費の概算 $1.04（文章 $0.65＋写真 $0.39）。
+- 工場のデジタル化計画（`samples/manuscript-03-long.md`）を最初から通したもの。20枚・止める指摘 0・同じ型の連続の注意 0・注意 3件（英字ラベルが写真に重なる2件＝テンプレートの作り・写真の切り抜き1件）・554秒・実費の概算 $0.88（文章 $0.49＋写真 $0.39）。
 - `deck.pptx`・`contact-sheet.jpg`・`report.md`・`review/changes-*.json`（作り直したページ以外は変化 0）・`generated-sheet.jpg`（生成写真の一覧。文字が入っていないかの確認用）。
-- 注意の「語の途中の改行」2件（p14「見える／化」・p19「平均45／分」）は、この実行の後に直した（DECISIONS D-031）。次の実行から出ない。
+- 文節の改行の直し（D-031）の後に作り直したもの。語の途中の改行の指摘は 0。
 
 ## 手順書の試し（`guide-dryrun/`）
 - `docs/TEMPLATE_GUIDE.md` 11章の例「引用」の型を、手順書に書いてあることだけで足したもの（PowerPoint の操作の代わりに python-pptx。`scripts/phase5/guide-dryrun.py`）。
