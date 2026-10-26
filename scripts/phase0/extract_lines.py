@@ -16,7 +16,7 @@ for c in cases:
                 # 合字（ffi など）は同じ位置に複数の文字が出るので、スパンの中は元の順番を保つ
                 x0, y0, x1, y1 = s["bbox"]
                 cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-                if c["x"] - 2 <= x0 and x1 <= c["x"] + c["width"] + c["size"] and c["y"] - 2 <= cy <= c["y"] + c["height"]:
+                if c["x"] - 2 <= x0 and x0 < c["x"] + c["width"] and c["y"] - 2 <= cy <= c["y"] + c["height"]:
                     lines.setdefault(round(s["origin"][1], 1), []).append((x0, "".join(ch["c"] for ch in s["chars"])))
     out[c["name"]] = ["".join(ch for _, ch in sorted(v)) for _, v in sorted(lines.items())]
 json.dump(out, open(sys.argv[3], "w", encoding="utf-8"), ensure_ascii=False, indent=1)

@@ -17,10 +17,13 @@ const isWestern = (c: string) => c.charCodeAt(0) < 0x2e80;
 
 type FontLike = { unitsPerEm: number; layout: (s: string) => { advanceWidth: number } };
 const cache = new Map<string, FontLike>();
+/** file は「パス」か、フォント集（.ttc）なら「パス#PostScript名」 */
 export function loadFont(file: string): FontLike {
   let f = cache.get(file);
   if (!f) {
-    f = fontkit.openSync(file) as unknown as FontLike;
+    const [p, ps] = file.split('#');
+    const opened = fontkit.openSync(p, ps) as unknown as FontLike;
+    f = opened;
     cache.set(file, f);
   }
   return f;
@@ -41,6 +44,8 @@ export type WrapOptions = {
    * PowerPoint の丸めは未確認なので、本番の判定では使わず、検証の再現用に限る。
    */
   rounding?: 'none' | 'lo-100mm';
+  /** 英数字に別の字体が当たる場合（PowerPoint は latin と ea に別の字体を使う）。無ければ fontFile */
+  latinFontFile?: string;
 };
 const HANG = new Set([...'、。，．,.」』）】'])
 
@@ -56,10 +61,12 @@ function tokens(text: string): string[] {
 }
 
 export function wrapLines(text: string, o: WrapOptions): string[] {
-  const font = loadFont(o.fontFile);
-  const scale = o.sizePt / font.unitsPerEm;
+  const cjkFont = loadFont(o.fontFile);
+  const latinFont = loadFont(o.latinFontFile ?? o.fontFile);
   const PT_PER_100MM = 72 / 2540;
   const w = (s: string) => {
+    const font = isWestern(s[0]) ? latinFont : cjkFont;
+    const scale = o.sizePt / font.unitsPerEm;
     if (o.rounding !== 'lo-100mm') return font.layout(s).advanceWidth * scale;
     let sum = 0;
     for (const ch of s) sum += Math.round((font.layout(ch).advanceWidth * scale) / PT_PER_100MM);

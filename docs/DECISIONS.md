@@ -50,7 +50,7 @@
 | ③ 平行四辺形の写真の差し替え | **回避策つきでできた**。形は残る。切り抜きは automizer では失敗したので sharp で先に行う（D-003） | 同上・`evidence.json` の `parallelogramPictures` |
 | ④ テーマ色の参照 | **できた**。出力の色はすべて `schemeClr`（`srgbClr` は0件）。テーマの2色を入れ替えると、飾り・強調の下線まで全部変わる | `probe-out-green.pptx`・`render/probe-out-green-01.png` |
 | 写真の生成（2.5-flare、見本2枚） | **できた**。3枚とも文字なし・同じ人物と服装と職場。1枚 7〜11 秒、3枚で $0.070 | `out/phase0/images/contact-sheet.jpg`・`result.json` |
-| 文字幅と折り返し | **余裕を持たせればあふれを見逃さない**。LibreOffice とは 36 件中 35 件で行数が一致。PowerPoint は未確認 | `out/phase0/wrap/compare.json` |
+| 文字幅と折り返し | **余裕を持たせればあふれを見逃さない**。LibreOffice とは 36 件中 35 件、PowerPoint（ブラウザ版）とは 36 件すべてで行数が一致（PowerPoint は字体が置き換わったので、規則だけの確認） | `out/phase0/wrap/compare.json`・`compare-powerpoint.json` |
 
 **PPTX のライブラリは pptx-automizer 0.9.4 に決める**（python-pptx には切り替えない）。ただし出力をそのまま使わず、必ず D-004 の掃除と構造検査を通す。
 
@@ -118,7 +118,19 @@
   - 読点を含む行が、計算より 1 文字多く入る場合が 4 件残った（原因は特定できていない。どれも予測のほうが行が多い、安全な側のずれ）
 - **決めたこと**：B段・検査（OVERFLOW）での判定は「autospace 0.25em・ぶら下げあり・幅の 3% を余裕」にする。改行位置までは合わせない（PowerPoint と LibreOffice で違うので、片方に合わせる意味が薄い）。目的は「予測では入るのに、実物ではあふれる」を 0 にすること。値は設定ファイルに置く。
 - **捨てたもの**：LibreOffice の丸めを本番の判定で再現すること（描画側の都合に寄せすぎる。検証の再現用にだけ残した）。
-- **未確認**：PowerPoint での折り返し。`out/phase0/README.md` の手順で PowerPoint から PDF を書き出してもらえば、同じ道具で突き合わせられる。
+- **PowerPoint での突き合わせ（2026-10-26）**：佐藤さんに PowerPoint for the web で `wrap.pptx` を PDF に書き出してもらった（`out/phase0/wrap/powerpoint.pdf`。14ページ・960×540pt）。
+  - **ブラウザ版は Noto を持たず、和文を MS ゴシック・英数字を Calibri に置き換えて描いた**（PDF の埋め込み字体で確認）。そのため Noto の文字幅は確かめられない。代わりに、置き換わった字体の幅で予測し直し、**PowerPoint の折り返しの規則**を確かめた（`scripts/phase0/measure-wrap-substituted.ts`。MS ゴシックと Calibri は Windows 同梱の有償フォントなのでリポジトリに入れない）。
+  - **PowerPoint は和文と英数字の間に空きを入れない**（実測 ±0.03em）。LibreOffice（0.25em）と違う。
+  - 句読点はぶら下げる（LibreOffice と同じ）。
+  - 太字の字体が無いとき（MS ゴシック）は、PowerPoint が太字を合成し、1文字の幅が約 0.75% 広がる（20pt で 20.15pt）。
+
+| 設定（PowerPoint・置き換わった字体の幅で予測） | 行数が一致 | 改行位置まで一致 | 見逃し |
+|---|---|---|---|
+| 空きなし・ぶら下げあり | **36/36** | 31/36 | 0 |
+| 空き 0.25em・ぶら下げあり・3% の余裕（本番の判定） | 28/36 | 6/36 | **0** |
+
+- **結論**：本番の判定（空き 0.25em・ぶら下げ・3% の余裕）は、LibreOffice でも PowerPoint でも「あふれの見逃し 0 件」。PowerPoint より空きを多めに見積もるぶん安全側に倒れる。改行位置を PowerPoint に合わせたいときは、空きを 0 にした設定を使えばよい（値は設定ファイルに置く）。
+- **まだ確かめられていないこと**：Noto が入った PowerPoint（デスクトップ版）での文字幅。規則は確かめたので、残るのは字体の幅の差だけ。3% の余裕でまかなえる見込みだが、PowerPoint のデスクトップ版が使えるようになったら同じ道具で測り直す。
 
 ## D-007 写真の生成（gpt-image-2.5-flare）
 
@@ -165,7 +177,7 @@
 
 ## Phase 1 に持ち越すこと
 
-1. 佐藤さんの PowerPoint での確認結果（修復の有無・Medium の名前・折り返し）を見て、D-004〜D-006 を確定する
+1. 佐藤さんの PowerPoint での確認結果（修復の有無・文字と写真が直せるか・色の差し替え）を見て、D-004 を確定する。Medium の名前（D-005）と Noto の文字幅（D-006）は、PowerPoint のデスクトップ版が使えるまで未確認
 2. 仮テンプレートの図形から、python-pptx の既定の「影」を外す（`p:style` の effectRef。検証テンプレートでは図形に影が出ていた）
 3. 設定の雛形：`headline.mincho: true`（D-008）、`emphasis` の形（D-009）、折り返しの規則と 3% の余裕（D-006）
 4. 写真の切り抜きの中心（D-003）は Phase 3
