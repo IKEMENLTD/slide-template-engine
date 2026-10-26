@@ -43,7 +43,7 @@
     },
     "img.left": {
       "mono": true,
-      "multiply": null
+      "multiply": "accent1"
     },
     "img.right": {
       "mono": true,
@@ -88,6 +88,12 @@
     "txt.item.*",
     "txt.note.*"
   ],
+  "photos": {
+    "maxUsesPerFile": 2,
+    "maxGenerate": 12,
+    "model": "gpt-image-2.5-flare",
+    "quality": "medium"
+  },
   "checks": {
     "nameIgnoreSlots": [
       "txt.eyebrow"

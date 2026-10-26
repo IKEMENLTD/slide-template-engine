@@ -1,0 +1,436 @@
+{
+  "run": {
+    "id": "20261026-151227-manuscript-03-long",
+    "createdAt": "2026-10-26T06:12:30.807Z",
+    "input": "samples/manuscript-03-long.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 20,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:17:38.062Z",
+  "slides": 20,
+  "ok": true,
+  "errors": 0,
+  "warnings": 0,
+  "byCode": {},
+  "issues": [],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 6,
+    "failedAttempts": 0,
+    "inputTokens": 12,
+    "outputTokens": 14456,
+    "cacheReadTokens": 30079,
+    "cacheWriteTokens": 11335,
+    "costUsdEstimate": 0.1789,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 6593,
+        "outputTokens": 4568,
+        "ms": 43539
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 4,
+        "inputTokens": 30975,
+        "outputTokens": 6281,
+        "ms": 71054
+      },
+      {
+        "stage": "C段 写真の割り当て",
+        "calls": 1,
+        "inputTokens": 3858,
+        "outputTokens": 3607,
+        "ms": 32538
+      }
+    ]
+  },
+  "photos": {
+    "slots": 24,
+    "supplied": 4,
+    "generatedUses": 20,
+    "templateLeft": 0,
+    "generated": 12,
+    "generationCostUsd": 0.3911,
+    "generationMs": 150462,
+    "records": [
+      {
+        "id": "p01/img.hero",
+        "page": 1,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:1",
+        "scene": "A worker in a gray work jacket loads a metal part into a running CNC machine while a colleague watches nearby."
+      },
+      {
+        "id": "p02/img.side",
+        "page": 2,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:2",
+        "scene": "Wide view of a metal machining line with several CNC machines running and workers tending them along the aisle."
+      },
+      {
+        "id": "p04/img.item.1",
+        "page": 4,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:6",
+        "scene": "Close-up of a worker's gloved hands adjusting the settings and fixture on a machine."
+      },
+      {
+        "id": "p04/img.item.2",
+        "page": 4,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:9",
+        "scene": "Defective metal parts lined up on an inspection table while a worker's hands examine one."
+      },
+      {
+        "id": "p04/img.item.3",
+        "page": 4,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:10",
+        "scene": "A veteran foreman in a gray work jacket writes a production schedule by hand on paper at a desk in the factory."
+      },
+      {
+        "id": "p04/img.item.4",
+        "page": 4,
+        "slot": "img.item.4",
+        "source": "generated",
+        "file": "gen:11",
+        "scene": "Warehouse shelves piled high with raw metal materials and boxes, a worker walking past."
+      },
+      {
+        "id": "p05/img.side",
+        "page": 5,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:4",
+        "scene": "Vertical view of an aisle between running machine tools, with a worker walking along it checking the machines."
+      },
+      {
+        "id": "p06/img.right",
+        "page": 6,
+        "slot": "img.right",
+        "source": "generated",
+        "file": "gen:10"
+      },
+      {
+        "id": "p06/img.left",
+        "page": 6,
+        "slot": "img.left",
+        "source": "generated",
+        "file": "gen:12",
+        "scene": "An office desk with a fax machine and a telephone, a staff member in a navy jacket reading a received sheet."
+      },
+      {
+        "id": "p08/img.hero",
+        "page": 8,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:3",
+        "scene": "A worker in a gray jacket checks machine status on a tablet beside a running machine, a colleague next to him."
+      },
+      {
+        "id": "p09/img.side",
+        "page": 9,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:4"
+      },
+      {
+        "id": "p11/img.hero",
+        "page": 11,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:3"
+      },
+      {
+        "id": "p12/img.right",
+        "page": 12,
+        "slot": "img.right",
+        "source": "generated",
+        "file": "gen:7",
+        "scene": "Close-up of a small sensor mounted on a machining machine, with a worker's hand adjusting it."
+      },
+      {
+        "id": "p12/img.left",
+        "page": 12,
+        "slot": "img.left",
+        "source": "generated",
+        "file": "gen:8",
+        "scene": "A worker in a gray jacket operates a handheld terminal in front of a machine."
+      },
+      {
+        "id": "p13/img.hero",
+        "page": 13,
+        "slot": "img.hero",
+        "source": "supplied",
+        "file": "03.jpg"
+      },
+      {
+        "id": "p15/img.item.1",
+        "page": 15,
+        "slot": "img.item.1",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p15/img.item.2",
+        "page": 15,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:7"
+      },
+      {
+        "id": "p15/img.item.3",
+        "page": 15,
+        "slot": "img.item.3",
+        "source": "supplied",
+        "file": "02.jpg"
+      },
+      {
+        "id": "p16/img.right",
+        "page": 16,
+        "slot": "img.right",
+        "source": "supplied",
+        "file": "03.jpg"
+      },
+      {
+        "id": "p16/img.left",
+        "page": 16,
+        "slot": "img.left",
+        "source": "generated",
+        "file": "gen:8"
+      },
+      {
+        "id": "p17/img.hero",
+        "page": 17,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:5",
+        "scene": "A veteran worker shows a young worker how to operate a machine, pointing at the controls while the young man watches."
+      },
+      {
+        "id": "p18/img.hero",
+        "page": 18,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:11"
+      },
+      {
+        "id": "p19/img.side",
+        "page": 19,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:5"
+      },
+      {
+        "id": "p20/img.hero",
+        "page": 20,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:1"
+      }
+    ]
+  },
+  "totalCostUsdEstimate": 0.57,
+  "timingsMs": {
+    "A段": 43579,
+    "B段": 72319,
+    "C段": 188330,
+    "D段": 2754
+  },
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "toc/5",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 3,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 4,
+      "type": "issues/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title",
+        "txt.item.2.title"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 6,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 7,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 8,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 9,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 10,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 11,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1",
+        "txt.item.2",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 12,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 13,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 14,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 15,
+      "type": "steps/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 16,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 17,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 18,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 19,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 20,
+      "type": "collage",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}

@@ -32,7 +32,8 @@ import { sourceNumbers } from '../check/content.js';
 import { makeOutline } from '../plan/outline.js';
 import { planDeck, type PlanStore } from '../plan/plan.js';
 import type { DeckPlan, Outline } from '../plan/schema.js';
-import { assignPhotos } from '../photos/assign.js';
+import { preparePhotos, type GeneratedRecord, type PhotoRecord } from '../photos/plan-photos.js';
+import type { ImageGenerator } from '../photos/openai-image.js';
 
 export type RunInfo = {
   id: string;
@@ -59,6 +60,8 @@ export type BuildOptions = {
   transport: AiTransport;
   /** 設定の ai.model を上書きする */
   model?: string;
+  /** 写真を生成する口。null なら生成しない（生成を割り当てた欄は見本の写真のまま） */
+  imageGenerator: ImageGenerator | null;
   log?: (m: string) => void;
   /** 試験用：指定した段が終わったところで止める */
   stopAfter?: 'outline' | 'plan' | 'photos' | 'assemble';
@@ -185,13 +188,15 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   log(`  設計図: ${plan.pages.map((p) => p.type).join(' / ')}`);
   if (o.stopAfter === 'plan') return { dir, issues: [], errors: 0, warnings: 0, stoppedAfter: 'plan' };
 
-  // ---- C段（Phase 2：支給の固定画像を割り当てて加工）
+  // ---- C段（写真の割り当て・生成・加工）
   const photosDone = path.join(dir, 'photos/done.json');
   if (!existsSync(photosDone)) {
     log('C段 写真の用意');
-    await timed('C段', () => assignPhotos({ plan, catalog, cfg, library: info.photos, outDir: path.join(dir, 'photos') }));
+    const res = await timed('C段', () =>
+      preparePhotos({ plan, catalog, cfg, manuscript, library: info.photos, dir, ai: ctx, generator: o.imageGenerator, log: (m) => log(`  ${m}`) })
+    );
     writeJson(planPath, plan);
-    writeJson(photosDone, { at: new Date().toISOString() });
+    writeJson(photosDone, { at: new Date().toISOString(), records: res.records });
   }
   if (o.stopAfter === 'photos') return { dir, issues: [], errors: 0, warnings: 0, stoppedAfter: 'photos' };
 
@@ -217,8 +222,26 @@ export function readCalls(dir: string): Array<AiCallRecord & { transport: string
     .map((l) => JSON.parse(l));
 }
 
+function photoSummary(dir: string) {
+  const done = path.join(dir, 'photos/done.json');
+  const gen = path.join(dir, 'photos/generated.json');
+  const records: PhotoRecord[] = existsSync(done) ? (readJson<{ records?: PhotoRecord[] }>(done).records ?? []) : [];
+  const generated: GeneratedRecord[] = existsSync(gen) ? readJson<GeneratedRecord[]>(gen) : [];
+  return {
+    slots: records.length,
+    supplied: records.filter((r) => r.source === 'supplied').length,
+    generatedUses: records.filter((r) => r.source === 'generated').length,
+    templateLeft: records.filter((r) => r.source === 'template').length,
+    generated: generated.length,
+    generationCostUsd: Math.round(generated.reduce((n, g) => n + g.costUsd, 0) * 10000) / 10000,
+    generationMs: generated.reduce((n, g) => n + g.ms, 0),
+    records,
+  };
+}
+
 export function writeReport(a: { dir: string; info: RunInfo; plan: DeckPlan; issues: Issue[]; timings: Record<string, number>; root: string }): BuildResult {
   const calls = readCalls(a.dir);
+  const photos = photoSummary(a.dir);
   const sum = (k: 'inputTokens' | 'outputTokens' | 'cacheReadTokens' | 'cacheWriteTokens') => calls.reduce((n, c) => n + (c[k] ?? 0), 0);
   const usage = { inputTokens: sum('inputTokens'), outputTokens: sum('outputTokens'), cacheReadTokens: sum('cacheReadTokens'), cacheWriteTokens: sum('cacheWriteTokens') };
   const cost = calls.reduce((n, c) => {
@@ -261,6 +284,9 @@ export function writeReport(a: { dir: string; info: RunInfo; plan: DeckPlan; iss
         }, {})
       ).map(([stage, v]) => ({ stage, ...v })),
     },
+    photos,
+    /** AI（文章）と写真の生成を合わせた概算 */
+    totalCostUsdEstimate: Math.round((cost + photos.generationCostUsd) * 10000) / 10000,
     timingsMs: a.timings,
     pages: a.plan.pages.map((p, i) => ({ page: i + 1, type: p.type, rewrites: p.rewrites, retypedFrom: p.retypedFrom ?? null, trimmed: p.trimmed, phraseBroken: p.phraseBroken })),
   };
@@ -271,6 +297,8 @@ export function writeReport(a: { dir: string; info: RunInfo; plan: DeckPlan; iss
     `- 原稿: ${path.basename(a.info.input)}／テンプレート: ${a.info.template}／${a.plan.pages.length} 枚`,
     `- 結果: ${errors === 0 ? '止める指摘 0 件' : `**止める指摘 ${errors} 件**（完成扱いにしない）`}・注意 ${warnings} 件`,
     `- AI: ${report.ai.transport}・${report.ai.model}・${report.ai.calls} 回（うちやり直し ${report.ai.failedAttempts}）・入力 ${usage.inputTokens + usage.cacheReadTokens + usage.cacheWriteTokens} トークン（キャッシュ読み ${usage.cacheReadTokens}）・出力 ${usage.outputTokens} トークン・概算 $${report.ai.costUsdEstimate}`,
+    `- 写真: 欄 ${photos.slots}（支給 ${photos.supplied}・生成 ${photos.generatedUses}・見本のまま ${photos.templateLeft}）・生成 ${photos.generated} 枚 $${photos.generationCostUsd}（${(photos.generationMs / 1000).toFixed(1)}秒）`,
+    `- 実費の概算（文章＋写真）: $${report.totalCostUsdEstimate}`,
     `- 時間: ${Object.entries(a.timings).map(([k, v]) => `${k} ${(v / 1000).toFixed(1)}秒`).join('・')}`,
     '',
     '## 止める指摘',

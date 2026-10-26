@@ -48,10 +48,11 @@ export async function processPhoto(src: string, out: string, aspect: number, pro
   const w = meta.autoOrient?.width ?? meta.width!;
   const h = meta.autoOrient?.height ?? meta.height!;
   const [cw, ch] = w / h > aspect ? [Math.round(h * aspect), h] : [w, Math.round(w / aspect)];
+  const outW = Math.min(maxWidth, cw);
+  // 切り抜く位置は、人の顔や肌など目立つところを残す（sharp の attention。中央で切ると顔が切れることがある）
   let img = sharp(src)
     .rotate()
-    .extract({ left: Math.round((w - cw) / 2), top: Math.round((h - ch) / 2), width: cw, height: ch })
-    .resize({ width: Math.min(maxWidth, cw), withoutEnlargement: true });
+    .resize({ width: outW, height: Math.round(outW / aspect), fit: 'cover', position: sharp.strategy.attention, withoutEnlargement: true });
   if (proc.mono) img = img.grayscale();
   if (multiplyHex) {
     const buf = await img.toColourspace('srgb').png().toBuffer();

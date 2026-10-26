@@ -1,0 +1,80 @@
+{
+  "cast": "Japanese employees in a bright modern Japanese office with white desks and large windows. Office staff wear business casual: navy jackets, white shirts, and ID cards on neck straps. Field staff wear light grey work jackets with navy caps. No visible text or logos.",
+  "assignments": [
+    {
+      "id": "p01/img.hero",
+      "use": "gen:1",
+      "scene": "Close view of an office worker's hand holding a smartphone to clock in just inside a bright office entrance, with colleagues walking in behind."
+    },
+    {
+      "id": "p02/img.side",
+      "use": "02.jpg"
+    },
+    {
+      "id": "p03/img.item.1",
+      "use": "gen:2",
+      "scene": "Stacks of blank paper time cards and a calculator on a cluttered desk, with a hand tallying them."
+    },
+    {
+      "id": "p03/img.item.2",
+      "use": "gen:3",
+      "scene": "Close view of a hand correcting a paper form with a pen at a desk, with a blank sheet beside it."
+    },
+    {
+      "id": "p03/img.item.3",
+      "use": "gen:4",
+      "scene": "An employee works alone at a computer in a dim office at night, lit by the monitor and a desk lamp, with city lights outside."
+    },
+    {
+      "id": "p03/img.item.4",
+      "use": "03.jpg"
+    },
+    {
+      "id": "p04/img.right",
+      "use": "gen:5",
+      "scene": "A field worker in a grey work jacket and navy cap stands in front of a work site and checks a smartphone."
+    },
+    {
+      "id": "p04/img.left",
+      "use": "gen:6",
+      "scene": "Close view of hands holding a smartphone and looking at its screen, with a blurred office in the background."
+    },
+    {
+      "id": "p05/img.side",
+      "use": "gen:7",
+      "scene": "Sales team members talk and smile around a meeting table in a bright office, looking at a laptop together."
+    },
+    {
+      "id": "p07/img.item.1",
+      "use": "gen:8",
+      "scene": "Two coworkers lean in and look at an app on a smartphone together at an office desk."
+    },
+    {
+      "id": "p07/img.item.2",
+      "use": "gen:9",
+      "scene": "A desk with a blank paper time card and a smartphone side by side, with a hand resting near them."
+    },
+    {
+      "id": "p07/img.item.3",
+      "use": "gen:1"
+    },
+    {
+      "id": "p07/img.item.4",
+      "use": "01.jpg"
+    },
+    {
+      "id": "p08/img.hero",
+      "use": "gen:11",
+      "scene": "Close view of one hand holding a blank paper time card at a time clock while the other hand taps a smartphone to clock in."
+    },
+    {
+      "id": "p09/img.hero",
+      "use": "gen:10",
+      "scene": "An employee holds an ID card up to a shared terminal mounted at a workplace entrance."
+    },
+    {
+      "id": "p10/img.hero",
+      "use": "02.jpg"
+    }
+  ]
+}

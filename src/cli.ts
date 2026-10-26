@@ -11,11 +11,12 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import * as fontkit from 'fontkit';
 import { buildCatalog } from './catalog/build-catalog.js';
-import { configExists, configPathFor, loadConfig, scaffoldConfig } from './catalog/config.js';
+import { ConfigSchema, configExists, configPathFor, loadConfig, scaffoldConfig } from './catalog/config.js';
 import { readTemplate } from './catalog/read-template.js';
 import { fitSlot } from './fit/fit-slot.js';
 import { AnthropicTransport, ClaudeCliTransport, type AiTransport } from './ai/transport.js';
 import { build, recheck } from './run/build.js';
+import { openAiImageGenerator, openAiKey, type ImageGenerator } from './photos/openai-image.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 
@@ -77,13 +78,25 @@ function transportFor(name: string | undefined): AiTransport {
   throw new Error(`--ai は anthropic か claude-cli（いま: ${n}）`);
 }
 
+/** 写真を生成する口。鍵が無ければ生成しない（警告を出す） */
+function imageGenerator(configPath: string | undefined, resume: string | undefined): ImageGenerator | null {
+  const key = openAiKey();
+  if (!key) {
+    console.warn('注意: OPENAI_API_KEY が無いので写真を生成しない（生成を割り当てた欄は見本の写真のまま）');
+    return null;
+  }
+  const cfgFile = resume ? path.join(path.resolve(resume), 'config.json') : configPath && path.resolve(configPath);
+  const cfg = cfgFile ? ConfigSchema.parse(JSON.parse(readFileSync(cfgFile, 'utf8'))) : ConfigSchema.parse({});
+  return openAiImageGenerator({ model: cfg.photos.model, quality: cfg.photos.quality, apiKey: key });
+}
+
 async function buildCmd(args: string[]) {
   const { values } = parseArgs({
     args,
     options: {
       template: { type: 'string' }, input: { type: 'string' }, photos: { type: 'string' }, 'no-photos': { type: 'boolean' },
       out: { type: 'string' }, config: { type: 'string' }, slides: { type: 'string' }, resume: { type: 'string' },
-      ai: { type: 'string' }, model: { type: 'string' }, 'stop-after': { type: 'string' },
+      ai: { type: 'string' }, model: { type: 'string' }, 'stop-after': { type: 'string' }, 'no-generate': { type: 'boolean' },
     },
   });
   const res = await build({
@@ -97,6 +110,7 @@ async function buildCmd(args: string[]) {
     resume: values.resume,
     transport: transportFor(values.ai),
     model: values.model,
+    imageGenerator: values['no-generate'] ? null : imageGenerator(values.config ?? (values.template ? values.template.replace(/\.pptx$/i, '.config.json') : undefined), values.resume),
     stopAfter: values['stop-after'] as never,
   });
   report(res);

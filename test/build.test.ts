@@ -15,7 +15,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { build } from '../src/run/build.js';
 import { readDeckTexts } from '../src/check/deck-check.js';
 import type { DeckPlan } from '../src/plan/schema.js';
-import { fakeTransport, ROOT, TEMPLATE } from './helpers.js';
+import { fakeGenerator, photoAwareFake, ROOT, TEMPLATE } from './helpers.js';
 
 const FIX = path.join(ROOT, 'test/fixtures/short');
 const outline = readFileSync(path.join(FIX, 'outline.json'), 'utf8');
@@ -27,8 +27,8 @@ const quiet = () => {};
 
 describe('slidegen build（偽物の AI で通す）', () => {
   it('原稿から .pptx が出て、止める指摘が 0 件', async () => {
-    const t = fakeTransport([outline, draft]);
-    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, log: quiet });
+    const t = photoAwareFake([outline, draft]);
+    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, imageGenerator: fakeGenerator(), log: quiet });
     expect(res.errors).toBe(0);
     expect(existsSync(path.join(res.dir, 'deck.pptx'))).toBe(true);
     const slides = await readDeckTexts(readFileSync(path.join(res.dir, 'deck.pptx')));
@@ -36,13 +36,13 @@ describe('slidegen build（偽物の AI で通す）', () => {
     // 強調は PPTX の中で下線の run になり、読み直すと [[ ]] に戻る
     expect(slides[0]['txt.headline']).toContain('[[');
     const report = JSON.parse(readFileSync(path.join(res.dir, 'report.json'), 'utf8'));
-    expect(report.ai.calls).toBe(2);
+    expect(report.ai.calls).toBe(3);
     expect(report.ok).toBe(true);
   });
 
   it('原稿に無い数字を入れた不正な設計図を与えると、検査で止まる（逆側の試験）', async () => {
-    const t = fakeTransport([outline, draft]);
-    const good = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, log: quiet });
+    const t = photoAwareFake([outline, draft]);
+    const good = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, imageGenerator: fakeGenerator(), log: quiet });
     const bad = path.join(tmp, 'tampered');
     cpSync(good.dir, bad, { recursive: true });
     const plan: DeckPlan = JSON.parse(readFileSync(path.join(bad, 'deck-plan.json'), 'utf8'));
@@ -51,7 +51,7 @@ describe('slidegen build（偽物の AI で通す）', () => {
     p.slots['txt.note.2'] = '満足度は[[99%]]';
     writeFileSync(path.join(bad, 'deck-plan.json'), JSON.stringify(plan));
     // AI は呼ばない（A・B段の結果があるので D段と検査だけが動く）
-    const res = await build({ root: ROOT, outDir: tmp, resume: bad, transport: fakeTransport([]), log: quiet });
+    const res = await build({ root: ROOT, outDir: tmp, resume: bad, transport: photoAwareFake([]), imageGenerator: fakeGenerator(), log: quiet });
     const nums = res.issues.filter((i) => i.code === 'NUMBER_NOT_IN_SOURCE');
     expect(nums.map((i) => i.slot).sort()).toEqual(['num.value.1', 'txt.note.2']);
     expect(nums.every((i) => i.level === 'error')).toBe(true);
@@ -62,27 +62,27 @@ describe('slidegen build（偽物の AI で通す）', () => {
   it('途中で落ちても --resume で続きから完了する（済んだ段の AI は呼び直さない）', async () => {
     // 1回目：A段のあと、B段の呼び出しで落ちる
     let n = 0;
-    const crashing = fakeTransport([outline]);
+    const crashing = photoAwareFake([outline]);
     const orig = crashing.complete.bind(crashing);
     crashing.complete = async (req) => {
       if (++n === 2) throw new Error('通信が切れた（試験）');
       return orig(req);
     };
-    await expect(build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: crashing, log: quiet })).rejects.toThrow('通信が切れた');
+    await expect(build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: crashing, imageGenerator: fakeGenerator(), log: quiet })).rejects.toThrow('通信が切れた');
     const dirs = readdirSync(tmp).filter((d) => d.endsWith('manuscript-01-short')).sort();
     const dir = path.join(tmp, dirs[dirs.length - 1]);
     expect(existsSync(path.join(dir, 'outline.json'))).toBe(true);
     expect(existsSync(path.join(dir, 'deck.pptx'))).toBe(false);
     // 2回目：続きから。A段は呼ばず、B段だけ呼ぶ
-    const t = fakeTransport([draft]);
-    const res = await build({ root: ROOT, outDir: tmp, resume: dir, transport: t, log: quiet });
-    expect(t.requests.map((r) => r.feature)).toEqual(['B段 下書き p1-5']);
+    const t = photoAwareFake([draft]);
+    const res = await build({ root: ROOT, outDir: tmp, resume: dir, transport: t, imageGenerator: fakeGenerator(), log: quiet });
+    expect(t.requests.map((r) => r.feature)).toEqual(['B段 下書き p1-5', 'C段 写真の割り当て']);
     expect(res.errors).toBe(0);
     expect(existsSync(path.join(dir, 'deck.pptx'))).toBe(true);
   });
 
   it('PPTX_REPAIR：壊れた .pptx は check で止まる（構造検査の配線）', async () => {
-    const good = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: fakeTransport([outline, draft]), log: quiet });
+    const good = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: photoAwareFake([outline, draft]), imageGenerator: fakeGenerator(), log: quiet });
     const bad = path.join(tmp, 'broken');
     cpSync(good.dir, bad, { recursive: true });
     const zip = await JSZip.loadAsync(readFileSync(path.join(bad, 'deck.pptx')));
@@ -102,9 +102,9 @@ describe('B段：入らない欄の書き直し・型の替え・丸め', () => 
   const page2 = (slots: Record<string, string>, type = 'issues/3') => JSON.stringify({ ...pages[1], type, slots: { ...pages[1].slots, ...slots } });
 
   it('欄に入らなければ、理由を添えて書き直させる（直れば丸めない）', async () => {
-    const t = fakeTransport([outline, withP2({ 'txt.item.1.body': long }), page2({ 'txt.item.1.body': '社長がいないと回らない' })]);
-    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, log: quiet });
-    expect(t.requests.map((r) => r.feature)).toEqual(['A段 原稿の構造化', 'B段 下書き p1-5', 'B段 書き直し p2']);
+    const t = photoAwareFake([outline, withP2({ 'txt.item.1.body': long }), page2({ 'txt.item.1.body': '社長がいないと回らない' })]);
+    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, imageGenerator: fakeGenerator(), log: quiet });
+    expect(t.requests.map((r) => r.feature)).toEqual(['A段 原稿の構造化', 'B段 下書き p1-5', 'B段 書き直し p2', 'C段 写真の割り当て']);
     expect(t.requests[2].user).toMatch(/txt\.item\.1\.body: この欄は最大\d+字×\d+行/);
     const plan: DeckPlan = JSON.parse(readFileSync(path.join(res.dir, 'deck-plan.json'), 'utf8'));
     expect(plan.pages[1]).toMatchObject({ rewrites: 1, trimmed: [] });
@@ -112,7 +112,7 @@ describe('B段：入らない欄の書き直し・型の替え・丸め', () => 
   });
 
   it('書き直しても入らなければ別の型に替え、それでも入らなければ丸めて TRIMMED を残す', async () => {
-    const t = fakeTransport([
+    const t = photoAwareFake([
       outline,
       withP2({ 'txt.item.1.body': long }),
       page2({ 'txt.item.1.body': long }),
@@ -121,8 +121,8 @@ describe('B段：入らない欄の書き直し・型の替え・丸め', () => 
       JSON.stringify({ type: 'issues/2', slots: { 'txt.eyebrow': 'Problems', 'txt.headline': 'こんなお悩み', 'txt.item.1.title': '属人化', 'txt.item.1.body': long, 'txt.item.2.title': '人件費', 'txt.item.2.body': '教育に時間がかかる' }, photos: {} }),
       JSON.stringify({ type: 'issues/2', slots: { 'txt.eyebrow': 'Problems', 'txt.headline': 'こんなお悩み', 'txt.item.1.title': '属人化', 'txt.item.1.body': long, 'txt.item.2.title': '人件費', 'txt.item.2.body': '教育に時間がかかる' }, photos: {} }),
     ]);
-    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, log: quiet });
-    expect(t.requests.map((r) => r.feature)).toEqual(['A段 原稿の構造化', 'B段 下書き p1-5', 'B段 書き直し p2', 'B段 書き直し p2', 'B段 型の替え p2', 'B段 書き直し p2']);
+    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, imageGenerator: fakeGenerator(), log: quiet });
+    expect(t.requests.map((r) => r.feature)).toEqual(['A段 原稿の構造化', 'B段 下書き p1-5', 'B段 書き直し p2', 'B段 書き直し p2', 'B段 型の替え p2', 'B段 書き直し p2', 'C段 写真の割り当て']);
     expect(t.requests[4].user).toMatch(/issues\/2/);
     const plan: DeckPlan = JSON.parse(readFileSync(path.join(res.dir, 'deck-plan.json'), 'utf8'));
     expect(plan.pages[1]).toMatchObject({ type: 'issues/2', retypedFrom: 'issues/3', trimmed: ['txt.item.1.body'] });

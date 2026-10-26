@@ -52,6 +52,18 @@ export const ConfigSchema = z
      * 本文のように長く流れる欄は入れない（後で人が直すとき、固定の改行が邪魔になる）
      */
     phraseBreak: z.array(z.string()).default(['txt.headline', 'txt.subtitle', 'txt.*.title', 'txt.*.lead', 'txt.*.main', 'txt.*.caption', 'txt.item.*', 'txt.note.*']),
+    /** 写真（7章C・10章） */
+    photos: z
+      .object({
+        /** 1枚の写真（支給・生成とも）を資料全体で使う回数の上限 */
+        maxUsesPerFile: z.number().int().positive(),
+        /** 1資料で生成する写真の上限 */
+        maxGenerate: z.number().int().nonnegative(),
+        model: z.string(),
+        quality: z.enum(['low', 'medium', 'high']),
+      })
+      .strict()
+      .default({ maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium' }),
     /** 検査（11章）の細かい決め。 */
     checks: z
       .object({
@@ -113,6 +125,7 @@ export function scaffoldConfig(opts: {
       lightDarkRatio: { enabled: false, target: 1.5, tolerance: 0.3 },
       ai: { model: 'claude-sonnet-5-5', effort: 'medium', refusalFallback: true, maxRewrites: 2, callBudgetMs: 600000 },
       phraseBreak: ['txt.headline', 'txt.subtitle', 'txt.*.title', 'txt.*.lead', 'txt.*.main', 'txt.*.caption', 'txt.item.*', 'txt.note.*'],
+      photos: { maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium' },
       checks: { nameIgnoreSlots: ['txt.eyebrow'], noNumberSlots: ['txt.unit.*'] },
     },
     unresolved,

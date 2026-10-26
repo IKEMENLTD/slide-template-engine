@@ -1,0 +1,47 @@
+{
+  "cast": "Japanese small company. Staff woman in her 30s wearing a navy blazer over a white blouse, shoulder-length dark hair. Company president, Japanese man in his 50s, light gray work jacket over a white shirt, short black hair. Small bright office with wooden desks, laptops, and large windows. Small workshop and warehouse area with cardboard boxes. No text anywhere.",
+  "assignments": [
+    {
+      "id": "p01/img.hero",
+      "use": "01.jpg"
+    },
+    {
+      "id": "p02/img.item.1",
+      "use": "gen:1",
+      "scene": "The president in a gray work jacket carries cardboard boxes in a small warehouse while checking his phone, busy and hurried."
+    },
+    {
+      "id": "p02/img.item.2",
+      "use": "gen:2",
+      "scene": "A veteran employee patiently shows a young new hire how to work at a computer, while a middle-aged manager stands behind them with a hand on his forehead, troubled."
+    },
+    {
+      "id": "p02/img.item.3",
+      "use": "gen:3",
+      "scene": "The president sits at his office desk, holding a sheet of paper and frowning with a hand on his forehead, deep in thought."
+    },
+    {
+      "id": "p03/img.side",
+      "use": "01.jpg"
+    },
+    {
+      "id": "p04/img.item.1",
+      "use": "gen:4",
+      "scene": "The staff woman in her navy blazer listens to the seated president and writes notes in a notebook at a table."
+    },
+    {
+      "id": "p04/img.item.2",
+      "use": "02.jpg"
+    },
+    {
+      "id": "p04/img.item.3",
+      "use": "gen:5",
+      "scene": "The staff woman sits at an office desk, looking at a laptop screen and checking results with a focused expression."
+    },
+    {
+      "id": "p05/img.hero",
+      "use": "gen:6",
+      "scene": "The president and the staff woman sit across a desk, looking at papers and a laptop while talking in a friendly way."
+    }
+  ]
+}
