@@ -4,6 +4,7 @@
 import type { Catalog, CatalogType } from '../catalog/build-catalog.js';
 import { matchesAny } from '../catalog/config.js';
 import { fitSlot } from '../fit/fit-slot.js';
+import { missingGlyphs } from '../fit/measure.js';
 import { emphasisCount, isDummy, issue, namesNotIn, numbersIn, numbersNotIn, type Issue } from './content.js';
 
 export type SlotCheckContext = {
@@ -45,6 +46,10 @@ export function checkPage(page: number, type: CatalogType, slots: Record<string,
     if (!matchesAny(c.nameIgnoreSlots, s.name)) {
       const names = namesNotIn(text, c.manuscript);
       if (names.length) out.push(issue('NAME_NOT_IN_SOURCE', `${s.name} に原稿に無い語 ${names.join('・')} がある（固有名詞なら要確認）`, where));
+    }
+    if (s.style) {
+      const miss = missingGlyphs(text, { fontFile: c.resolveFile(s.style.fontFile), latinFontFile: c.resolveFile(s.style.latinFontFile) });
+      if (miss.length) out.push(issue('GLYPH_MISSING', `${s.name} の「${miss.join('」「')}」は欄の字体に無い文字。別の書き方にする（例：「→」は「から」「へ」）`, where));
     }
     emphasis += emphasisCount(text);
     let fit;

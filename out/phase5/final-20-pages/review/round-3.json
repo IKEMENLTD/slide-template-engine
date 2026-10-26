@@ -1,0 +1,18 @@
+{
+  "pages": [
+    9,
+    18
+  ],
+  "review": [
+    {
+      "page": 9,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 18,
+      "verdict": "ok",
+      "problems": []
+    }
+  ]
+}

@@ -130,7 +130,9 @@ export class ClaudeCliTransport implements AiTransport {
     const system = req.system.map((b) => b.text).join('\n\n');
     const args = [
       '-p', '--output-format', 'json', '--model', getModelApiId(req.modelId),
-      '--system-prompt', system, '--tools', names.length ? 'Read' : '', ...(names.length ? ['--allowedTools', 'Read'] : []),
+      // 画像を見せるときだけ Read を許す。許すのはこの呼び出しの場所の画像だけ（原稿由来の文に指示を仕込まれても、
+      // 他のファイル＝鍵などを読ませない。2026-10-26 に場所の外のファイルが拒否されることを実物で確かめた）
+      '--system-prompt', system, '--tools', names.length ? 'Read' : '', ...(names.length ? ['--allowedTools', 'Read(./image-*.png)'] : []),
       '--setting-sources', '', '--no-session-persistence',
       '--disable-slash-commands', '--strict-mcp-config',
       ...(req.effort ? ['--effort', req.effort] : []),

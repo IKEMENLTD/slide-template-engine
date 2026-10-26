@@ -91,6 +91,10 @@ describe('1ページの検査（B段と E段が同じものを使う）', () => 
     expect(codes('numbers/3', { ...goodPage('numbers/3'), 'txt.unit.1': '時間/月' })).not.toContain('SLOT_RULE');
     expect(codes('numbers/3', { ...goodPage('numbers/3'), 'txt.unit.1': 'か月' })).not.toContain('SLOT_RULE');
   });
+  it('GLYPH_MISSING：欄の字体に無い文字（英数字の字体に無い「→」など）は止める', () => {
+    expect(codes('cover', { ...goodPage('cover'), 'txt.point.1.main': '月40時間→月8時間' })).toContain('GLYPH_MISSING');
+    expect(codes('cover', { ...goodPage('cover'), 'txt.point.1.main': '月40時間から月8時間' })).not.toContain('GLYPH_MISSING');
+  });
   it('NAME_NOT_IN_SOURCE は注意。飾りの英字（eyebrow）は調べない', () => {
     const s = { ...goodPage('issues/3'), 'txt.item.1.title': 'AcmeCloud' };
     const r = checkPage(1, T('issues/3'), s, ctx).filter((i) => i.code === 'NAME_NOT_IN_SOURCE');
@@ -130,6 +134,10 @@ describe('強調語は太字の実フォントで測る（D-009）', () => {
 describe('文節の改行（7章B-4）', () => {
   it('強調の内側では切らない', () => {
     expect(phrases('業務が[[属人化]]しており、自分がいないと回らない')).toEqual(['業務が', '[[属人化]]しており、', '自分が', 'いないと', '回らない']);
+  });
+  it('数字の途中・数字と単位の間・接尾の字（化・的など）の前では切らない', () => {
+    expect(phrases('2年目：稼働の見える化。全20台にセンサー')).toEqual(['2年目：稼働の', '見える化。', '全20台に', 'センサー']);
+    expect(phrases('段取り替えを平均45分から20分へ短縮します')).toEqual(['段取り替えを', '平均45分から', '20分へ', '短縮します']);
   });
   it('1行に入るならそのまま。入らないなら文節の切れ目で改行する', () => {
     const s = T('cover').slots.find((x) => x.name === 'txt.headline')!;

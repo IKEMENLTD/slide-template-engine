@@ -1,0 +1,65 @@
+{
+  "pages": [
+    6,
+    9,
+    14,
+    18,
+    19
+  ],
+  "review": [
+    {
+      "page": 6,
+      "verdict": "ok",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "「TODAY」が青い斜め帯と写真に重なっていて、ほとんど読めません。"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "「比べているのは現在の数字です」は意味がはっきりしない不自然な文です。何と比べているのかが分かりません。「いずれも3年後の目標値。現状は前ページのとおりです。」のように直してください。"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 18,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.body",
+          "message": "「補助金」が1文目と2文目で重なっています。2文目の「補助金も生かしながら」は不要です。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.body",
+          "message": "2行目の途中で「一歩/ずつ」と語が分かれて改行されており、読みにくいです。文を短くして、語の途中で切れないようにしてください。"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "verdict": "ok",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "「Impact」が青い帯と写真に重なっていて、読みにくいです。"
+        }
+      ]
+    }
+  ]
+}

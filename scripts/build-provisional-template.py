@@ -318,7 +318,8 @@ def numbers(prs):
     for i, (x, vw) in enumerate([(296.5, 196), (497.5, 258), (762.5, 190)], 1):
         text(s, ids, f"txt.label.{i}", x, 180, 180, 32, "ダミー", ea=GOTHIC, latin=LATIN, size=23, bold=True, line=30)
         text(s, ids, f"num.value.{i}", x, 212, vw, 104, "00", ea=GOTHIC, latin=LATIN, size=99, line=104)
-        poly(s, ids, f"deco.value-{i}-rule", [(x - 4.5, 310.5), (x + 141.5, 310.5), (x + 134.5, 303), (x + 3, 303)], "accent2")
+        # 両端は 45 度（ルール 1。PDF から写した値では右端が 47 度だったので 45 度にそろえた）
+        poly(s, ids, f"deco.value-{i}-rule", [(x - 4.5, 310.5), (x + 141.5, 310.5), (x + 134, 303), (x + 3, 303)], "accent2")
         # 単位は黄色い線の右端にそろえる（PDF の「万円」の位置）
         text(s, ids, f"txt.unit.{i}", x, 312, 141.5, 28, "単位", ea=GOTHIC, latin=LATIN, size=23, bold=True, line=28, align="r")
         text(s, ids, f"txt.note.{i}", x + 6, 344, 180, 46, "ダミー説明", ea=GOTHIC, latin=LATIN, size=15, bold=True, line=22)
@@ -435,9 +436,10 @@ def photo_text_a(prs):
     poly(s, ids, "deco.tri-top", [(208.5, 0), (470.4, 0), (208.5, 261.1)], "accent1", alpha=88)
     poly(s, ids, "deco.tri-bottom", [(75.5, 533.7), (208.5, 400.8), (208.5, 533.7)], "accent1", alpha=88)
     poly(s, ids, "deco.end-triangle", [(939.5, 449), (939.5, 522.5), (866, 522.5)], "accent2")
-    text(s, ids, "txt.headline", 520, 70, 400, 80, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="b")
-    rect(s, ids, "deco.rule", 520, 166, 60, 4, "accent2")
-    text(s, ids, "txt.body", 520, 196, 400, 182, "ダミー本文", ea=GOTHIC, latin=LATIN, size=15, line=26)
+    # 見出しはグリッドの最上段（0〜135pt）に収める（ルール 5-2）。本文は下3段
+    text(s, ids, "txt.headline", 520, 45, 400, 80, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="b")
+    rect(s, ids, "deco.rule", 520, 141, 60, 4, "accent2")
+    text(s, ids, "txt.body", 520, 171, 400, 182, "ダミー本文", ea=GOTHIC, latin=LATIN, size=15, line=26)
     notes(s, 'type: photo-text\nvariant: "a"\nrole: [photo-text]\nlabel: 写真＋本文A（見出しと説明文）')
 
 
@@ -451,9 +453,10 @@ def photo_text_b(prs):
                       ("deco.tri-3", [(506.4, 8.4), (506.4, 270.4), (244.3, 270.4)]),
                       ("deco.tri-4", [(244.3, 531.3), (244.3, 269.3), (506.4, 269.3)])]:
         poly(s, ids, name, pts, "accent1", alpha=88)
-    text(s, ids, "txt.headline", 556, 70, 370, 80, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="b")
+    # 見出しはグリッドの最上段（0〜135pt）に収める（ルール 5-2）
+    text(s, ids, "txt.headline", 556, 45, 370, 80, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="b")
     for k in range(3):
-        y = 200 + k * 92
+        y = 175 + k * 92
         rect(s, ids, f"deco.point-{k + 1}", 556, y + 5, 12, 12, "accent2")
         text(s, ids, f"txt.item.{k + 1}", 580, y, 346, 66, "ダミー要点", ea=GOTHIC_M, latin=LATIN_M, size=16, line=22)
     notes(s, 'type: photo-text\nvariant: "b"\nrole: [photo-text]\nlabel: 写真＋本文B（見出しと要点3つ）')

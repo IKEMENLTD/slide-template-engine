@@ -157,3 +157,28 @@ describe('trimTo（語の途中で切らない。移植）', () => {
   it('改行と連続空白は1つの空白に潰す', () => expect(trimTo('a\n\nb   c', 50)).toBe('a b c'));
   it('redactDevTools は道具の名前の節ごと落とす', () => expect(redactDevTools('Claude Code で自動生成するので早い。品質は高い。')).toBe('品質は高い。'));
 });
+
+describe('claude -p 経由の呼び出し（検証用の口）', () => {
+  it('画像を見せるときも、読めるのはその呼び出しの画像だけ（Read を場所と名前で絞る）', async () => {
+    const { mkdtempSync, writeFileSync, chmodSync } = await import('node:fs');
+    const os = await import('node:os');
+    const path = await import('node:path');
+    const { ClaudeCliTransport } = await import('../src/ai/transport.js');
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'fake-claude-'));
+    const bin = path.join(dir, 'claude');
+    // 受け取った引数と作業場所を、そのまま結果として返す偽物の claude
+    writeFileSync(bin, `#!/usr/bin/env node\nconst a=process.argv.slice(2);process.stdout.write(JSON.stringify({result:JSON.stringify({args:a,cwd:process.cwd()}),stop_reason:'end_turn',usage:{input_tokens:1,output_tokens:1}}))\n`);
+    chmodSync(bin, 0o755);
+    const img = path.join(dir, 'p.png');
+    writeFileSync(img, 'x');
+    const t = new ClaudeCliTransport(bin);
+    const base = { feature: 'E段', modelId: 'claude-sonnet-5-5', system: [{ text: 's', cache: false }], user: 'u', maxTokens: 2000, remainingMs: 30_000 };
+    const withImg = JSON.parse((await t.complete({ ...base, images: [img] })).text);
+    const i = withImg.args.indexOf('--allowedTools');
+    expect(withImg.args[i + 1]).toBe('Read(./image-*.png)');
+    expect(withImg.args).not.toContain('Read(*)');
+    const noImg = JSON.parse((await t.complete(base)).text);
+    expect(noImg.args).not.toContain('--allowedTools');
+    expect(noImg.args[noImg.args.indexOf('--tools') + 1]).toBe('');
+  });
+});

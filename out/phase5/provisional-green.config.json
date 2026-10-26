@@ -1,0 +1,112 @@
+{
+  "fonts": {
+    "Noto Sans JP Medium": "fonts/NotoSansJP-Medium.otf",
+    "Barlow Medium": "fonts/Barlow-Medium.ttf",
+    "Noto Serif JP": "fonts/NotoSerifJP-Regular.otf",
+    "Noto Sans JP:bold": "fonts/NotoSansJP-Bold.otf",
+    "Barlow:bold": "fonts/Barlow-Bold.ttf",
+    "Noto Sans JP": "fonts/NotoSansJP-Regular.otf",
+    "Barlow": "fonts/Barlow-Regular.ttf",
+    "Noto Serif JP:bold": "fonts/NotoSerifJP-Bold.otf",
+    "Noto Sans JP Medium:bold": "fonts/NotoSansJP-Bold.otf",
+    "Barlow Medium:bold": "fonts/Barlow-Bold.ttf"
+  },
+  "emphasis": {
+    "underline": "accent2",
+    "bold": true,
+    "maxPerSlide": 2
+  },
+  "headline": {
+    "maxLines": 2,
+    "mincho": true
+  },
+  "images": {
+    "img.hero": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.1": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.2": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.3": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.item.4": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.left": {
+      "mono": true,
+      "multiply": "accent1"
+    },
+    "img.right": {
+      "mono": true,
+      "multiply": null
+    },
+    "img.side": {
+      "mono": true,
+      "multiply": null
+    }
+  },
+  "slots": {},
+  "fit": {
+    "autospaceEm": 0.25,
+    "hangingPunct": true,
+    "slackRatio": 0.03,
+    "defaultLineHeight": 1.2
+  },
+  "deck": {
+    "maxSameTypeInRow": 2,
+    "minSlides": 4,
+    "maxSlides": 20
+  },
+  "lightDarkRatio": {
+    "enabled": false,
+    "target": 1.5,
+    "tolerance": 0.3,
+    "darkBelow": 0.5
+  },
+  "ai": {
+    "model": "claude-sonnet-5-5",
+    "effort": "medium",
+    "refusalFallback": true,
+    "maxRewrites": 2,
+    "callBudgetMs": 600000
+  },
+  "phraseBreak": [
+    "txt.headline",
+    "txt.subtitle",
+    "txt.*.title",
+    "txt.*.lead",
+    "txt.*.main",
+    "txt.*.caption",
+    "txt.item.*",
+    "txt.note.*"
+  ],
+  "photos": {
+    "maxUsesPerFile": 2,
+    "maxGenerate": 12,
+    "model": "gpt-image-2.5-flare",
+    "quality": "medium"
+  },
+  "review": {
+    "enabled": true,
+    "maxRounds": 2,
+    "pagesPerCall": 5,
+    "dpi": 96
+  },
+  "checks": {
+    "nameIgnoreSlots": [
+      "txt.eyebrow"
+    ],
+    "unitSlots": [
+      "txt.unit.*"
+    ]
+  }
+}

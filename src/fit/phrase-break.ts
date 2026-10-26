@@ -54,6 +54,33 @@ export function phrases(marked: string): string[] {
     cur += p.s;
   }
   if (cur) out.push(cur);
+  return mergeBadSplits(out);
+}
+
+/** 語の後ろに付いて1語になる漢字（「見える化」「効率的」など）。この字で文節を始めない */
+const SUFFIX = new Set([...'化的性率型式用']);
+
+/**
+ * budoux が数字や接尾の字の前後で切ることがあるので、つなぎ直す（D-031）。
+ * 「全2｜0台」（数字の途中）・「平均45｜分から」（数字と単位）・「見える｜化」（接尾の字）
+ */
+function mergeBadSplits(parts: string[]): string[] {
+  const out: string[] = [];
+  for (const p of parts) {
+    const prev = out[out.length - 1];
+    if (prev !== undefined) {
+      const a = prev.replace(/\]\]$/, '').slice(-1);
+      const b = p.replace(/^\[\[/, '').charAt(0);
+      const digitA = /[0-9０-９]/.test(a);
+      const joinNumber = digitA && /[0-9０-９,，.．]/.test(b);
+      const joinUnit = digitA && b !== '' && !/[ぁ-ゖ、。・\s（(「]/.test(b);
+      if (joinNumber || joinUnit || SUFFIX.has(b)) {
+        out[out.length - 1] = prev + p;
+        continue;
+      }
+    }
+    out.push(p);
+  }
   return out;
 }
 
