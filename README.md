@@ -38,3 +38,14 @@ npx tsx src/cli.ts theme --template templates/provisional.pptx --out templates/p
 
 - 設定は `templates/<名前>.config.json`（字体のファイル・強調の書式・写真の加工・AI のモデル・検査の決め）。
 - 試験：`npx vitest run`（描画の試験には Docker が要る）／型：`npm run typecheck`
+
+## アプリ（先方が使う画面）
+
+```bash
+npm run app:build      # 画面を組む（初回と画面を直したとき）
+npm run app            # http://127.0.0.1:8787 を開く
+```
+
+- 「設定」で Claude の鍵（必須）と OpenAI の鍵（写真を作るとき）を入れる。資料・設定は `data/` に置く（版管理しない）。
+- 箱で動かす：`docker build -f docker/app/Dockerfile -t slidegen-app .` → `docker run -p 8787:8787 -v slidegen-data:/data -e SLIDEGEN_PASSWORD=… slidegen-app`
+- 作りの説明は docs/DECISIONS.md の D-038。
