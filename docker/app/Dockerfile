@@ -1,6 +1,7 @@
 # アプリ一式の箱（画面＋API＋描画）。どこのサーバーでも、この1つを動かせば使える。
 #   docker build -f docker/app/Dockerfile -t slidegen-app .
-#   docker run -p 8787:8787 -v slidegen-data:/data -e SLIDEGEN_PASSWORD=… slidegen-app
+#   docker run -p 8787:8787 -v slidegen-data:/data -e SLIDEGEN_PASSWORD=… -e SLIDEGEN_HOSTS=slides.example.co.jp slidegen-app
+# SLIDEGEN_HOSTS＝公開に使う名前（これ以外の宛先からは開けない）。
 # 描画は箱の中の LibreOffice で行う（SLIDEGEN_RENDER=local）。字体は fonts/ の静的フォントだけ（描画用の箱と同じ）。
 FROM node:22.20.0-bookworm-slim AS build
 WORKDIR /app

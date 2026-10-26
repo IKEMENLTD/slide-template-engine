@@ -10,6 +10,7 @@ import { serve } from '@hono/node-server';
 import { Hono, type Context } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 import { HTTPException } from 'hono/http-exception';
+import { bodyLimit } from 'hono/body-limit';
 import mammoth from 'mammoth';
 import { aiRevise, changeType, checkDraft, ensurePdf, pagesView, replacePhoto, saveText, typeChoices, undo, versions } from './edit.js';
 import { createRun, deleteRun, estimateSeconds, estimateUsd, listRuns, monthCostUsd, recommendedSlides, recoverOnBoot, resumeRun, runDir, runView } from './runs.js';
@@ -26,6 +27,22 @@ if (!process.env.SLIDEGEN_PASSWORD && !['127.0.0.1', '::1', 'localhost'].include
   console.error(`HOST=${hostname} で開くときは SLIDEGEN_PASSWORD が必要です（パスワード無しでは起動しません）`);
   process.exit(1);
 }
+// 開いてよい宛先（Host）。この PC の名前と、公開するときに SLIDEGEN_HOSTS（カンマ区切り）で足した名前だけ。
+// ほかのサイトの画面から、この API を勝手に呼ばせない（DNS リバインディングと、別のサイトからの書き換えを断る）
+const allowedHosts = new Set(['127.0.0.1', 'localhost', '[::1]', ...(process.env.SLIDEGEN_HOSTS ?? '').split(',').map((h) => h.trim().toLowerCase()).filter(Boolean)]);
+app.use('*', async (c, next) => {
+  const host = (c.req.header('host') ?? '').toLowerCase();
+  const name = host.replace(/:\d+$/, '');
+  if (!allowedHosts.has(name)) return c.json({ error: 'この宛先からは開けません' }, 421);
+  if (c.req.method !== 'GET' && c.req.method !== 'HEAD') {
+    const site = c.req.header('sec-fetch-site');
+    const origin = c.req.header('origin');
+    if (site && site !== 'same-origin' && site !== 'none') return c.json({ error: '別のサイトからの操作は受け付けません' }, 403);
+    if (origin && new URL(origin).host.toLowerCase() !== host) return c.json({ error: '別のサイトからの操作は受け付けません' }, 403);
+  }
+  await next();
+});
+
 if (process.env.SLIDEGEN_PASSWORD) {
   app.use('*', basicAuth({ username: process.env.SLIDEGEN_USER ?? 'slidegen', password: process.env.SLIDEGEN_PASSWORD }));
 }
@@ -49,6 +66,15 @@ async function fileBuf(f: unknown): Promise<{ name: string; data: Buffer } | nul
   if (f.size > MAX_UPLOAD) throw new AppError('ファイルが大きすぎます（25MB まで）');
   return { name: f.name, data: Buffer.from(await f.arrayBuffer()) };
 }
+
+// 読み込む前に大きさで断る（全部を読み込んでから断ると、その間にメモリを使い切る）
+const tooLarge = (c: Context) => c.json({ error: 'ファイルが大きすぎます' }, 413);
+app.use('/api/runs', bodyLimit({ maxSize: 200 * 1024 * 1024, onError: tooLarge }));
+app.use('/api/manuscript', bodyLimit({ maxSize: MAX_UPLOAD + 1024 * 1024, onError: tooLarge }));
+app.use('/api/runs/:id/pages/:n/photo', bodyLimit({ maxSize: MAX_UPLOAD + 1024 * 1024, onError: tooLarge }));
+const smallBody = bodyLimit({ maxSize: 1024 * 1024, onError: tooLarge });
+app.use('/api/*', (c, next) => (/^\/api\/(runs|manuscript|runs\/[^/]+\/pages\/\d+\/photo)$/.test(c.req.path) ? next() : smallBody(c, next)));
+const MAX_PHOTOS = 30;
 
 // ---------------------------------------------------------------- 状態・設定
 
@@ -130,6 +156,7 @@ app.post('/api/runs', async (c) => {
   const form = await c.req.formData();
   const photos: Array<{ name: string; data: Buffer; description: string }> = [];
   const files = form.getAll('photos');
+  if (files.length > MAX_PHOTOS) throw new AppError(`写真は1回に${MAX_PHOTOS}枚までにしてください`);
   const notes = form.getAll('photoNotes').map(String);
   for (const [i, f] of files.entries()) {
     const b = await fileBuf(f);

@@ -47,5 +47,5 @@ npm run app            # http://127.0.0.1:8787 を開く
 ```
 
 - 「設定」で Claude の鍵（必須）と OpenAI の鍵（写真を作るとき）を入れる。資料・設定は `data/` に置く（版管理しない）。
-- 箱で動かす：`docker build -f docker/app/Dockerfile -t slidegen-app .` → `docker run -p 8787:8787 -v slidegen-data:/data -e SLIDEGEN_PASSWORD=… slidegen-app`
+- 箱で動かす：`docker build -f docker/app/Dockerfile -t slidegen-app .` → `docker run -p 8787:8787 -v slidegen-data:/data -e SLIDEGEN_PASSWORD=… -e SLIDEGEN_HOSTS=<公開に使う名前> slidegen-app`（パスワード無しでは起動しない。SLIDEGEN_HOSTS 以外の宛先と、別のサイトからの操作は断る）
 - 作りの説明は docs/DECISIONS.md の D-038。
