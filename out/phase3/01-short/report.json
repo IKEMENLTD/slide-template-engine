@@ -1,0 +1,207 @@
+{
+  "run": {
+    "id": "20261026-151227-manuscript-01-short",
+    "createdAt": "2026-10-26T06:12:30.960Z",
+    "input": "samples/manuscript-01-short.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 5,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:15:01.941Z",
+  "slides": 5,
+  "ok": true,
+  "errors": 0,
+  "warnings": 0,
+  "byCode": {},
+  "issues": [],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 5,
+    "failedAttempts": 0,
+    "inputTokens": 10,
+    "outputTokens": 4709,
+    "cacheReadTokens": 5008,
+    "cacheWriteTokens": 22203,
+    "costUsdEstimate": 0.1036,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 5649,
+        "outputTokens": 1318,
+        "ms": 24517
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 1,
+        "inputTokens": 7238,
+        "outputTokens": 1239,
+        "ms": 12018
+      },
+      {
+        "stage": "B段 書き直し",
+        "calls": 2,
+        "inputTokens": 12091,
+        "outputTokens": 830,
+        "ms": 19337
+      },
+      {
+        "stage": "C段 写真の割り当て",
+        "calls": 1,
+        "inputTokens": 2243,
+        "outputTokens": 1322,
+        "ms": 18143
+      }
+    ]
+  },
+  "photos": {
+    "slots": 9,
+    "supplied": 3,
+    "generatedUses": 6,
+    "templateLeft": 0,
+    "generated": 6,
+    "generationCostUsd": 0.1569,
+    "generationMs": 72459,
+    "records": [
+      {
+        "id": "p01/img.hero",
+        "page": 1,
+        "slot": "img.hero",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p02/img.item.1",
+        "page": 2,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:1",
+        "scene": "The president in a gray work jacket carries cardboard boxes in a small warehouse while checking his phone, busy and hurried."
+      },
+      {
+        "id": "p02/img.item.2",
+        "page": 2,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:2",
+        "scene": "A veteran employee patiently shows a young new hire how to work at a computer, while a middle-aged manager stands behind them with a hand on his forehead, troubled."
+      },
+      {
+        "id": "p02/img.item.3",
+        "page": 2,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:3",
+        "scene": "The president sits at his office desk, holding a sheet of paper and frowning with a hand on his forehead, deep in thought."
+      },
+      {
+        "id": "p03/img.side",
+        "page": 3,
+        "slot": "img.side",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p04/img.item.1",
+        "page": 4,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:4",
+        "scene": "The staff woman in her navy blazer listens to the seated president and writes notes in a notebook at a table."
+      },
+      {
+        "id": "p04/img.item.2",
+        "page": 4,
+        "slot": "img.item.2",
+        "source": "supplied",
+        "file": "02.jpg"
+      },
+      {
+        "id": "p04/img.item.3",
+        "page": 4,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:5",
+        "scene": "The staff woman sits at an office desk, looking at a laptop screen and checking results with a focused expression."
+      },
+      {
+        "id": "p05/img.hero",
+        "page": 5,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:6",
+        "scene": "The president and the staff woman sit across a desk, looking at papers and a laptop while talking in a friendly way."
+      }
+    ]
+  },
+  "totalCostUsdEstimate": 0.2605,
+  "timingsMs": {
+    "A段": 24537,
+    "B段": 31927,
+    "C段": 92772,
+    "D段": 1195
+  },
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.point.1.main",
+        "txt.point.2.lead",
+        "txt.point.2.main",
+        "txt.point.3.lead",
+        "txt.point.3.main",
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "issues/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title"
+      ]
+    },
+    {
+      "page": 3,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.2",
+        "txt.note.3"
+      ]
+    },
+    {
+      "page": 4,
+      "type": "steps/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "collage",
+      "rewrites": 2,
+      "retypedFrom": null,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ]
+    }
+  ]
+}

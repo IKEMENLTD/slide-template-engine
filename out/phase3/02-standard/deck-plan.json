@@ -1,0 +1,247 @@
+{
+  "version": 1,
+  "deckTitle": "新しい勤怠管理の仕組み 社内説明会",
+  "template": {
+    "file": "templates/provisional.pptx",
+    "sha256": "91f87896c67f634bb79414982be5f50d09478115b3af15322bd3863ad66c4604"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "slots": {
+        "txt.point.1.lead": "課題",
+        "txt.point.1.main": "いまの勤怠管理",
+        "txt.point.2.lead": "変化",
+        "txt.point.2.main": "スマホで打刻",
+        "txt.point.3.lead": "予定",
+        "txt.point.3.main": "4月1日に切替",
+        "txt.headline": "新しい\n勤怠管理の仕組み",
+        "txt.subtitle": "4月から紙のタイムカードをやめ、\n[[スマートフォン]]で打刻します。"
+      },
+      "photos": {
+        "img.hero": "スマートフォンで出勤の打刻をしている会社員の手元とオフィスの入口"
+      },
+      "outlinePage": 1,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p01-img.hero.jpg"
+      }
+    },
+    {
+      "type": "toc/4",
+      "slots": {
+        "txt.eyebrow": "CONTENTS",
+        "txt.item.1": "いまの勤怠管理の課題",
+        "txt.item.2": "新しい仕組みで変わること",
+        "txt.item.3": "切り替えまでの予定",
+        "txt.item.4": "皆さんにお願いしたいこと"
+      },
+      "photos": {
+        "img.side": "明るいオフィスで社員が集まって説明を聞いている様子"
+      },
+      "outlinePage": 2,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.side": "p02-img.side.jpg"
+      }
+    },
+    {
+      "type": "issues/4",
+      "slots": {
+        "txt.eyebrow": "ISSUES",
+        "txt.headline": "いまの勤怠管理の課題",
+        "txt.item.1.title": "集計に時間がかかる",
+        "txt.item.1.body": "総務が毎月3日かけて手で集計",
+        "txt.item.2.title": "[[打刻の漏れ]]が多い",
+        "txt.item.2.body": "直行直帰の日は後から手書きで直す",
+        "txt.item.3.title": "残業時間が\nすぐ分からない",
+        "txt.item.3.body": "月末まで誰がどれだけ残業か不明",
+        "txt.item.4.title": "有給の残りが\n分からない",
+        "txt.item.4.body": "申請のたびに総務へ問い合わせ"
+      },
+      "photos": {
+        "img.item.1": "机に積まれた紙のタイムカードと電卓",
+        "img.item.2": "手書きで書類を修正している手元",
+        "img.item.3": "夜のオフィスでパソコンに向かう社員",
+        "img.item.4": "総務の窓口で書類を見ながら相談する二人"
+      },
+      "outlinePage": 3,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.3.title",
+        "txt.item.4.title"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p03-img.item.1.jpg",
+        "img.item.2": "p03-img.item.2.jpg",
+        "img.item.3": "p03-img.item.3.jpg",
+        "img.item.4": "p03-img.item.4.jpg"
+      }
+    },
+    {
+      "type": "photo-text/a",
+      "slots": {
+        "txt.headline": "スマホで打刻、\n集計は[[自動]]",
+        "txt.body": "[[アプリ]]で出勤と退勤を記録します。現場に直行する日も、その場で打刻できます。集計は自動で、総務の作業は毎月3日から半日に減る見込みです。残業時間と有給の残りは、アプリでいつでも自分で確認できます。"
+      },
+      "photos": {
+        "img.right": "現場の前でスマートフォンを操作する作業着の社員",
+        "img.left": "スマートフォンの画面を見て確認する手元"
+      },
+      "outlinePage": 4,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.right": "p04-img.right.jpg",
+        "img.left": "p04-img.left.jpg"
+      }
+    },
+    {
+      "type": "numbers/3",
+      "slots": {
+        "txt.eyebrow": "TRIAL\nRESULTS",
+        "txt.headline": "営業部30名の試験導入で効果",
+        "txt.label.1": "打刻の漏れ",
+        "num.value.1": "6",
+        "txt.unit.1": "件",
+        "txt.note.1": "[[月120件から月6件]]に\n減少",
+        "txt.label.2": "集計時間",
+        "num.value.2": "3",
+        "txt.unit.2": "日から半日",
+        "txt.note.2": "毎月の集計作業が\n半日に短縮",
+        "txt.label.3": "有給問い合わせ",
+        "num.value.3": "5",
+        "txt.unit.3": "件",
+        "txt.note.3": "月45件から\n月5件に減少",
+        "txt.footnote": "試験導入した営業部（30名）の結果。"
+      },
+      "photos": {
+        "img.side": "オフィスで笑顔で話し合う営業部の社員たち"
+      },
+      "outlinePage": 5,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.2",
+        "txt.note.3"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.side": "p05-img.side.jpg"
+      }
+    },
+    {
+      "type": "section",
+      "slots": {
+        "txt.headline": "切り替えまでの予定"
+      },
+      "photos": {},
+      "outlinePage": 6,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0
+    },
+    {
+      "type": "steps/4",
+      "slots": {
+        "txt.eyebrow": "4 STEPS",
+        "txt.headline": "切り替えは4段階",
+        "txt.item.1.caption": "2月：アプリ配布と\n部署説明",
+        "txt.item.2.caption": "3月：紙と\nアプリを並行",
+        "txt.item.3.caption": "[[4月1日]]：完全に\n切り替え",
+        "txt.item.4.caption": "4月末：総務が\n初回集計を確認"
+      },
+      "photos": {
+        "img.item.1": "スマートフォンのアプリ画面を見せ合う社員",
+        "img.item.2": "机の上に紙のタイムカードとスマートフォンが並ぶ様子",
+        "img.item.3": "スマートフォンで出勤打刻する社員",
+        "img.item.4": "パソコンで集計結果を確認する総務の担当者"
+      },
+      "outlinePage": 7,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption",
+        "txt.item.4.caption"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p07-img.item.1.jpg",
+        "img.item.2": "p07-img.item.2.jpg",
+        "img.item.3": "p07-img.item.3.jpg",
+        "img.item.4": "p07-img.item.4.jpg"
+      }
+    },
+    {
+      "type": "attention",
+      "slots": {
+        "txt.eyebrow": "CAUTION",
+        "txt.headline": "3月は[[両方]]で打刻",
+        "txt.body": "3月の並行期間は、紙のタイムカードとアプリの両方で打刻してください。どちらか一方だけだと、[[給与の計算が合わなくなります]]。"
+      },
+      "photos": {
+        "img.hero": "紙のタイムカードとスマートフォンを並べて打刻する手元"
+      },
+      "outlinePage": 8,
+      "trimmed": [],
+      "phraseBroken": [],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p08-img.hero.jpg"
+      }
+    },
+    {
+      "type": "photo-text/b",
+      "slots": {
+        "txt.headline": "スマホが無い方は\n共用端末で",
+        "txt.item.1": "共用端末は各事業所の入口に設置しています。",
+        "txt.item.2": "[[社員証をかざす]]だけで打刻できます。",
+        "txt.item.3": "問い合わせは総務部の勤怠担当、または\n社内チャット「勤怠切り替え」へ。"
+      },
+      "photos": {
+        "img.hero": "事業所の入口に置かれた共用端末に社員証をかざす社員"
+      },
+      "outlinePage": 9,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.3"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p09-img.hero.jpg"
+      }
+    },
+    {
+      "type": "collage",
+      "slots": {
+        "txt.headline": "分からないことはお気軽に",
+        "txt.subtitle": "総務部の勤怠担当、\nまたは[[勤怠切り替え]]へ"
+      },
+      "photos": {
+        "img.hero": "オフィスで社員が総務の担当者に笑顔で相談している場面"
+      },
+      "outlinePage": 10,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ],
+      "rewrites": 1,
+      "photoFiles": {
+        "img.hero": "p10-img.hero.jpg"
+      }
+    }
+  ]
+}

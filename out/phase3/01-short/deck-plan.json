@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "deckTitle": "中小企業のための業務自動化サービスのご案内",
+  "template": {
+    "file": "templates/provisional.pptx",
+    "sha256": "91f87896c67f634bb79414982be5f50d09478115b3af15322bd3863ad66c4604"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "slots": {
+        "txt.point.1.lead": "属人化を解消",
+        "txt.point.1.main": "誰でも\n回る業務へ",
+        "txt.point.2.lead": "人件費の\n負担を軽く",
+        "txt.point.2.main": "事務作業を\n機械へ",
+        "txt.point.3.lead": "開発費を\n抑えて導入",
+        "txt.point.3.main": "小さく\n始められる",
+        "txt.headline": "[[業務自動化]]で、\n本来の仕事に時間を",
+        "txt.subtitle": "毎日の事務作業に追われる中小企業の経営者の\n方へ。業務の自動化サービスをご案内します。"
+      },
+      "photos": {
+        "img.hero": "事務所でパソコンに向かい、余裕を持って仕事をする中小企業の経営者"
+      },
+      "outlinePage": 1,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.point.1.main",
+        "txt.point.2.lead",
+        "txt.point.2.main",
+        "txt.point.3.lead",
+        "txt.point.3.main",
+        "txt.headline",
+        "txt.subtitle"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.hero": "p01-img.hero.jpg"
+      }
+    },
+    {
+      "type": "issues/3",
+      "slots": {
+        "txt.eyebrow": "Issues",
+        "txt.headline": "こんなお悩みはありませんか",
+        "txt.item.1.title": "社長が現場から\n離れられない",
+        "txt.item.1.body": "[[属人化]]して、自分がいないと回らない",
+        "txt.item.2.title": "人件費が厳しい",
+        "txt.item.2.body": "採用しても教育に時間がかかり、すぐ辞める",
+        "txt.item.3.title": "開発費が高すぎる",
+        "txt.item.3.body": "見積もりは数百万円から数千万円"
+      },
+      "photos": {
+        "img.item.1": "忙しそうに現場で作業を続ける社長",
+        "img.item.2": "新人に仕事を教える従業員と困り顔の管理者",
+        "img.item.3": "見積書を見て悩む経営者"
+      },
+      "outlinePage": 2,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p02-img.item.1.jpg",
+        "img.item.2": "p02-img.item.2.jpg",
+        "img.item.3": "p02-img.item.3.jpg"
+      }
+    },
+    {
+      "type": "numbers/3",
+      "slots": {
+        "txt.eyebrow": "Results",
+        "txt.headline": "導入いただいた企業の結果",
+        "txt.label.1": "請求書の時間",
+        "num.value.1": "8",
+        "txt.unit.1": "時間／月",
+        "txt.note.1": "[[月40時間から月8時間]]に減りました",
+        "txt.label.2": "差し戻し",
+        "num.value.2": "0",
+        "txt.unit.2": "件",
+        "txt.note.2": "入力ミスによる\n差し戻しがほぼ0件に",
+        "txt.label.3": "導入期間",
+        "num.value.3": "2",
+        "txt.unit.3": "週間",
+        "txt.note.3": "導入までの期間は\n平均で2週間",
+        "txt.footnote": "請求書づくりにかかる時間は月40時間から月8時間に減少。入力ミスによる差し戻しはほぼ0件、導入までは平均2週間です。"
+      },
+      "photos": {
+        "img.side": "請求書の処理をパソコンで手早く済ませるオフィスの担当者"
+      },
+      "outlinePage": 3,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.2",
+        "txt.note.3"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.side": "p03-img.side.jpg"
+      }
+    },
+    {
+      "type": "steps/3",
+      "slots": {
+        "txt.eyebrow": "Flow",
+        "txt.headline": "導入の流れ",
+        "txt.item.1.caption": "無料のヒアリング：いまの\n業務の流れを伺います",
+        "txt.item.2.caption": "自動化の設計：機械に任せる作業を一緒に決めます",
+        "txt.item.3.caption": "試験運用：1つの業務から\n[[小さく始めて]]確かめます"
+      },
+      "photos": {
+        "img.item.1": "経営者の話を聞きながらメモを取る担当者",
+        "img.item.2": "画面を見ながら業務の流れを一緒に設計する二人",
+        "img.item.3": "パソコンで試験運用の結果を確認する様子"
+      },
+      "outlinePage": 4,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.3.caption"
+      ],
+      "rewrites": 0,
+      "photoFiles": {
+        "img.item.1": "p04-img.item.1.jpg",
+        "img.item.2": "p04-img.item.2.jpg",
+        "img.item.3": "p04-img.item.3.jpg"
+      }
+    },
+    {
+      "type": "collage",
+      "slots": {
+        "txt.headline": "まずはご相談ください",
+        "txt.subtitle": "ヒアリングは[[無料]]です。\n自動化を一緒に探します。"
+      },
+      "photos": {
+        "img.hero": "経営者と担当者が机を挟んで、業務の流れを紙やパソコンを見ながら和やかに相談している場面"
+      },
+      "outlinePage": 5,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.subtitle"
+      ],
+      "rewrites": 2,
+      "photoFiles": {
+        "img.hero": "p05-img.hero.jpg"
+      }
+    }
+  ]
+}

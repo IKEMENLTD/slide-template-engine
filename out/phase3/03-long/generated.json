@@ -1,0 +1,266 @@
+[
+  {
+    "key": "gen:1",
+    "file": "generated/gen-1.jpg",
+    "scene": "A worker in a gray work jacket loads a metal part into a running CNC machine while a colleague watches nearby.",
+    "size": "1536x1024",
+    "costUsd": 0.01116,
+    "ms": 10234,
+    "withReferences": 0,
+    "usage": {
+      "input_tokens": 174,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 174
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 517
+    }
+  },
+  {
+    "key": "gen:2",
+    "file": "generated/gen-2.jpg",
+    "scene": "Wide view of a metal machining line with several CNC machines running and workers tending them along the aisle.",
+    "size": "1536x1024",
+    "costUsd": 0.023613,
+    "ms": 12591,
+    "withReferences": 1,
+    "usage": {
+      "input_tokens": 1743,
+      "input_tokens_details": {
+        "image_tokens": 1536,
+        "text_tokens": 207
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 2086
+    }
+  },
+  {
+    "key": "gen:6",
+    "file": "generated/gen-6.jpg",
+    "scene": "Close-up of a worker's gloved hands adjusting the settings and fixture on a machine.",
+    "size": "1024x1024",
+    "costUsd": 0.038821,
+    "ms": 13618,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3287,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 215
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3726
+    }
+  },
+  {
+    "key": "gen:9",
+    "file": "generated/gen-9.jpg",
+    "scene": "Defective metal parts lined up on an inspection table while a worker's hands examine one.",
+    "size": "1024x1024",
+    "costUsd": 0.034725,
+    "ms": 13601,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2775,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 215
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3214
+    }
+  },
+  {
+    "key": "gen:10",
+    "file": "generated/gen-10.jpg",
+    "scene": "A veteran foreman in a gray work jacket writes a production schedule by hand on paper at a desk in the factory.",
+    "size": "1024x1024",
+    "costUsd": 0.034755,
+    "ms": 11805,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2781,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 221
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3220
+    }
+  },
+  {
+    "key": "gen:11",
+    "file": "generated/gen-11.jpg",
+    "scene": "Warehouse shelves piled high with raw metal materials and boxes, a worker walking past.",
+    "size": "1024x1024",
+    "costUsd": 0.034715,
+    "ms": 13957,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2773,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 213
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3212
+    }
+  },
+  {
+    "key": "gen:4",
+    "file": "generated/gen-4.jpg",
+    "scene": "Vertical view of an aisle between running machine tools, with a worker walking along it checking the machines.",
+    "size": "1024x1536",
+    "costUsd": 0.031855,
+    "ms": 12801,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2777,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 217
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 3120
+    }
+  },
+  {
+    "key": "gen:12",
+    "file": "generated/gen-12.jpg",
+    "scene": "An office desk with a fax machine and a telephone, a staff member in a navy jacket reading a received sheet.",
+    "size": "1024x1536",
+    "costUsd": 0.035966,
+    "ms": 11968,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3292,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 220
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 3635
+    }
+  },
+  {
+    "key": "gen:3",
+    "file": "generated/gen-3.jpg",
+    "scene": "A worker in a gray jacket checks machine status on a tablet beside a running machine, a colleague next to him.",
+    "size": "1024x1024",
+    "costUsd": 0.038846,
+    "ms": 11745,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3292,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 220
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3731
+    }
+  },
+  {
+    "key": "gen:7",
+    "file": "generated/gen-7.jpg",
+    "scene": "Close-up of a small sensor mounted on a machining machine, with a worker's hand adjusting it.",
+    "size": "1024x1536",
+    "costUsd": 0.031855,
+    "ms": 12667,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2777,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 217
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 3120
+    }
+  },
+  {
+    "key": "gen:8",
+    "file": "generated/gen-8.jpg",
+    "scene": "A worker in a gray jacket operates a handheld terminal in front of a machine.",
+    "size": "1024x1536",
+    "costUsd": 0.035931,
+    "ms": 12625,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3285,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 213
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 3628
+    }
+  },
+  {
+    "key": "gen:5",
+    "file": "generated/gen-5.jpg",
+    "scene": "A veteran worker shows a young worker how to operate a machine, pointing at the controls while the young man watches.",
+    "size": "1024x1024",
+    "costUsd": 0.038846,
+    "ms": 12850,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3292,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 220
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3731
+    }
+  }
+]

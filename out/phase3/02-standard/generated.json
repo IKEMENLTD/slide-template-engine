@@ -1,0 +1,244 @@
+[
+  {
+    "key": "gen:1",
+    "file": "generated/gen-1.jpg",
+    "scene": "Close view of an office worker's hand holding a smartphone to clock in just inside a bright office entrance, with colleagues walking in behind.",
+    "size": "1536x1024",
+    "costUsd": 0.011175,
+    "ms": 9613,
+    "withReferences": 0,
+    "usage": {
+      "input_tokens": 177,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 177
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 520
+    }
+  },
+  {
+    "key": "gen:2",
+    "file": "generated/gen-2.jpg",
+    "scene": "Stacks of blank paper time cards and a calculator on a cluttered desk, with a hand tallying them.",
+    "size": "1024x1024",
+    "costUsd": 0.026498,
+    "ms": 13670,
+    "withReferences": 1,
+    "usage": {
+      "input_tokens": 1744,
+      "input_tokens_details": {
+        "image_tokens": 1536,
+        "text_tokens": 208
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 2183
+    }
+  },
+  {
+    "key": "gen:3",
+    "file": "generated/gen-3.jpg",
+    "scene": "Close view of a hand correcting a paper form with a pen at a desk, with a blank sheet beside it.",
+    "size": "1024x1024",
+    "costUsd": 0.03474,
+    "ms": 13719,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2778,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 218
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3217
+    }
+  },
+  {
+    "key": "gen:4",
+    "file": "generated/gen-4.jpg",
+    "scene": "An employee works alone at a computer in a dim office at night, lit by the monitor and a desk lamp, with city lights outside.",
+    "size": "1024x1024",
+    "costUsd": 0.034765,
+    "ms": 12869,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2783,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 223
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3222
+    }
+  },
+  {
+    "key": "gen:5",
+    "file": "generated/gen-5.jpg",
+    "scene": "A field worker in a grey work jacket and navy cap stands in front of a work site and checks a smartphone.",
+    "size": "1024x1536",
+    "costUsd": 0.03186,
+    "ms": 11431,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2778,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 218
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 3121
+    }
+  },
+  {
+    "key": "gen:6",
+    "file": "generated/gen-6.jpg",
+    "scene": "Close view of hands holding a smartphone and looking at its screen, with a blurred office in the background.",
+    "size": "1024x1536",
+    "costUsd": 0.035946,
+    "ms": 10566,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3288,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 216
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 3631
+    }
+  },
+  {
+    "key": "gen:7",
+    "file": "generated/gen-7.jpg",
+    "scene": "Sales team members talk and smile around a meeting table in a bright office, looking at a laptop together.",
+    "size": "1024x1536",
+    "costUsd": 0.035946,
+    "ms": 11851,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3288,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 216
+      },
+      "output_tokens": 343,
+      "output_tokens_details": {
+        "image_tokens": 343,
+        "text_tokens": 0
+      },
+      "total_tokens": 3631
+    }
+  },
+  {
+    "key": "gen:8",
+    "file": "generated/gen-8.jpg",
+    "scene": "Two coworkers lean in and look at an app on a smartphone together at an office desk.",
+    "size": "1024x1024",
+    "costUsd": 0.038811,
+    "ms": 12047,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 3285,
+      "input_tokens_details": {
+        "image_tokens": 3072,
+        "text_tokens": 213
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3724
+    }
+  },
+  {
+    "key": "gen:9",
+    "file": "generated/gen-9.jpg",
+    "scene": "A desk with a blank paper time card and a smartphone side by side, with a hand resting near them.",
+    "size": "1024x1024",
+    "costUsd": 0.034735,
+    "ms": 12133,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2777,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 217
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3216
+    }
+  },
+  {
+    "key": "gen:11",
+    "file": "generated/gen-11.jpg",
+    "scene": "Close view of one hand holding a blank paper time card at a time clock while the other hand taps a smartphone to clock in.",
+    "size": "1024x1024",
+    "costUsd": 0.034755,
+    "ms": 12244,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2781,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 221
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3220
+    }
+  },
+  {
+    "key": "gen:10",
+    "file": "generated/gen-10.jpg",
+    "scene": "An employee holds an ID card up to a shared terminal mounted at a workplace entrance.",
+    "size": "1024x1024",
+    "costUsd": 0.03471,
+    "ms": 12382,
+    "withReferences": 2,
+    "usage": {
+      "input_tokens": 2772,
+      "input_tokens_details": {
+        "image_tokens": 2560,
+        "text_tokens": 212
+      },
+      "output_tokens": 439,
+      "output_tokens_details": {
+        "image_tokens": 439,
+        "text_tokens": 0
+      },
+      "total_tokens": 3211
+    }
+  }
+]
