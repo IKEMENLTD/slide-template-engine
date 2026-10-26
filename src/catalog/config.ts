@@ -32,7 +32,11 @@ export const ConfigSchema = z
       })
       .strict(),
     deck: z.object({ maxSameTypeInRow: z.number().int().positive(), minSlides: z.number().int().positive(), maxSlides: z.number().int().positive() }).strict(),
-    lightDarkRatio: z.object({ enabled: z.boolean(), target: z.number(), tolerance: z.number() }).strict(),
+    /**
+     * 白と黒の面積比（ルール 4-6「白：黒＝3：2」）。「黒」の定義が未確定（16章 #4）なので既定は無効。
+     * 明るさ（0〜1）が darkBelow 未満の画素を「黒」、それ以外を「白」と数え、白÷黒 が target±tolerance から外れたら注意
+     */
+    lightDarkRatio: z.object({ enabled: z.boolean(), target: z.number(), tolerance: z.number(), darkBelow: z.number().min(0).max(1).default(0.5) }).strict(),
     /** AI の呼び出し（9章）。model は models.ts にあるもの */
     ai: z
       .object({
@@ -64,16 +68,33 @@ export const ConfigSchema = z
       })
       .strict()
       .default({ maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium' }),
+    /** 見た目の採点と作り直し（11章 VISUAL_REVIEW・7章E） */
+    review: z
+      .object({
+        enabled: z.boolean(),
+        /** 作り直しの回数（1ページ最大2回。7章E） */
+        maxRounds: z.number().int().nonnegative(),
+        /** 1回の呼び出しで見せるページ数 */
+        pagesPerCall: z.number().int().positive(),
+        /** 描画の解像度（dpi）。96 で 1280x720 */
+        dpi: z.number().int().positive(),
+      })
+      .strict()
+      .default({ enabled: true, maxRounds: 2, pagesPerCall: 5, dpi: 96 }),
     /** 検査（11章）の細かい決め。 */
-    checks: z
+    // 旧い名前（noNumberSlots。Phase 2 の実行の設定に残っている）も読めるようにする
+    checks: z.preprocess(
+      (v) => (v && typeof v === 'object' && 'noNumberSlots' in v ? (({ noNumberSlots, ...rest }) => ({ unitSlots: noNumberSlots, ...rest }))(v as Record<string, unknown>) : v),
+      z
       .object({
         /** 固有名詞らしき語を調べない欄（英字の飾りの見出しなど） */
         nameIgnoreSlots: z.array(z.string()),
-        /** 数字を入れない欄（単位の欄。数字は num.* に入れる） */
-        noNumberSlots: z.array(z.string()).default(['txt.unit.*']),
+        /** 単位の欄（単位だけを入れる。数字は num.*、説明は txt.note.* へ） */
+        unitSlots: z.array(z.string()).default(['txt.unit.*']),
       })
       .strict()
-      .default({ nameIgnoreSlots: ['txt.eyebrow'], noNumberSlots: ['txt.unit.*'] }),
+      .default({ nameIgnoreSlots: ['txt.eyebrow'], unitSlots: ['txt.unit.*'] })
+    ),
   })
   .strict();
 
@@ -122,11 +143,12 @@ export function scaffoldConfig(opts: {
       slots: {},
       fit: { autospaceEm: 0.25, hangingPunct: true, slackRatio: 0.03, defaultLineHeight: 1.2 },
       deck: { maxSameTypeInRow: 2, minSlides: 4, maxSlides: 20 },
-      lightDarkRatio: { enabled: false, target: 1.5, tolerance: 0.3 },
+      lightDarkRatio: { enabled: false, target: 1.5, tolerance: 0.3, darkBelow: 0.5 },
       ai: { model: 'claude-sonnet-5-5', effort: 'medium', refusalFallback: true, maxRewrites: 2, callBudgetMs: 600000 },
       phraseBreak: ['txt.headline', 'txt.subtitle', 'txt.*.title', 'txt.*.lead', 'txt.*.main', 'txt.*.caption', 'txt.item.*', 'txt.note.*'],
       photos: { maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium' },
-      checks: { nameIgnoreSlots: ['txt.eyebrow'], noNumberSlots: ['txt.unit.*'] },
+      review: { enabled: true, maxRounds: 2, pagesPerCall: 5, dpi: 96 },
+      checks: { nameIgnoreSlots: ['txt.eyebrow'], unitSlots: ['txt.unit.*'] },
     },
     unresolved,
   };

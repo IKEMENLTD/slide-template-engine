@@ -1,0 +1,523 @@
+{
+  "run": {
+    "id": "20261026-153557-manuscript-03-long",
+    "createdAt": "2026-10-26T06:35:58.230Z",
+    "input": "samples/manuscript-03-long.md",
+    "template": "templates/provisional.pptx",
+    "photos": "assets/photos",
+    "targetSlides": 20,
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5"
+  },
+  "finishedAt": "2026-10-26T06:44:26.106Z",
+  "slides": 20,
+  "ok": true,
+  "errors": 0,
+  "warnings": 5,
+  "byCode": {
+    "VISUAL_REVIEW": 5
+  },
+  "issues": [
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 6,
+      "slot": "txt.footnote",
+      "message": "txt.footnote: 「現状」のページなのに、3年後の目標の数値を3つ並べています。目標は次ページ(p9)の内容と重複していて、現状の数字から注意がそれます。現状の数字から読み取れる課題を一言で述べる文に変えるか、短くしてください。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 9,
+      "slot": "txt.eyebrow",
+      "message": "txt.eyebrow: 「Goals」が明るい写真の上に重なり、ほとんど読めません（「oa」しか見えません）。ただし位置や色はテンプレートで決まっているため、文言の修正対象ではありません。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 15,
+      "slot": "img.photo",
+      "message": "写真: img.photo: 写真の左端で、男性の顔が半分以上切れています。人物が不自然に見えるので、切り抜きの位置を調整するか、別の写真に替えてください。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 18,
+      "slot": "txt.eyebrow",
+      "message": "txt.eyebrow: 左上の「Expected Effects」が写真と青い図形に重なっていて、ほとんど読めません。"
+    },
+    {
+      "code": "VISUAL_REVIEW",
+      "level": "warning",
+      "page": 20,
+      "slot": "photo",
+      "message": "写真: photo: 右端の人物の顔がコラージュの縁で切れています。"
+    }
+  ],
+  "ai": {
+    "transport": "claude-cli",
+    "model": "claude-sonnet-5-5",
+    "calls": 19,
+    "failedAttempts": 1,
+    "inputTokens": 56,
+    "outputTokens": 26369,
+    "cacheReadTokens": 122199,
+    "cacheWriteTokens": 69077,
+    "costUsdEstimate": 0.4609,
+    "byStage": [
+      {
+        "stage": "A段 原稿の構造化",
+        "calls": 1,
+        "inputTokens": 6593,
+        "outputTokens": 4248,
+        "ms": 31237
+      },
+      {
+        "stage": "B段 下書き",
+        "calls": 4,
+        "inputTokens": 30992,
+        "outputTokens": 7165,
+        "ms": 60696
+      },
+      {
+        "stage": "C段 写真の割り当て",
+        "calls": 1,
+        "inputTokens": 3763,
+        "outputTokens": 4204,
+        "ms": 35145
+      },
+      {
+        "stage": "E段 見た目の採点 r1",
+        "calls": 4,
+        "inputTokens": 75264,
+        "outputTokens": 4264,
+        "ms": 55471
+      },
+      {
+        "stage": "E段 書き直し",
+        "calls": 6,
+        "inputTokens": 45625,
+        "outputTokens": 3932,
+        "ms": 53857
+      },
+      {
+        "stage": "E段 見た目の採点 r2",
+        "calls": 1,
+        "inputTokens": 11879,
+        "outputTokens": 1177,
+        "ms": 14925
+      },
+      {
+        "stage": "E段 見た目の採点 r3",
+        "calls": 2,
+        "inputTokens": 17216,
+        "outputTokens": 1379,
+        "ms": 23013
+      }
+    ]
+  },
+  "photos": {
+    "slots": 23,
+    "supplied": 4,
+    "generatedUses": 19,
+    "templateLeft": 0,
+    "generated": 12,
+    "generationCostUsd": 0.3902,
+    "generationMs": 154934,
+    "records": [
+      {
+        "id": "p01/img.hero",
+        "page": 1,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:1",
+        "scene": "Workers in gray uniforms operate CNC machines in a bright factory, one checking a machined metal part."
+      },
+      {
+        "id": "p02/img.side",
+        "page": 2,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:2",
+        "scene": "Wide view of neatly lined-up CNC machines inside a clean factory, with a worker walking in the aisle."
+      },
+      {
+        "id": "p04/img.right",
+        "page": 4,
+        "slot": "img.right",
+        "source": "generated",
+        "file": "gen:3",
+        "scene": "A foreman in a dark green jacket reads a paper work order beside a machine, checking a metal part."
+      },
+      {
+        "id": "p04/img.left",
+        "page": 4,
+        "slot": "img.left",
+        "source": "generated",
+        "file": "gen:4",
+        "scene": "A factory office desk with a fax machine and stacks of paper documents, a hand taking a sheet."
+      },
+      {
+        "id": "p05/img.item.1",
+        "page": 5,
+        "slot": "img.item.1",
+        "source": "generated",
+        "file": "gen:5",
+        "scene": "Close-up of a worker's gloved hands adjusting the settings on a machine's control panel."
+      },
+      {
+        "id": "p05/img.item.2",
+        "page": 5,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:3"
+      },
+      {
+        "id": "p05/img.item.3",
+        "page": 5,
+        "slot": "img.item.3",
+        "source": "generated",
+        "file": "gen:6",
+        "scene": "A foreman looks at a handwritten schedule board in the factory office, pen in hand."
+      },
+      {
+        "id": "p05/img.item.4",
+        "page": 5,
+        "slot": "img.item.4",
+        "source": "generated",
+        "file": "gen:7",
+        "scene": "Warehouse shelves piled high with metal material bars and boxes, a worker looking up at them."
+      },
+      {
+        "id": "p06/img.side",
+        "page": 6,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:1"
+      },
+      {
+        "id": "p08/img.right",
+        "page": 8,
+        "slot": "img.right",
+        "source": "supplied",
+        "file": "02.jpg"
+      },
+      {
+        "id": "p08/img.left",
+        "page": 8,
+        "slot": "img.left",
+        "source": "generated",
+        "file": "gen:2"
+      },
+      {
+        "id": "p09/img.side",
+        "page": 9,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:8",
+        "scene": "A worker in a gray uniform watches a running metal machining machine and checks the part being cut."
+      },
+      {
+        "id": "p11/img.hero",
+        "page": 11,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:5"
+      },
+      {
+        "id": "p12/img.hero",
+        "page": 12,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:6"
+      },
+      {
+        "id": "p14/img.item.1",
+        "page": 14,
+        "slot": "img.item.1",
+        "source": "supplied",
+        "file": "01.jpg"
+      },
+      {
+        "id": "p14/img.item.2",
+        "page": 14,
+        "slot": "img.item.2",
+        "source": "generated",
+        "file": "gen:9",
+        "scene": "Close-up of a small sensor mounted on the side of a machining machine, a worker's hand adjusting it."
+      },
+      {
+        "id": "p14/img.item.3",
+        "page": 14,
+        "slot": "img.item.3",
+        "source": "supplied",
+        "file": "03.jpg"
+      },
+      {
+        "id": "p15/img.right",
+        "page": 15,
+        "slot": "img.right",
+        "source": "generated",
+        "file": "gen:10",
+        "scene": "A worker on the factory floor tries a new handheld tablet next to a machine, tapping the screen."
+      },
+      {
+        "id": "p15/img.left",
+        "page": 15,
+        "slot": "img.left",
+        "source": "supplied",
+        "file": "03.jpg"
+      },
+      {
+        "id": "p16/img.hero",
+        "page": 16,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:11",
+        "scene": "A veteran worker in his 50s shows a young worker how to hold a metal part at a machine, both focused."
+      },
+      {
+        "id": "p18/img.side",
+        "page": 18,
+        "slot": "img.side",
+        "source": "generated",
+        "file": "gen:8"
+      },
+      {
+        "id": "p19/img.hero",
+        "page": 19,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:11"
+      },
+      {
+        "id": "p20/img.hero",
+        "page": 20,
+        "slot": "img.hero",
+        "source": "generated",
+        "file": "gen:12",
+        "scene": "Factory workers in gray uniforms stand together smiling in front of the machines, relaxed and natural."
+      }
+    ]
+  },
+  "totalCostUsdEstimate": 0.8511,
+  "timingsMs": {
+    "A段": 31244,
+    "B段": 61379,
+    "C段": 196032,
+    "D段": 7687,
+    "E段 描画": 62793,
+    "E段 採点": 93424,
+    "E段 作り直し": 54293
+  },
+  "totalMs": 506852,
+  "pages": [
+    {
+      "page": 1,
+      "type": "cover",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.subtitle"
+      ]
+    },
+    {
+      "page": 2,
+      "type": "toc/5",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 3,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 4,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 5,
+      "type": "issues/4",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.title",
+        "txt.item.2.title"
+      ]
+    },
+    {
+      "page": 6,
+      "type": "numbers/3",
+      "rewrites": 2,
+      "retypedFrom": null,
+      "revisedByReview": 2,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 7,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 8,
+      "type": "photo-text/a",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 9,
+      "type": "numbers/3",
+      "rewrites": 2,
+      "retypedFrom": null,
+      "revisedByReview": 2,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 10,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 11,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.1",
+        "txt.item.2",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 12,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 13,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 14,
+      "type": "steps/3",
+      "rewrites": 1,
+      "retypedFrom": null,
+      "revisedByReview": 1,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.item.1.caption",
+        "txt.item.2.caption",
+        "txt.item.3.caption"
+      ]
+    },
+    {
+      "page": 15,
+      "type": "photo-text/a",
+      "rewrites": 1,
+      "retypedFrom": null,
+      "revisedByReview": 1,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline"
+      ]
+    },
+    {
+      "page": 16,
+      "type": "attention",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 17,
+      "type": "section",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    },
+    {
+      "page": 18,
+      "type": "numbers/3",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.note.1",
+        "txt.note.2"
+      ]
+    },
+    {
+      "page": 19,
+      "type": "photo-text/b",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": [
+        "txt.headline",
+        "txt.item.3"
+      ]
+    },
+    {
+      "page": 20,
+      "type": "collage",
+      "rewrites": 0,
+      "retypedFrom": null,
+      "revisedByReview": 0,
+      "trimmed": [],
+      "phraseBroken": []
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "review": [
+    {
+      "page": 1,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 2,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 3,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 4,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 5,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 6,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "「CURRENT STATUS」が灰色の見出し帯と写真に重なり、「CURREN」までしか読めず切れている。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "「現状」のページなのに、3年後の目標の数値(80%、1.5%、2件)を先出ししている。ページの目的と合わず、次ページ(p9)の内容とも重複する。現状の出典や集計期間などに置き換えるか、削除する。"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 8,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 9,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "「Our Goals」が帯と写真に重なり、ほとんど読めない。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.note.1",
+          "message": "黄色の下線が「80%」だけに付いている。3つの目標の中で1項目だけが強調され、ページ全体でいちばん見てほしい語になっていない。大きな数字の「80」と並んでおり、強調として重複もしている。強調を外すか、見せたい語に絞る。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "見出し「3年後の目標」と3項目の内容をそのまま繰り返しているだけで、新しい情報がない。削除するか、目標の達成時期や前提などに差し替える。"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 11,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 12,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 13,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 14,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.item.1.caption",
+          "message": "黄色の下線が「1年目」だけに付いています。「1年目」は順番を示す語で、このページでいちばん見てほしい語ではありません。3つの手順を並べて見せるページなので、下線を外すか、各年の中身を表す語（例：紙を無くす）に付けてください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.item.2.caption",
+          "message": "この欄だけ改行が指定されておらず、「全20台にセンサー／を付けて」と文の途中で切れて読みにくくなっています。他の2つのように意味の切れ目で改行してください。"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.body",
+          "message": "体制、外部の専門家、現場での試行という3つの内容が1段落に詰まっています。「各段／階」と、語の途中で改行されている箇所もあります。推進チームを中心に文を絞って短くしてください。"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 17,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 18,
+      "verdict": "ok",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "左上の「Expected Effects」が写真と青い図形に重なっていて、ほとんど読めません。"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 20,
+      "verdict": "ok",
+      "problems": [
+        {
+          "kind": "photo",
+          "slot": "photo",
+          "message": "右端の人物の顔がコラージュの縁で切れています。"
+        }
+      ]
+    }
+  ]
+}

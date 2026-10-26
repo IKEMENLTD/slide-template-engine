@@ -14,13 +14,13 @@ import { buildFixtureCatalog, ROOT } from './helpers.js';
 const cat: Catalog = await buildFixtureCatalog();
 const resolveFile = (p: string) => path.join(ROOT, p);
 const manuscript = '請求書づくりの時間が月40時間から月8時間に減りました。導入は平均2週間。開発費は2,000万円。業務の属人化が課題です。';
-const ctx: SlotCheckContext = { catalog: cat, headlineMaxLines: 2, manuscript, sourceNumbers: sourceNumbers(manuscript), nameIgnoreSlots: ['txt.eyebrow'], noNumberSlots: ['txt.unit.*'], resolveFile };
+const ctx: SlotCheckContext = { catalog: cat, headlineMaxLines: 2, manuscript, sourceNumbers: sourceNumbers(manuscript), nameIgnoreSlots: ['txt.eyebrow'], unitSlots: ['txt.unit.*'], resolveFile };
 const T = (key: string) => cat.types.find((t) => t.key === key)!;
 
 /** 型の文言の欄を、正しい短い文言で埋めた1ページ */
 function goodPage(key: string): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const s of T(key).slots) if (s.kind !== 'img') out[s.name] = s.kind === 'num' ? '8' : s.name === 'txt.eyebrow' ? 'Results' : '時間が減る';
+  for (const s of T(key).slots) if (s.kind !== 'img') out[s.name] = s.kind === 'num' ? '8' : s.name === 'txt.eyebrow' ? 'Results' : s.name.startsWith('txt.unit.') ? '時間' : '時間が減る';
   return out;
 }
 const codes = (key: string, slots: Record<string, string>) => checkPage(1, T(key), slots, ctx).map((i) => i.code);
@@ -85,9 +85,11 @@ describe('1ページの検査（B段と E段が同じものを使う）', () => 
     s['txt.item.3.title'] = '[[c]]';
     expect(codes('issues/3', s)).toContain('EMPHASIS_TOO_MANY');
   });
-  it('SLOT_RULE：単位の欄に数字を入れると指摘する', () => {
+  it('SLOT_RULE：単位の欄に数字や文を入れると指摘する', () => {
     expect(codes('numbers/3', { ...goodPage('numbers/3'), 'txt.unit.1': '件→8件' })).toContain('SLOT_RULE');
+    expect(codes('numbers/3', { ...goodPage('numbers/3'), 'txt.unit.1': '日が半日に' })).toContain('SLOT_RULE');
     expect(codes('numbers/3', { ...goodPage('numbers/3'), 'txt.unit.1': '時間/月' })).not.toContain('SLOT_RULE');
+    expect(codes('numbers/3', { ...goodPage('numbers/3'), 'txt.unit.1': 'か月' })).not.toContain('SLOT_RULE');
   });
   it('NAME_NOT_IN_SOURCE は注意。飾りの英字（eyebrow）は調べない', () => {
     const s = { ...goodPage('issues/3'), 'txt.item.1.title': 'AcmeCloud' };
