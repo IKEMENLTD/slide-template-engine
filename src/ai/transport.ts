@@ -9,7 +9,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { spawn } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createMessageWithFailover, type AiUsage, type UsageSink } from './model-failover.js';
@@ -29,6 +29,8 @@ export type CompleteRequest = {
   /** この呼び出しに使える壁時計の残り（ms） */
   remainingMs: number;
   effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  /** 見せる画像（PNG のパス）。user の文より前に置く */
+  images?: string[];
 };
 
 export type CompleteResult = {
@@ -67,7 +69,17 @@ export class AnthropicTransport implements AiTransport {
       model: getModelApiId(req.modelId),
       max_tokens: req.maxTokens,
       system: req.system.map((b) => (b.cache ? { type: 'text' as const, text: b.text, cache_control: { type: 'ephemeral' as const } } : { type: 'text' as const, text: b.text })),
-      messages: [{ role: 'user' as const, content: req.user }],
+      messages: [
+        {
+          role: 'user' as const,
+          content: req.images?.length
+            ? [
+                ...req.images.map((f) => ({ type: 'image' as const, source: { type: 'base64' as const, media_type: 'image/png' as const, data: readFileSync(f).toString('base64') } })),
+                { type: 'text' as const, text: req.user },
+              ]
+            : req.user,
+        },
+      ],
       ...(req.effort ? { output_config: { effort: req.effort } } : {}),
       // 型に無い欄は SDK がそのまま送る。ヘッダーと対で付ける（片方だけだと 400）
       ...(this.opts.refusalFallback ? { fallbacks: 'default' } : {}),
@@ -105,13 +117,21 @@ export class ClaudeCliTransport implements AiTransport {
 
   complete(req: CompleteRequest): Promise<CompleteResult> {
     const started = Date.now();
-    // 作業場所をリポジトリの外にする（CLAUDE.md などを読み込ませない）
-    const cwd = path.join(os.tmpdir(), 'slidegen-claude-cli');
-    mkdirSync(cwd, { recursive: true });
+    // 作業場所をリポジトリの外にする（CLAUDE.md などを読み込ませない）。画像を見せるときは、その呼び出しだけの場所に写す
+    const base = path.join(os.tmpdir(), 'slidegen-claude-cli');
+    mkdirSync(base, { recursive: true });
+    const cwd = req.images?.length ? mkdtempSync(path.join(base, 'img-')) : base;
+    const names = (req.images ?? []).map((f, i) => {
+      const n = `image-${String(i + 1).padStart(2, '0')}.png`;
+      copyFileSync(f, path.join(cwd, n));
+      return n;
+    });
+    const user = names.length ? `次の画像ファイルを Read で開いて見てから答えてください（この順に1枚目、2枚目…）: ${names.join(', ')}\n\n${req.user}` : req.user;
     const system = req.system.map((b) => b.text).join('\n\n');
     const args = [
       '-p', '--output-format', 'json', '--model', getModelApiId(req.modelId),
-      '--system-prompt', system, '--tools', '', '--setting-sources', '', '--no-session-persistence',
+      '--system-prompt', system, '--tools', names.length ? 'Read' : '', ...(names.length ? ['--allowedTools', 'Read'] : []),
+      '--setting-sources', '', '--no-session-persistence',
       '--disable-slash-commands', '--strict-mcp-config',
       ...(req.effort ? ['--effort', req.effort] : []),
     ];
@@ -132,6 +152,7 @@ export class ClaudeCliTransport implements AiTransport {
       });
       child.on('close', (code, signal) => {
         clearTimeout(timer);
+        if (cwd !== base) rmSync(cwd, { recursive: true, force: true });
         let parsed: CliOutput;
         try {
           parsed = JSON.parse(out) as CliOutput;
@@ -162,7 +183,7 @@ export class ClaudeCliTransport implements AiTransport {
           ms: Date.now() - started,
         });
       });
-      child.stdin.end(req.user);
+      child.stdin.end(user);
     });
   }
 }

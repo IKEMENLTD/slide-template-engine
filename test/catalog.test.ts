@@ -123,3 +123,11 @@ describe('強調の印', () => {
     expect(() => splitEmphasis('こんな[[限界を')).toThrow();
   });
 });
+
+describe('設定の互換', () => {
+  it('旧い名前 checks.noNumberSlots も unitSlots として読む', async () => {
+    const { ConfigSchema } = await import('../src/catalog/config.js');
+    const c = ConfigSchema.parse({ ...CFG, checks: { nameIgnoreSlots: ['txt.eyebrow'], noNumberSlots: ['txt.unit.*'] } });
+    expect(c.checks.unitSlots).toEqual(['txt.unit.*']);
+  });
+});

@@ -64,6 +64,10 @@ export type DeckPlan = {
       rewrites: number;
       /** 別の型に替えたなら元の型 */
       retypedFrom?: string;
+      /** 見た目の採点で作り直した回数 */
+      revisedByReview?: number;
+      /** 見た目の採点で作り直したが、決まりに反したので元に戻した回数 */
+      revertedByReview?: number;
       /** 写真の欄 → 使う写真（リポジトリからの相対パス）。C段で入る */
       photoFiles?: Record<string, string>;
     }

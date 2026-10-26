@@ -78,6 +78,8 @@ export async function callForJson<S extends z.ZodTypeAny>(
     retries?: number;
     /** 形は合っているが中身の決まりに反するときの検査。理由の文を返すと作り直させる */
     validate?: (v: z.infer<S>) => string | null;
+    /** 見せる画像（PNG のパス） */
+    images?: string[];
   }
 ): Promise<z.infer<S>> {
   const system: SystemBlock[] = [...opts.materials.map((text) => ({ text, cache: true })), { text: opts.instruction, cache: false }];
@@ -96,7 +98,7 @@ export async function callForJson<S extends z.ZodTypeAny>(
       `\n\n出力は JSON のみとし、${Math.floor(allowed * 0.8)} トークン以内で必ず閉じてください。途中で切れると全部無駄になります。収まらない場合は各項目の記述を短くしてください（項目自体は省かない）。`;
     let res: CompleteResult;
     try {
-      res = await ctx.transport.complete({ feature: opts.stage, modelId: ctx.modelId, system, user, maxTokens: allowed, remainingMs: opts.budgetMs, effort: ctx.effort });
+      res = await ctx.transport.complete({ feature: opts.stage, modelId: ctx.modelId, system, user, maxTokens: allowed, remainingMs: opts.budgetMs, effort: ctx.effort, images: opts.images });
     } catch (e) {
       ctx.record({ feature: opts.stage, model: ctx.modelId, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, cacheDeclared: false, cacheHit: false, cacheIneffective: false, ms: 0, stopReason: 'error', attempt, ok: false, error: (e as Error).message });
       throw e;

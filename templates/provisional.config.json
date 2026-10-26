@@ -69,7 +69,8 @@
   "lightDarkRatio": {
     "enabled": false,
     "target": 1.5,
-    "tolerance": 0.3
+    "tolerance": 0.3,
+    "darkBelow": 0.5
   },
   "ai": {
     "model": "claude-sonnet-5-5",
@@ -94,11 +95,17 @@
     "model": "gpt-image-2.5-flare",
     "quality": "medium"
   },
+  "review": {
+    "enabled": true,
+    "maxRounds": 2,
+    "pagesPerCall": 5,
+    "dpi": 96
+  },
   "checks": {
     "nameIgnoreSlots": [
       "txt.eyebrow"
     ],
-    "noNumberSlots": [
+    "unitSlots": [
       "txt.unit.*"
     ]
   }

@@ -16,7 +16,7 @@
  *   report.json / .md   検査結果・使用トークン・実費の概算
  */
 import { createHash } from 'node:crypto';
-import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { appendFileSync, copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { buildCatalog, type Catalog } from '../catalog/build-catalog.js';
 import { ConfigSchema, type TemplateConfig } from '../catalog/config.js';
@@ -25,12 +25,16 @@ import type { AiCallRecord, AiContext } from '../ai/call-json.js';
 import { costUsd } from '../ai/models.js';
 import type { AiTransport } from '../ai/transport.js';
 import { assembleDeck } from '../assemble/build-deck.js';
-import type { Issue } from '../check/content.js';
+import { issue, type Issue } from '../check/content.js';
+import { checkLightDark } from '../check/light-dark.js';
+import { renderDeck, renderIssues, type RenderResult } from '../render/render.js';
+import { latestReview, pagesToRedo, reviewIssues, reviewPages, type PageReview } from '../review/visual.js';
+import JSZip from 'jszip';
 import { checkDeck } from '../check/deck-check.js';
-import type { SlotCheckContext } from '../check/slots.js';
+import { checkPage, type SlotCheckContext } from '../check/slots.js';
 import { sourceNumbers } from '../check/content.js';
 import { makeOutline } from '../plan/outline.js';
-import { planDeck, type PlanStore } from '../plan/plan.js';
+import { fixPage, planDeck, type PlanStore } from '../plan/plan.js';
 import type { DeckPlan, Outline } from '../plan/schema.js';
 import { preparePhotos, type GeneratedRecord, type PhotoRecord } from '../photos/plan-photos.js';
 import type { ImageGenerator } from '../photos/openai-image.js';
@@ -63,6 +67,8 @@ export type BuildOptions = {
   /** 写真を生成する口。null なら生成しない（生成を割り当てた欄は見本の写真のまま） */
   imageGenerator: ImageGenerator | null;
   log?: (m: string) => void;
+  /** false なら描画しない（描画・見た目の採点・明暗の比を飛ばす。試験用） */
+  render?: boolean;
   /** 試験用：指定した段が終わったところで止める */
   stopAfter?: 'outline' | 'plan' | 'photos' | 'assemble';
 };
@@ -173,7 +179,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     manuscript,
     sourceNumbers: sourceNumbers(manuscript),
     nameIgnoreSlots: cfg.checks.nameIgnoreSlots,
-    noNumberSlots: cfg.checks.noNumberSlots,
+    unitSlots: cfg.checks.unitSlots,
     resolveFile: resolveRepo,
   };
   const planPath = path.join(dir, 'deck-plan.json');
@@ -202,14 +208,85 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
 
   // ---- D段
   const deckPath = path.join(dir, 'deck.pptx');
+  const assemble = () => assembleDeck({ templatePath: path.join(dir, 'template.pptx'), catalog, cfg, plan, photoDir: path.join(dir, 'photos'), outFile: deckPath });
   log('D段 組み立て');
-  const { buffer } = await timed('D段', () =>
-    assembleDeck({ templatePath: path.join(dir, 'template.pptx'), catalog, cfg, plan, photoDir: path.join(dir, 'photos'), outFile: deckPath })
-  );
+  let { buffer } = await timed('D段', assemble);
   if (o.stopAfter === 'assemble') return { dir, issues: [], errors: 0, warnings: 0, stoppedAfter: 'assemble' };
 
-  // ---- 検査（Phase 4 で描画・見た目の採点・作り直しを足す）
+  // ---- E段：測定の検査 → 描画 → 見た目の採点 → 指摘のあったページだけ B段の直し方で作り直す（最大 review.maxRounds 回）
+  const planArgs = { catalog, cfg, manuscript, outline, check, store, log: (m: string) => log(`  ${m}`) };
+  const reviewDir = path.join(dir, 'review');
+  let render: RenderResult | null = null;
+  let lastReview: PageReview[] = [];
+  const doRender = async () => {
+    if (o.render === false) return null;
+    log('E段 描画');
+    const r = await timed('E段 描画', () => renderDeck(buffer, dir, { dpi: cfg.review.dpi }));
+    writeJson(path.join(dir, 'render.json'), { engine: r.engine, fonts: r.fonts, pages: r.pages.map((p) => path.relative(dir, p)), ms: r.ms });
+    return r;
+  };
+  render = await doRender();
+  if (render && cfg.review.enabled) {
+    let targets = plan.pages.map((_, i) => i + 1);
+    for (let round = 1; round <= cfg.review.maxRounds + 1 && targets.length; round++) {
+      const rPath = path.join(reviewDir, `round-${round}.json`);
+      let reviewed = existsSync(rPath) ? readJson<{ pages: number[]; review: PageReview[] }>(rPath) : undefined;
+      if (!reviewed) {
+        log(`E段 見た目の採点（${round}回目・${targets.length}ページ）`);
+        const review = await timed('E段 採点', () => reviewPages(ctx, { plan, catalog, cfg, pages: targets, pngs: render!.pages, round }));
+        reviewed = { pages: targets, review };
+        writeJson(rPath, reviewed);
+      }
+      // 採点の結果は、そのページの最新の結果で上書きして持つ
+      lastReview = [...lastReview.filter((x) => !reviewed!.pages.includes(x.page)), ...reviewed.review].sort((x, y) => x.page - y.page);
+      const redo = pagesToRedo(reviewed.review);
+      if (!redo.length || round > cfg.review.maxRounds) break;
+      log(`E段 作り直し（${round}回目）: p${redo.join(', p')}`);
+      const before = await slideHashes(buffer);
+      await timed('E段 作り直し', async () => {
+        for (const n of redo) {
+          const key = `review/page-${String(n).padStart(2, '0')}-r${round}`;
+          let fixed = store.get<DeckPlan['pages'][number]>(key);
+          if (!fixed) {
+            const cur = plan.pages[n - 1];
+            const forced = reviewed!.review
+              .find((x) => x.page === n)!
+              .problems.filter((x) => x.kind === 'text')
+              .map((x) => issue('VISUAL_REVIEW', `${x.slot ? `${x.slot}: ` : ''}${x.message}`, { page: n, slot: x.slot }));
+            fixed = await fixPage(ctx, planArgs, n, { type: cur.type, slots: cur.slots, photos: cur.photos }, { allowRetype: false, stage: 'E段', forced });
+            store.set(key, fixed);
+          }
+          const cur = plan.pages[n - 1];
+          // 作り直した結果が止める決まりに反するなら、元の版を残す（見た目の指摘を直して、測定の決まりを壊さない）
+          const t = catalog.types.find((x) => x.key === fixed!.type)!;
+          const broken = checkPage(n, t, fixed.slots, check).filter((x) => x.level === 'error');
+          if (broken.length || fixed.trimmed.length) {
+            log(`  p${n} は作り直しで決まりに反したので元の版に戻した: ${[...broken.map((x) => x.message), ...fixed.trimmed.map((x) => `${x} を丸めた`)].join(' / ')}`);
+            plan.pages[n - 1] = { ...cur, revertedByReview: (cur.revertedByReview ?? 0) + 1 };
+            continue;
+          }
+          plan.pages[n - 1] = { ...fixed, rewrites: cur.rewrites + fixed.rewrites, photoFiles: cur.photoFiles, revisedByReview: (cur.revisedByReview ?? 0) + 1 };
+        }
+      });
+      writeJson(planPath, plan);
+      ({ buffer } = await timed('D段', assemble));
+      // 作り直したページ以外は、スライドの中身が1バイトも変わっていないことを確かめて残す（15章 Phase 4）
+      const after = await slideHashes(buffer);
+      const changed = after.map((h, i) => (h !== before[i] ? i + 1 : 0)).filter(Boolean);
+      const unexpected = changed.filter((n) => !redo.includes(n));
+      writeJson(path.join(reviewDir, `changes-${round}.json`), { redo, changed, unexpected });
+      if (unexpected.length) log(`  注意: 作り直していないページ p${unexpected.join(', p')} の中身が変わった`);
+      render = await doRender();
+      targets = redo;
+    }
+  }
+
   const issues = await checkDeck(buffer, plan, catalog, check, cfg.deck.maxSameTypeInRow);
+  if (render) {
+    issues.push(...(await checkLightDark(render.pages, cfg.lightDarkRatio)));
+    issues.push(...renderIssues(render, plan.pages.length));
+  }
+  issues.push(...reviewIssues(lastReview));
   return writeReport({ dir, info, plan, issues, timings, root: o.root });
 }
 
@@ -288,7 +365,9 @@ export function writeReport(a: { dir: string; info: RunInfo; plan: DeckPlan; iss
     /** AI（文章）と写真の生成を合わせた概算 */
     totalCostUsdEstimate: Math.round((cost + photos.generationCostUsd) * 10000) / 10000,
     timingsMs: a.timings,
-    pages: a.plan.pages.map((p, i) => ({ page: i + 1, type: p.type, rewrites: p.rewrites, retypedFrom: p.retypedFrom ?? null, trimmed: p.trimmed, phraseBroken: p.phraseBroken })),
+    /** 段ごとの時間の合計（再開したときは、それぞれの実行の分を足したもの） */
+    totalMs: Object.values(a.timings).reduce((n, v) => n + v, 0),
+    pages: a.plan.pages.map((p, i) => ({ page: i + 1, type: p.type, rewrites: p.rewrites, retypedFrom: p.retypedFrom ?? null, revisedByReview: p.revisedByReview ?? 0, trimmed: p.trimmed, phraseBroken: p.phraseBroken })),
   };
   writeJson(path.join(a.dir, 'report.json'), report);
   const lines = [
@@ -299,7 +378,7 @@ export function writeReport(a: { dir: string; info: RunInfo; plan: DeckPlan; iss
     `- AI: ${report.ai.transport}・${report.ai.model}・${report.ai.calls} 回（うちやり直し ${report.ai.failedAttempts}）・入力 ${usage.inputTokens + usage.cacheReadTokens + usage.cacheWriteTokens} トークン（キャッシュ読み ${usage.cacheReadTokens}）・出力 ${usage.outputTokens} トークン・概算 $${report.ai.costUsdEstimate}`,
     `- 写真: 欄 ${photos.slots}（支給 ${photos.supplied}・生成 ${photos.generatedUses}・見本のまま ${photos.templateLeft}）・生成 ${photos.generated} 枚 $${photos.generationCostUsd}（${(photos.generationMs / 1000).toFixed(1)}秒）`,
     `- 実費の概算（文章＋写真）: $${report.totalCostUsdEstimate}`,
-    `- 時間: ${Object.entries(a.timings).map(([k, v]) => `${k} ${(v / 1000).toFixed(1)}秒`).join('・')}`,
+    `- 時間: 合計 ${(report.totalMs / 1000).toFixed(1)}秒（${Object.entries(a.timings).map(([k, v]) => `${k} ${(v / 1000).toFixed(1)}秒`).join('・')}）`,
     '',
     '## 止める指摘',
     ...(errors ? a.issues.filter((i) => i.level === 'error').map(fmt) : ['なし']),
@@ -308,9 +387,9 @@ export function writeReport(a: { dir: string; info: RunInfo; plan: DeckPlan; iss
     ...(warnings ? a.issues.filter((i) => i.level === 'warning').map(fmt) : ['なし']),
     '',
     '## ページ',
-    '| p | 型 | 書き直し | 型の替え | 丸め | 文節の改行 |',
-    '|---|---|---|---|---|---|',
-    ...report.pages.map((p) => `| ${p.page} | ${p.type} | ${p.rewrites} | ${p.retypedFrom ?? ''} | ${p.trimmed.join(', ')} | ${p.phraseBroken.join(', ')} |`),
+    '| p | 型 | 書き直し | 型の替え | 見た目で作り直し | 丸め | 文節の改行 |',
+    '|---|---|---|---|---|---|---|',
+    ...report.pages.map((p) => `| ${p.page} | ${p.type} | ${p.rewrites} | ${p.retypedFrom ?? ''} | ${p.revisedByReview || ''} | ${p.trimmed.join(', ')} | ${p.phraseBroken.join(', ')} |`),
     '',
   ];
   writeFileSync(path.join(a.dir, 'report.md'), lines.join('\n'));
@@ -334,9 +413,41 @@ export async function recheck(dirArg: string, root: string): Promise<BuildResult
     manuscript,
     sourceNumbers: sourceNumbers(manuscript),
     nameIgnoreSlots: cfg.checks.nameIgnoreSlots,
-    noNumberSlots: cfg.checks.noNumberSlots,
+    unitSlots: cfg.checks.unitSlots,
     resolveFile: (p) => (path.isAbsolute(p) ? p : path.join(root, p)),
   }, cfg.deck.maxSameTypeInRow);
+  // 描画と見た目の採点は、保存してある結果を読む（check は AI も描画も呼ばない）
+  const pngs = existsSync(path.join(dir, 'render.json')) ? readJson<{ pages: string[] }>(path.join(dir, 'render.json')).pages.map((p) => path.join(dir, p)) : [];
+  if (pngs.length) issues.push(...(await checkLightDark(pngs, cfg.lightDarkRatio)));
+  const rd = path.join(dir, 'review');
+  const rounds = existsSync(rd)
+    ? readdirSync(rd)
+        .filter((f) => /^round-\d+\.json$/.test(f))
+        .sort((a, b) => Number(a.match(/\d+/)![0]) - Number(b.match(/\d+/)![0]))
+        .map((f) => readJson<{ pages: number[]; review: PageReview[] }>(path.join(rd, f)))
+    : [];
+  issues.push(...reviewIssues(latestReview(rounds)));
   const timings = existsSync(path.join(dir, 'timings.json')) ? readJson<Record<string, number>>(path.join(dir, 'timings.json')) : {};
   return writeReport({ dir, info, plan, issues, timings, root });
+}
+
+/** スライドごとの中身（slideN.xml と、その関係ファイル）の指紋。作り直していないページが変わっていないかを確かめる */
+export async function slideHashes(buf: Buffer): Promise<string[]> {
+  const zip = await JSZip.loadAsync(buf);
+  const pres = await zip.file('ppt/presentation.xml')!.async('string');
+  const rels = await zip.file('ppt/_rels/presentation.xml.rels')!.async('string');
+  const ids = [...pres.matchAll(/<p:sldId [^>]*r:id="([^"]+)"/g)].map((m) => m[1]);
+  const target = new Map([...rels.matchAll(/<Relationship [^>]*Id="([^"]+)"[^>]*Target="([^"]+)"/g)].map((m) => [m[1], m[2]]));
+  const out: string[] = [];
+  for (const id of ids) {
+    const part = path.posix.join('ppt', target.get(id)!);
+    const xml = await zip.file(part)!.async('string');
+    // 画像の中身も含める（関係の付け替えで別の画像を指すようになったら気づくため）
+    const relXml = (await zip.file(part.replace(/slides\/(slide\d+\.xml)$/, 'slides/_rels/$1.rels'))?.async('string')) ?? '';
+    const media = await Promise.all(
+      [...relXml.matchAll(/Target="\.\.\/media\/([^"]+)"/g)].map(async (m) => createHash('sha256').update((await zip.file(`ppt/media/${m[1]}`)?.async('nodebuffer')) ?? Buffer.alloc(0)).digest('hex'))
+    );
+    out.push(createHash('sha256').update(xml).update(media.join(',')).digest('hex'));
+  }
+  return out;
 }

@@ -12,8 +12,8 @@ export type SlotCheckContext = {
   manuscript: string;
   sourceNumbers: Set<string>;
   nameIgnoreSlots: string[];
-  /** 数字を入れない欄（単位の欄など）。数字は num.* に入れる */
-  noNumberSlots: string[];
+  /** 単位の欄。単位だけを入れる（数字・文を入れない。数字は num.*、説明は txt.note.* へ） */
+  unitSlots: string[];
   resolveFile: (p: string) => string;
 };
 
@@ -36,8 +36,12 @@ export function checkPage(page: number, type: CatalogType, slots: Record<string,
     if (s.kind === 'num' && !NUM_ONLY.test(text.replace(/\[\[|\]\]/g, ''))) out.push(issue('NUMBER_NOT_IN_SOURCE', `${s.name} は数字だけの欄。「${text}」には数字以外が入っている`, where));
     const bad = numbersNotIn(text, c.sourceNumbers);
     if (bad.length) out.push(issue('NUMBER_NOT_IN_SOURCE', `${s.name} に原稿に無い数字 ${bad.join(', ')} がある`, where));
-    if (matchesAny(c.noNumberSlots, s.name) && numbersIn(text).length)
-      out.push(issue('SLOT_RULE', `${s.name} は単位などを入れる欄で、数字は入れない（数字は num.* と説明の欄へ）: 「${text}」`, where));
+    if (matchesAny(c.unitSlots, s.name)) {
+      const plain = text.replace(/\[\[|\]\]/g, '');
+      if (numbersIn(plain).length) out.push(issue('SLOT_RULE', `${s.name} は単位だけを入れる欄で、数字は入れない（数字は num.* と説明の欄へ）: 「${text}」`, where));
+      // 単位に平仮名は「か月」の「か」くらいしか使わない。それ以外の平仮名があれば文（「件に減少」）になっている
+      else if (/[ぁ-ゖ]/.test(plain.replace(/か月|ヶ月|ヵ月/g, ''))) out.push(issue('SLOT_RULE', `${s.name} は単位だけを入れる欄で、文は入れない（変化や説明は txt.note.* へ）: 「${text}」`, where));
+    }
     if (!matchesAny(c.nameIgnoreSlots, s.name)) {
       const names = namesNotIn(text, c.manuscript);
       if (names.length) out.push(issue('NAME_NOT_IN_SOURCE', `${s.name} に原稿に無い語 ${names.join('・')} がある（固有名詞なら要確認）`, where));

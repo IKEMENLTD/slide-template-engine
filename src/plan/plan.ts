@@ -170,67 +170,85 @@ export async function planDeck(ctx: AiContext, a: PlanArgs): Promise<DeckPlan['p
     const key = `plan/page-${String(n).padStart(2, '0')}`;
     const saved = store.get<FinalPage>(key);
     if (saved) return (results[i] = saved);
-    let page: PlanPage = d;
-    let t = findType(catalog, page.type)!;
-    let { slots, broken } = normalize(t, page, a);
-    let problems = fixable(checkPage(n, t, slots, a.check));
-    let rewrites = 0;
-    let retypedFrom: string | undefined;
-    const rewrite = async (candidates?: CatalogType[]) => {
-      const res = await callForJson(ctx, {
-        stage: `B段 ${candidates ? '型の替え' : '書き直し'} p${n}`,
-        materials,
-        instruction: rewriteInstruction(catalog, cfg),
-        user: rewriteUser(n, t, slots, problems, outline, candidates),
-        schema: PlanPageSchema,
-        maxTokens: REWRITE_MAX_OUTPUT_TOKENS,
-        budgetMs: cfg.ai.callBudgetMs,
-        validate: (v) => {
-          const allowed = candidates ? candidates.map((c) => c.key) : [t.key];
-          if (!allowed.includes(v.type)) return `type は ${allowed.join(' か ')} にする`;
-          return draftProblems([v], 1, catalog, { ...cfg, deck: { ...cfg.deck, maxSameTypeInRow: Number.MAX_SAFE_INTEGER } }, []);
-        },
-      });
-      page = res;
-      t = findType(catalog, page.type)!;
-      ({ slots, broken } = normalize(t, page, a));
-      problems = fixable(checkPage(n, t, slots, a.check));
-    };
-    while (problems.length && rewrites < cfg.ai.maxRewrites) {
-      rewrites++;
-      log(`B段 書き直し p${n}（${rewrites}回目）: ${problems.map((p) => p.message).join(' / ')}`);
-      await rewrite();
-    }
-    if (problems.some((p) => p.code === 'OVERFLOW' || p.code === 'HEADLINE_LINES')) {
-      const role = outline.pages[i].role;
-      const candidates = catalog.types.filter((c) => c.key !== t.key && c.role.includes(role));
-      if (candidates.length) {
-        retypedFrom = t.key;
-        log(`B段 型の替え p${n}: ${t.key} → 候補 ${candidates.map((c) => c.key).join(', ')}`);
-        await rewrite(candidates);
-        if (problems.length) {
-          rewrites++;
-          await rewrite();
-        }
-      }
-    }
-    capEmphasis(slots, catalog.emphasis.maxPerSlide, textSlots(t).map((s) => s.name));
-    const trimmed = trimToFit(t, slots, a);
-    const final: FinalPage = {
-      type: t.key,
-      slots,
-      photos: Object.fromEntries(imageSlots(t).map((s) => [s.name, page.photos[s.name] ?? ''])),
-      outlinePage: n,
-      trimmed,
-      phraseBroken: broken.filter((b) => !trimmed.includes(b)),
-      rewrites,
-      ...(retypedFrom ? { retypedFrom } : {}),
-    };
+    const final = await fixPage(ctx, a, n, d, { allowRetype: true, stage: 'B段' });
     store.set(key, final);
     results[i] = final;
   });
   await runLimited(work, a.concurrency ?? 3);
   return results;
+}
+
+/**
+ * 1ページを、欄に収まり決まりに合うまで直す（B段の 2〜5。E段の作り直しも同じものを使う）。
+ * @param forced 最初に必ず直させる指摘（E段：見た目の採点の指摘）。測定の検査の指摘に加えて渡す
+ */
+export async function fixPage(
+  ctx: AiContext,
+  a: PlanArgs,
+  n: number,
+  draft: PlanPage,
+  opts: { allowRetype: boolean; stage: 'B段' | 'E段'; forced?: Issue[] }
+): Promise<FinalPage> {
+  const { catalog, cfg, outline } = a;
+  const log = a.log ?? (() => {});
+  const materials = [manuscriptBlock(a.manuscript), catalogBlock(catalog)];
+  let page: PlanPage = draft;
+  let t = findType(catalog, page.type)!;
+  let { slots, broken } = normalize(t, page, a);
+  let problems = [...(opts.forced ?? []), ...fixable(checkPage(n, t, slots, a.check))];
+  let rewrites = 0;
+  let retypedFrom: string | undefined;
+  const rewrite = async (candidates?: CatalogType[]) => {
+    const res = await callForJson(ctx, {
+      stage: `${opts.stage} ${candidates ? '型の替え' : '書き直し'} p${n}`,
+      materials,
+      instruction: rewriteInstruction(catalog, cfg),
+      user: rewriteUser(n, t, slots, problems, outline, candidates),
+      schema: PlanPageSchema,
+      maxTokens: REWRITE_MAX_OUTPUT_TOKENS,
+      budgetMs: cfg.ai.callBudgetMs,
+      validate: (v) => {
+        const allowed = candidates ? candidates.map((c) => c.key) : [t.key];
+        if (!allowed.includes(v.type)) return `type は ${allowed.join(' か ')} にする`;
+        return draftProblems([v], 1, catalog, { ...cfg, deck: { ...cfg.deck, maxSameTypeInRow: Number.MAX_SAFE_INTEGER } }, []);
+      },
+    });
+    page = res;
+    t = findType(catalog, page.type)!;
+    ({ slots, broken } = normalize(t, page, a));
+    // 2回目からは測定の検査の指摘だけで判断する（見た目の指摘は1回の書き直しで渡し終えている）
+    problems = fixable(checkPage(n, t, slots, a.check));
+  };
+  while (problems.length && rewrites < cfg.ai.maxRewrites) {
+    rewrites++;
+    log(`${opts.stage} 書き直し p${n}（${rewrites}回目）: ${problems.map((p) => p.message).join(' / ')}`);
+    await rewrite();
+  }
+  if (opts.allowRetype && problems.some((p) => p.code === 'OVERFLOW' || p.code === 'HEADLINE_LINES')) {
+    const role = outline.pages[n - 1].role;
+    const candidates = catalog.types.filter((c) => c.key !== t.key && c.role.includes(role));
+    if (candidates.length) {
+      retypedFrom = t.key;
+      log(`${opts.stage} 型の替え p${n}: ${t.key} → 候補 ${candidates.map((c) => c.key).join(', ')}`);
+      await rewrite(candidates);
+      if (problems.length) {
+        rewrites++;
+        await rewrite();
+      }
+    }
+  }
+  capEmphasis(slots, catalog.emphasis.maxPerSlide, textSlots(t).map((s) => s.name));
+  const trimmed = trimToFit(t, slots, a);
+  return {
+    type: t.key,
+    slots,
+    photos: Object.fromEntries(imageSlots(t).map((s) => [s.name, page.photos[s.name] ?? ''])),
+    outlinePage: n,
+    trimmed,
+    phraseBroken: broken.filter((b) => !trimmed.includes(b)),
+    rewrites,
+    ...(retypedFrom ? { retypedFrom } : {}),
+  };
 }
 
 async function runLimited(tasks: Array<() => Promise<unknown>>, limit: number) {
