@@ -1,0 +1,36 @@
+{
+  "engine": "LibreOffice 7.4.7.2 40(Build:2)",
+  "fonts": [
+    "Barlow-Bold",
+    "Barlow-Medium",
+    "Barlow-Regular",
+    "NotoSansJP-Bold-VKana",
+    "NotoSansJP-Medium-VKana",
+    "NotoSansJP-Regular-VKana",
+    "NotoSerifJP-Bold-VKana",
+    "NotoSerifJP-Regular-VKana"
+  ],
+  "pages": [
+    "pages/01.png",
+    "pages/02.png",
+    "pages/03.png",
+    "pages/04.png",
+    "pages/05.png",
+    "pages/06.png",
+    "pages/07.png",
+    "pages/08.png",
+    "pages/09.png",
+    "pages/10.png",
+    "pages/11.png",
+    "pages/12.png",
+    "pages/13.png",
+    "pages/14.png",
+    "pages/15.png",
+    "pages/16.png",
+    "pages/17.png",
+    "pages/18.png",
+    "pages/19.png",
+    "pages/20.png"
+  ],
+  "ms": 17679
+}

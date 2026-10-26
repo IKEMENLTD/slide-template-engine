@@ -131,3 +131,28 @@ describe('設定の互換', () => {
     expect(c.checks.unitSlots).toEqual(['txt.unit.*']);
   });
 });
+
+describe('配色の差し替え（Phase 5）', () => {
+  it('テーマの配色だけを差し替え、型と欄の上限は変わらない', async () => {
+    const { retheme, readThemeColors } = await import('../src/catalog/theme.js');
+    const green = await retheme(TPL, { accent1: '1E8C4E', accent2: 'E5508A' });
+    expect(await readThemeColors(green)).toMatchObject({ accent1: '1E8C4E', accent2: 'E5508A', dk1: '000000' });
+    const a = await build();
+    const b = await build(green);
+    const limits = (c: typeof a.catalog) => c.types.map((t) => [t.key, t.slots.map((s) => [s.name, s.maxChars, s.maxLines])]);
+    expect(limits(b.catalog)).toEqual(limits(a.catalog));
+    expect(b.catalog.theme.colors.accent1).toBe('1E8C4E');
+    await expect(retheme(TPL, { accent9: '000000' })).rejects.toThrow();
+    await expect(retheme(TPL, { accent1: 'green' })).rejects.toThrow();
+  });
+  it('色を直書きした図形があると注意を出す（無ければ出さない）', async () => {
+    expect((await build()).problems.filter((p) => /直書き/.test(p.message))).toEqual([]);
+    const buf = await mutate(async (z) => {
+      const f = 'ppt/slides/slide1.xml';
+      const xml = await z.file(f)!.async('string');
+      z.file(f, xml.replace(/<a:schemeClr val="accent1"\/>/, '<a:srgbClr val="FF0000"/>'));
+    });
+    const w = (await build(buf)).problems.filter((p) => /直書き/.test(p.message));
+    expect(w.map((p) => p.level)).toEqual(['warning']);
+  });
+});

@@ -54,6 +54,8 @@ export type RawType = {
   slots: RawSlot[];
   /** 名前の付いていない／契約外の名前の図形（飾り）の数 */
   decorations: number;
+  /** 色を直書き（srgbClr／sysClr）している箇所の数。テーマ色を差し替えても変わらない */
+  hardColors: number;
 };
 
 export type RawTemplate = {
@@ -211,7 +213,8 @@ export async function readTemplate(buf: Buffer | Uint8Array): Promise<RawTemplat
       }
       slots.push(slot);
     }
-    types.push({ slideNumber, order: i + 1, meta, notesError, slots, decorations });
+    const hardColors = all(doc, 'a', 'srgbClr').length + all(doc, 'a', 'sysClr').length;
+    types.push({ slideNumber, order: i + 1, meta, notesError, slots, decorations, hardColors });
   }
   return {
     slideSize: { w: num(sz.getAttribute('cx')) / EMU_PER_PT, h: num(sz.getAttribute('cy')) / EMU_PER_PT },

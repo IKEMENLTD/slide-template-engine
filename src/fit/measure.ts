@@ -13,9 +13,9 @@ import * as fontkit from 'fontkit';
 const NO_START = new Set([...'、。，．,.・：；:;？！?!ー－ゝゞ々」』）】〉》〕］｝)]}ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ〜…‥%％']);
 const NO_END = new Set([...'「『（【〈《〔［｛([{']);
 const isWesternWordChar = (c: string) => /[A-Za-z0-9.,/%'&+\-]/.test(c);
-const isWestern = (c: string) => c.charCodeAt(0) < 0x2e80;
+export const isWestern = (c: string) => c.charCodeAt(0) < 0x2e80;
 
-type FontLike = { unitsPerEm: number; layout: (s: string) => { advanceWidth: number } };
+type FontLike = { unitsPerEm: number; layout: (s: string) => { advanceWidth: number }; hasGlyphForCodePoint: (cp: number) => boolean };
 const cache = new Map<string, FontLike>();
 /** file は「パス」か、フォント集（.ttc）なら「パス#PostScript名」 */
 export function loadFont(file: string): FontLike {
@@ -143,4 +143,19 @@ export function lineWidth(
     prev = t.s;
   }
   return sum;
+}
+
+/**
+ * 欄の字体に無い文字。測るときと同じ決め方（英数字の範囲は latin の字体、それ以外は和文の字体）で字体を選び、
+ * その字体に字形が無い文字を返す。無い文字は描画で別の字体に置き換わり、幅の予測も見た目も変わる（D-030）。
+ */
+export function missingGlyphs(text: string, o: { fontFile: string; latinFontFile: string }): string[] {
+  const cjk = loadFont(o.fontFile);
+  const latin = loadFont(o.latinFontFile);
+  const out = new Set<string>();
+  for (const c of text.replace(/\[\[|\]\]/g, '').replace(/\s/g, '')) {
+    const f = isWestern(c) ? latin : cjk;
+    if (!f.hasGlyphForCodePoint(c.codePointAt(0)!)) out.add(c);
+  }
+  return [...out];
 }

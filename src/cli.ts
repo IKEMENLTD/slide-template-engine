@@ -4,9 +4,11 @@
  *   slidegen build   --template templates/provisional.pptx --input samples/manuscript-01.md [--photos assets/photos] [--out out/] [--slides 10] [--ai anthropic|claude-cli] [--model <id>]
  *   slidegen build   --resume out/<実行ID> [--ai ...]
  *   slidegen check   out/<実行ID>
+ *   slidegen theme   --template templates/provisional.pptx --out templates/provisional-green.pptx --set accent1=1E8C4E,accent2=E5508A
  */
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { retheme } from './catalog/theme.js';
+import { copyFileSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import * as fontkit from 'fontkit';
@@ -122,10 +124,25 @@ function report(res: { dir: string; errors: number; warnings: number; stoppedAft
   if (res.errors) process.exitCode = 1;
 }
 
+/** slidegen theme --template <元.pptx> --out <新.pptx> --set accent1=1E8C4E,accent2=E5508A [--name 名前] */
+async function themeCmd(args: string[]) {
+  const { values } = parseArgs({ args, options: { template: { type: 'string' }, out: { type: 'string' }, set: { type: 'string' }, name: { type: 'string' } } });
+  if (!values.template || !values.out || !values.set) throw new Error('--template と --out と --set が要る');
+  const colors = Object.fromEntries(values.set.split(',').map((kv) => kv.split('=').map((x) => x.trim().replace(/^#/, '')) as [string, string]));
+  const src = path.resolve(values.template);
+  const out = path.resolve(values.out);
+  writeFileSync(out, await retheme(readFileSync(src), colors, values.name));
+  // 設定は同じものを使う（配色以外は同じテンプレート）
+  const cfgSrc = configPathFor(src);
+  if (configExists(cfgSrc) && !configExists(configPathFor(out))) copyFileSync(cfgSrc, configPathFor(out));
+  console.log(`配色を差し替えた: ${path.relative(ROOT, out)}（${Object.entries(colors).map(([k, v]) => `${k}=#${v}`).join(' ')}）`);
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 if (cmd === 'catalog') await catalog(rest);
 else if (cmd === 'build') await buildCmd(rest);
 else if (cmd === 'check') report(await recheck(rest[0], ROOT));
+else if (cmd === 'theme') await themeCmd(rest);
 else {
   console.error('使い方: slidegen catalog|build|check（src/cli.ts の先頭を見る）');
   process.exitCode = 2;

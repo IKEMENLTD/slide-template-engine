@@ -190,6 +190,7 @@ export function buildCatalog(raw: RawTemplate, cfg: TemplateConfig, ctx: { file:
       t.slots.push(slot);
     }
     if (t.slots.length === 0) problems.push({ level: 'warning', where, message: '名前の付いた欄が1つも無い' });
+    if (rt.hardColors) problems.push({ level: 'warning', where, message: `色を直書きしている箇所が ${rt.hardColors} 個ある。テーマ色（配色）を差し替えても、そこだけ色が変わらない` });
     types.push(t);
   }
 

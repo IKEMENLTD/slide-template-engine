@@ -17,7 +17,9 @@ export type IssueCode =
   | 'PPTX_REPAIR'
   | 'SLIDE_COUNT'
   /** 欄の使い方の決まり（単位の欄に数字を入れない など）。B段で書き直させ、残れば注意 */
-  | 'SLOT_RULE';
+  | 'SLOT_RULE'
+  /** 欄の字体に無い文字（描画で別の字体に置き換わる） */
+  | 'GLYPH_MISSING';
 
 export type Issue = { code: IssueCode; level: IssueLevel; page?: number; slot?: string; message: string };
 
@@ -36,6 +38,7 @@ export const LEVEL: Record<IssueCode, IssueLevel> = {
   PPTX_REPAIR: 'error',
   SLIDE_COUNT: 'warning',
   SLOT_RULE: 'warning',
+  GLYPH_MISSING: 'error',
 };
 
 export const issue = (code: IssueCode, message: string, where: { page?: number; slot?: string } = {}): Issue => ({ code, level: LEVEL[code], ...where, message });

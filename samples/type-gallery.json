@@ -1,0 +1,165 @@
+{
+ "_": "全型の見本（Phase 5 の配色の比較用）。1つの型に1ページ。文言は samples/manuscript-03-long.md から（数字はすべて架空）",
+ "pages": [
+  {
+   "type": "cover",
+   "slots": {
+    "txt.headline": "現場の仕事を、\nデータで回す",
+    "txt.subtitle": "部品加工工場のデジタル化計画のご紹介です。",
+    "txt.point.1.lead": "稼働率",
+    "txt.point.1.main": "62%から\n80%へ",
+    "txt.point.2.lead": "不良率",
+    "txt.point.2.main": "3.8%から\n1.5%へ",
+    "txt.point.3.lead": "納期遅れ",
+    "txt.point.3.main": "月2件へ"
+   }
+  },
+  {
+   "type": "toc/3",
+   "slots": {
+    "txt.eyebrow": "Contents",
+    "txt.item.1": "工場の現状と課題",
+    "txt.item.2": "3つの取り組み",
+    "txt.item.3": "投資と効果"
+   }
+  },
+  {
+   "type": "section",
+   "slots": {
+    "txt.headline": "工場の現状と課題"
+   }
+  },
+  {
+   "type": "issues/2",
+   "slots": {
+    "txt.eyebrow": "Issues",
+    "txt.headline": "現場で起きている問題",
+    "txt.item.1.title": "段取り替えが\n長い",
+    "txt.item.1.body": "機械の設定変更に平均45分",
+    "txt.item.2.title": "[[熟練者]]に\n頼っている",
+    "txt.item.2.body": "日程を組めるのは班長2人だけ"
+   }
+  },
+  {
+   "type": "numbers/3",
+   "slots": {
+    "txt.eyebrow": "Goals",
+    "txt.headline": "3年後の目標",
+    "txt.label.1": "稼働率",
+    "num.value.1": "80",
+    "txt.unit.1": "%",
+    "txt.note.1": "いまの62%から\n引き上げる",
+    "txt.label.2": "投資額",
+    "num.value.2": "4,800",
+    "txt.unit.2": "万円",
+    "txt.note.2": "うち1,600万円は\n補助金を活用",
+    "txt.label.3": "納期遅れ",
+    "num.value.3": "2",
+    "txt.unit.3": "件/月",
+    "txt.note.3": "いまは月14件",
+    "txt.footnote": "いずれも3年後の目標の値です。"
+   }
+  },
+  {
+   "type": "issues/3",
+   "slots": {
+    "txt.eyebrow": "Issues",
+    "txt.headline": "3つの課題",
+    "txt.item.1.title": "段取り替えが\n長い",
+    "txt.item.1.body": "機械の設定変更に平均45分",
+    "txt.item.2.title": "不良の原因が\n分からない",
+    "txt.item.2.body": "どの条件で作ったかを追えない",
+    "txt.item.3.title": "在庫が多すぎる",
+    "txt.item.3.body": "材料が必要な量の2倍近くある"
+   }
+  },
+  {
+   "type": "attention",
+   "slots": {
+    "txt.eyebrow": "Point",
+    "txt.headline": "目的は[[熟練者に頼らない]]工場",
+    "txt.body": "仕組みを入れることが目的ではありません。現場の知恵を書き出して、みんなのものにします。"
+   }
+  },
+  {
+   "type": "issues/4",
+   "slots": {
+    "txt.eyebrow": "Issues",
+    "txt.headline": "現場で起きている問題",
+    "txt.item.1.title": "段取り替えが\n長い",
+    "txt.item.1.body": "機械の設定変更に平均45分",
+    "txt.item.2.title": "不良の原因が\n分からない",
+    "txt.item.2.body": "どの条件で作ったかを追えない",
+    "txt.item.3.title": "[[熟練者]]に\n頼っている",
+    "txt.item.3.body": "日程を組めるのは班長2人だけ",
+    "txt.item.4.title": "在庫が多すぎる",
+    "txt.item.4.body": "材料が必要な量の2倍近くある"
+   }
+  },
+  {
+   "type": "steps/3",
+   "slots": {
+    "txt.eyebrow": "Roadmap",
+    "txt.headline": "3年間の進め方",
+    "txt.item.1.caption": "1年目：指示書を\nデジタル化",
+    "txt.item.2.caption": "2年目：全20台に\nセンサー",
+    "txt.item.3.caption": "3年目：日程づくりを\n仕組みに"
+   }
+  },
+  {
+   "type": "photo-text/a",
+   "slots": {
+    "txt.headline": "受注から出荷まで\n紙で回っている",
+    "txt.body": "受注は電話とファクスで受け、営業担当が紙の指示書を作っています。指示書は工場に回り、班長が手書きで日程を組みます。"
+   }
+  },
+  {
+   "type": "steps/4",
+   "slots": {
+    "txt.eyebrow": "Steps",
+    "txt.headline": "日程づくりの流れ",
+    "txt.item.1.caption": "決め方を\n書き出す",
+    "txt.item.2.caption": "仕組みが\n案を作る",
+    "txt.item.3.caption": "人が確認して\n決める",
+    "txt.item.4.caption": "結果を\n見直す"
+   }
+  },
+  {
+   "type": "toc/4",
+   "slots": {
+    "txt.eyebrow": "Contents",
+    "txt.item.1": "工場の現状と課題",
+    "txt.item.2": "目指す姿",
+    "txt.item.3": "3つの取り組み",
+    "txt.item.4": "投資と効果"
+   }
+  },
+  {
+   "type": "photo-text/b",
+   "slots": {
+    "txt.headline": "人への投資",
+    "txt.item.1": "段取り替えを平均45分から\n20分へ",
+    "txt.item.2": "残業を1人あたり月20時間から\n10時間へ",
+    "txt.item.3": "熟練者が若手に教える時間を\n[[毎週2時間]]確保"
+   }
+  },
+  {
+   "type": "toc/5",
+   "slots": {
+    "txt.eyebrow": "Contents",
+    "txt.item.1": "工場の現状と課題",
+    "txt.item.2": "目指す姿",
+    "txt.item.3": "3つの取り組み",
+    "txt.item.4": "進め方と体制",
+    "txt.item.5": "投資と効果"
+   }
+  },
+  {
+   "type": "collage",
+   "slots": {
+    "txt.headline": "全員でつくる工場の計画",
+    "txt.subtitle": "小さく始めて、\n一歩ずつ進めます"
+   }
+  }
+ ]
+}

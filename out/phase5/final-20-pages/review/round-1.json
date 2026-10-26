@@ -1,0 +1,210 @@
+{
+  "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "review": [
+    {
+      "page": 1,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.point.3.main",
+          "message": "「誰でも」は途中で終わっていて、何が誰でもできるのか分かりません。「日程づくり」＋「誰でも」では不自然な日本語です。「誰でも組める」「共有できる」のように言い切る形にしてください。"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 3,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 4,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 5,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 6,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "縦に回転した「Current Status」が、青い斜め帯と写真に重なっています。白く薄い文字なので、ほとんど読めません。短く言い換えるか、重ならない形にしてください。"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 8,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "「Our Goals」が、写真と青い帯に重なっています。文字が薄くて切れており、読めません。短く言い換えるか、重ならない形にしてください。"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 10,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.item.3",
+          "message": "2行目の行頭に「：」が来ています。見出しの後ろで改行する位置が不自然で、他の2項目と形もそろっていません。「：」の前で切らず、文の途中で改行してください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.headline",
+          "message": "直前の中扉と同じ「3つの取り組み」を繰り返しています。内容が分かる見出しに変えてください。例：「現場を変える3つの施策」"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 12,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.headline",
+          "message": "「日程づくりを誰でも」は文が途中で終わっていて不自然です。「日程づくりを誰でもできるように」のように述語まで書いてください。"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 14,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.item.2.caption",
+          "message": "「見える\\n化」の改行で「見える化」が語の途中で切れて読みにくいです。「稼働の見える化。\\n全20台にセンサー」のように語の切れ目で改行してください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.item.1.caption",
+          "message": "強調が「1年目」という順番を示す語だけに付いています。3つの手順のうち1つだけで、見てほしい内容の語でもありません。強調を外すか、各手順の中心の語（デジタル化・見える化・仕組み化）に揃えてください。"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.headline",
+          "message": "見出しに「現場の声」とありますが、本文には現場の声の内容が書かれていません（作業者に試してもらうという記述だけです）。見出しを「推進の体制」に絞るか、本文に現場の声を入れてください。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.body",
+          "message": "体制の人数、専門家の助言、試して直す進め方と、3つの話が入っていて情報が多すぎます。体制を中心に絞ってください。"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 17,
+      "verdict": "ok",
+      "problems": []
+    },
+    {
+      "page": 18,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.eyebrow",
+          "message": "斜めの帯と写真に重なっていて、「Investment Plan」の文字がかなり読みにくい。「Investment」の一部が帯に隠れている。短い語にするか、改行をなくして重ならないようにする。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.note.1",
+          "message": "「3年間の投資額は合計4,800万円」は見出しの言い換えで、同じことを繰り返している。「計画の期間」の補足としては、「2026年度から3年間」のような別の情報にする。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.footnote",
+          "message": "補助金の注記まで入っていて、数字3つと見出しに対して情報が多い。4,800万円を目立たせたいなら、この注記は削るか別のページに回す。"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "verdict": "redo",
+      "problems": [
+        {
+          "kind": "text",
+          "slot": "txt.item.1",
+          "message": "「平均45\\n分から」で、数字の45と単位の「分」が改行で離れてしまい、読みにくい。改行の位置を「平均45分から」の前後にするか、文を短くして1行に収める。"
+        },
+        {
+          "kind": "text",
+          "slot": "txt.item.3",
+          "message": "「月あたり1人20時間から」の後で改行されている。1行目と2行目の長さが不揃いで、文も長い。「残業は月20時間から10時間へ」のように短くする。"
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "verdict": "ok",
+      "problems": []
+    }
+  ]
+}
