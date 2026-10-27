@@ -50,6 +50,9 @@ export type RunInfo = {
   model: string;
 };
 
+/** 進み具合の段（画面に出す）。done は検査まで終わったとき */
+export type BuildStep = 'outline' | 'plan' | 'photos' | 'assemble' | 'render' | 'review' | 'redo' | 'check' | 'done';
+
 export type BuildOptions = {
   root: string;
   outDir: string;
@@ -67,6 +70,12 @@ export type BuildOptions = {
   /** 写真を生成する口。null なら生成しない（生成を割り当てた欄は見本の写真のまま） */
   imageGenerator: ImageGenerator | null;
   log?: (m: string) => void;
+  /** 段に入るたびに呼ぶ（画面の進み具合。detail は「2回目・5ページ」など） */
+  progress?: (step: BuildStep, detail?: string) => void;
+  /** 実行ID を決めたときに呼ぶ（画面が作成中の資料を開けるように） */
+  onRunId?: (id: string, dir: string) => void;
+  /** 新しく作るときの実行ID（画面が先に決めて渡す。無ければ原稿の名前と時刻から作る） */
+  runId?: string;
   /** false なら描画しない（描画・見た目の採点・明暗の比を飛ばす。試験用） */
   render?: boolean;
   /** 試験用：指定した段が終わったところで止める */
@@ -93,6 +102,7 @@ export type BuildResult = { dir: string; issues: Issue[]; errors: number; warnin
 
 export async function build(o: BuildOptions): Promise<BuildResult> {
   const log = o.log ?? ((m) => console.log(m));
+  const progress = o.progress ?? (() => {});
   const resolveRepo = (p: string) => (path.isAbsolute(p) ? p : path.join(o.root, p));
 
   // ---- 実行のフォルダ
@@ -105,7 +115,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     log(`続きから再開: ${path.relative(o.root, dir)}`);
   } else {
     if (!o.input || !o.template) throw new Error('--input と --template が要る');
-    const id = newRunId(o.input);
+    const id = o.runId ?? newRunId(o.input);
     dir = path.join(o.outDir, id);
     mkdirSync(dir, { recursive: true });
     copyFileSync(o.input, path.join(dir, 'input.md'));
@@ -135,6 +145,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     };
     writeJson(path.join(dir, 'run.json'), info);
     log(`実行ID: ${id}`);
+    o.onRunId?.(id, dir);
   }
   const cfg = ConfigSchema.parse(readJson(path.join(dir, 'config.json')));
   const catalog = readJson<Catalog>(path.join(dir, 'catalog.json'));
@@ -166,6 +177,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   if (existsSync(outlinePath)) outline = readJson<Outline>(outlinePath);
   else {
     log('A段 原稿の構造化');
+    progress('outline');
     outline = await timed('A段', () => makeOutline(ctx, { catalog, cfg, manuscript, targetSlides: info.targetSlides }));
     writeJson(outlinePath, outline);
   }
@@ -187,6 +199,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   if (existsSync(planPath)) plan = readJson<DeckPlan>(planPath);
   else {
     log('B段 型の選択と流し込み');
+    progress('plan');
     const pages = await timed('B段', () => planDeck(ctx, { catalog, cfg, manuscript, outline, check, store, log: (m) => log(`  ${m}`) }));
     plan = { version: 1, deckTitle: outline.deckTitle, template: { file: catalog.template.file, sha256: catalog.template.sha256 }, pages };
     writeJson(planPath, plan);
@@ -198,6 +211,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   const photosDone = path.join(dir, 'photos/done.json');
   if (!existsSync(photosDone)) {
     log('C段 写真の用意');
+    progress('photos');
     const res = await timed('C段', () =>
       preparePhotos({ plan, catalog, cfg, manuscript, library: info.photos, dir, ai: ctx, generator: o.imageGenerator, log: (m) => log(`  ${m}`) })
     );
@@ -210,6 +224,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   const deckPath = path.join(dir, 'deck.pptx');
   const assemble = () => assembleDeck({ templatePath: path.join(dir, 'template.pptx'), catalog, cfg, plan, photoDir: path.join(dir, 'photos'), outFile: deckPath });
   log('D段 組み立て');
+  progress('assemble');
   let { buffer } = await timed('D段', assemble);
   if (o.stopAfter === 'assemble') return { dir, issues: [], errors: 0, warnings: 0, stoppedAfter: 'assemble' };
 
@@ -221,6 +236,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   const doRender = async () => {
     if (o.render === false) return null;
     log('E段 描画');
+    progress('render');
     const r = await timed('E段 描画', () => renderDeck(buffer, dir, { dpi: cfg.review.dpi }));
     writeJson(path.join(dir, 'render.json'), { engine: r.engine, fonts: r.fonts, pages: r.pages.map((p) => path.relative(dir, p)), ms: r.ms });
     return r;
@@ -233,6 +249,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
       let reviewed = existsSync(rPath) ? readJson<{ pages: number[]; review: PageReview[] }>(rPath) : undefined;
       if (!reviewed) {
         log(`E段 見た目の採点（${round}回目・${targets.length}ページ）`);
+        progress('review', `${round}回目・${targets.length}ページ`);
         const review = await timed('E段 採点', () => reviewPages(ctx, { plan, catalog, cfg, pages: targets, pngs: render!.pages, round }));
         reviewed = { pages: targets, review };
         writeJson(rPath, reviewed);
@@ -242,6 +259,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
       const redo = pagesToRedo(reviewed.review);
       if (!redo.length || round > cfg.review.maxRounds) break;
       log(`E段 作り直し（${round}回目）: p${redo.join(', p')}`);
+      progress('redo', `${redo.length}ページ`);
       const before = await slideHashes(buffer);
       await timed('E段 作り直し', async () => {
         for (const n of redo) {
@@ -281,13 +299,16 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     }
   }
 
+  progress('check');
   const issues = await checkDeck(buffer, plan, catalog, check, cfg.deck.maxSameTypeInRow);
   if (render) {
     issues.push(...(await checkLightDark(render.pages, cfg.lightDarkRatio)));
     issues.push(...renderIssues(render, plan.pages.length));
   }
   issues.push(...reviewIssues(lastReview));
-  return writeReport({ dir, info, plan, issues, timings, root: o.root });
+  const res = writeReport({ dir, info, plan, issues, timings, root: o.root });
+  progress('done');
+  return res;
 }
 
 export function readCalls(dir: string): Array<AiCallRecord & { transport: string }> {

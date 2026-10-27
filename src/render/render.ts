@@ -5,7 +5,8 @@
  * あわせて PDF に入ったフォント（pdffonts）を受け取り、テンプレートの字体が代わりの字体で描かれていないかを確かめる。
  */
 import { spawn } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { issue, type Issue } from '../check/content.js';
 
@@ -39,24 +40,37 @@ export function untar(buf: Buffer): Map<string, Buffer> {
   return out;
 }
 
-const SCRIPT = (dpi: number) =>
+const SCRIPT = (dpi: number, work = '/work') =>
   [
     'set -e',
-    'mkdir -p /work/out',
-    'cat > /work/in.pptx',
-    'HOME=/tmp soffice --headless --convert-to pdf --outdir /work /work/in.pptx > /work/log 2>&1 || true',
-    '[ -f /work/in.pdf ] || { cat /work/log >&2; exit 3; }',
-    'cp /work/in.pdf /work/out/deck.pdf',
-    `pdftoppm -r ${dpi} -png /work/in.pdf /work/out/page`,
-    'pdffonts /work/in.pdf > /work/out/fonts.txt',
-    'HOME=/tmp soffice --version > /work/out/version.txt 2>/dev/null || true',
-    'cd /work/out && tar -cf - .',
+    `mkdir -p ${work}/out`,
+    `cat > ${work}/in.pptx`,
+    `HOME=${work === '/work' ? '/tmp' : work} soffice --headless --convert-to pdf --outdir ${work} ${work}/in.pptx > ${work}/log 2>&1 || true`,
+    `[ -f ${work}/in.pdf ] || { cat ${work}/log >&2; exit 3; }`,
+    `cp ${work}/in.pdf ${work}/out/deck.pdf`,
+    `pdftoppm -r ${dpi} -png ${work}/in.pdf ${work}/out/page`,
+    `pdffonts ${work}/in.pdf > ${work}/out/fonts.txt`,
+    `HOME=${work === '/work' ? '/tmp' : work} soffice --version > ${work}/out/version.txt 2>/dev/null || true`,
+    `cd ${work}/out && tar -cf - .`,
   ].join(' && ');
+
+/**
+ * 描画の場所。既定は Docker のイメージ（検証機）。アプリの箱の中では LibreOffice がそのまま入っているので
+ * SLIDEGEN_RENDER=local で、その場の soffice を使う（箱の中で Docker は動かせない）。
+ */
+function renderCommand(dpi: number, image: string): { cmd: string; args: string[]; cleanup?: () => void } {
+  if (process.env.SLIDEGEN_RENDER === 'local') {
+    const work = mkdtempSync(path.join(os.tmpdir(), 'slidegen-render-'));
+    return { cmd: 'sh', args: ['-c', SCRIPT(dpi, work)], cleanup: () => rmSync(work, { recursive: true, force: true }) };
+  }
+  return { cmd: 'docker', args: ['run', '-i', '--rm', image, 'sh', '-c', SCRIPT(dpi)] };
+}
 
 export function renderDeck(pptx: Buffer, outDir: string, opts: { dpi?: number; image?: string } = {}): Promise<RenderResult> {
   const started = Date.now();
   return new Promise((resolve, reject) => {
-    const child = spawn('docker', ['run', '-i', '--rm', opts.image ?? RENDER_IMAGE, 'sh', '-c', SCRIPT(opts.dpi ?? 96)], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const run = renderCommand(opts.dpi ?? 96, opts.image ?? RENDER_IMAGE);
+    const child = spawn(run.cmd, run.args, { stdio: ['pipe', 'pipe', 'pipe'] });
     const chunks: Buffer[] = [];
     let err = '';
     child.stdout.on('data', (d: Buffer) => chunks.push(d));
@@ -65,6 +79,7 @@ export function renderDeck(pptx: Buffer, outDir: string, opts: { dpi?: number; i
     const timer = setTimeout(() => child.kill('SIGKILL'), 600_000);
     child.on('close', (code) => {
       clearTimeout(timer);
+      run.cleanup?.();
       if (code !== 0) return reject(new Error(`描画に失敗した（終了 ${code}）: ${err.slice(0, 500)}`));
       const files = untar(Buffer.concat(chunks));
       const pdf = files.get('deck.pdf');

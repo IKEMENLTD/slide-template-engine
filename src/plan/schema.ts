@@ -70,6 +70,8 @@ export type DeckPlan = {
       revertedByReview?: number;
       /** 写真の欄 → 使う写真（リポジトリからの相対パス）。C段で入る */
       photoFiles?: Record<string, string>;
+      /** 写真の欄 → 加工する前の写真（実行のフォルダからの相対パス）。仕上げで人が替えた・形を替えたときに入る */
+      photoSources?: Record<string, string>;
     }
   >;
 };

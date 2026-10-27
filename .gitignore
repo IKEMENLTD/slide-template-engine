@@ -11,3 +11,7 @@ out/*
 !out/phase4/
 !out/phase5/
 out/phase0/automizer/photos/
+
+# アプリの資料・設定・鍵（版管理しない）
+data/
+web/dist/
