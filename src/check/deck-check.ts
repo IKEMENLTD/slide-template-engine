@@ -78,7 +78,9 @@ export async function checkDeck(buf: Buffer, plan: DeckPlan, catalog: Catalog, c
     // 写真の切り抜きで、顔を見えている部分に入れきれなかった欄（C段・仕上げで写真を置いたときに記録）
     for (const [name, fit] of Object.entries(p.photoFit ?? {}))
       if (fit.faceVisible !== null && fit.faceVisible < minFaceVisible && p.photoFiles?.[name])
-        out.push(issue('FACE_COVERED', `${name} の写真で、人の顔の${Math.round((1 - fit.faceVisible) * 10)}割ほどが図形に隠れている`, { page: i + 1, slot: name }));
+        out.push(
+          issue('FACE_COVERED', `${name}: ${fit.faceVisible < 0.15 ? '人の顔がほとんど図形に隠れている' : `人の顔の約${Math.round((1 - fit.faceVisible) * 10)}割が図形に隠れている`}`, { page: i + 1, slot: name })
+        );
   });
   out.push(...checkTypeRuns(plan.pages.map((p) => p.type), maxSameTypeInRow));
   return out;
