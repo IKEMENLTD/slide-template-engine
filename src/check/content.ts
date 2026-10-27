@@ -19,7 +19,9 @@ export type IssueCode =
   /** 欄の使い方の決まり（単位の欄に数字を入れない など）。B段で書き直させ、残れば注意 */
   | 'SLOT_RULE'
   /** 欄の字体に無い文字（描画で別の字体に置き換わる） */
-  | 'GLYPH_MISSING';
+  | 'GLYPH_MISSING'
+  /** 写真の人の顔が、上に重なる図形（色ベタ）に隠れている */
+  | 'FACE_COVERED';
 
 export type Issue = { code: IssueCode; level: IssueLevel; page?: number; slot?: string; message: string };
 
@@ -38,6 +40,7 @@ export const LEVEL: Record<IssueCode, IssueLevel> = {
   PPTX_REPAIR: 'error',
   SLIDE_COUNT: 'warning',
   SLOT_RULE: 'warning',
+  FACE_COVERED: 'warning',
   GLYPH_MISSING: 'error',
 };
 

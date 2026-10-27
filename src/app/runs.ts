@@ -10,7 +10,7 @@ import type { Issue } from '../check/content.js';
 import type { DeckPlan } from '../plan/schema.js';
 import { costUsd } from '../ai/models.js';
 import { build, readCalls, type BuildStep, type RunInfo } from '../run/build.js';
-import { AppError, aiTransport, imageGenerator, readSettings, ROOT, RUNS } from './settings.js';
+import { AppError, aiTransport, CACHE, imageGenerator, readSettings, ROOT, RUNS } from './settings.js';
 import { getTemplate } from './templates.js';
 import { ISSUE_WORDS, LEVEL_WORDS, plainText, slotLabel, STEP_ORDER, STEP_WORDS } from './words.js';
 
@@ -151,6 +151,7 @@ async function runOne(id: string) {
     await build({
       root: ROOT,
       outDir: RUNS,
+      cacheDir: CACHE,
       runId: id,
       ...(resume
         ? { resume: dir }

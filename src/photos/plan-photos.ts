@@ -6,9 +6,11 @@
  *    同じページで同じ写真を使わない・1枚を使う回数・生成する枚数の上限はコードで確かめる。
  * 2. 生成：足りない分を1枚ずつ作る。2枚目からは、それまでに作った写真を見本として渡し、人物・服装・場所をそろえる。
  *    作った写真はすぐ保存する（落ちても、作った分は払い直さない）。
- * 3. 加工：枠の縦横比に切り抜く（人の顔など目立つところを残す）→ モノクロ → 設定に応じて乗算（prepare.ts）。
+ * 3. 加工：枠の縦横比に切り抜く → モノクロ → 設定に応じて乗算（prepare.ts）。
+ *    写真の上に図形が重なる欄では、顔が「見えている部分」に入る位置・拡大・（生成写真だけ）左右反転を選ぶ。
+ *    それでも顔が隠れる生成写真は、人の位置を指定して作り直す（photos.maxRegenerate 枚まで）。
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 import { z } from 'zod';
@@ -18,7 +20,8 @@ import { callForJson, type AiContext } from '../ai/call-json.js';
 import { manuscriptBlock } from '../plan/prompts.js';
 import type { DeckPlan } from '../plan/schema.js';
 import { photoPrompt, sizeFor, type ImageGenerator } from './openai-image.js';
-import { loadPhotoLibrary, processPhoto, resolveColor, type PhotoEntry } from './prepare.js';
+import { loadPhotoLibrary, processPhoto, resolveColor, type PhotoEntry, type PhotoFit } from './prepare.js';
+import { openAreaHint, type VisibilityMap } from './visibility.js';
 
 export type PhotoRequest = { id: string; page: number; slot: string; want: string; aspect: number };
 
@@ -49,6 +52,7 @@ export type PhotoRecord = {
 export type GeneratedRecord = { key: string; file: string; scene: string; size: string; costUsd: number; ms: number; withReferences: number; usage: unknown };
 
 export const ASSIGN_MAX_OUTPUT_TOKENS = 8000;
+export type { PhotoFit };
 
 export function collectRequests(plan: DeckPlan, catalog: Catalog): PhotoRequest[] {
   const out: PhotoRequest[] = [];
@@ -113,6 +117,8 @@ export type PhotoStageArgs = {
   ai: AiContext;
   /** 無ければ生成しない（生成の割り当ては見本の写真のままにする） */
   generator: ImageGenerator | null;
+  /** 欄ごとの「図形に隠れず見えている部分」（visibility.ts）。無ければ顔を枠に残すことだけを考える */
+  visibility?: VisibilityMap | null;
   log?: (m: string) => void;
 };
 
@@ -158,10 +164,12 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
       const first = reqs.find((r) => byId.get(r.id)!.use === key)!;
       const scene = byId.get(first.id)!.scene ?? first.want;
       const size = sizeFor(first.aspect);
+      const firstPage = a.plan.pages[first.page - 1];
+      const grid = a.visibility?.[firstPage.type]?.[first.slot];
       // 見本は、最初に作った写真と直前に作った写真（人物・服装・場所をそろえる。10章）
       const refs = [...new Set([generated[0], generated[generated.length - 1]].filter(Boolean).map((g) => g!.file))].map((f) => readFileSync(path.join(photoDir, f)));
       log(`C段 写真の生成 ${key}（${size}・見本 ${refs.length}枚）: ${scene}`);
-      const img = await a.generator({ prompt: photoPrompt(assign.cast, scene, refs.length > 0), size, references: refs });
+      const img = await a.generator({ prompt: photoPrompt(assign.cast, scene, refs.length > 0, grid ? openAreaHint(grid) : null), size, references: refs });
       const file = `generated/${key.replace(':', '-')}.jpg`;
       writeFileSync(path.join(photoDir, file), img.jpeg);
       generated.push({ key, file, scene, size, costUsd: img.costUsd, ms: img.ms, withReferences: img.withReferences, usage: img.usage });
@@ -171,6 +179,7 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
 
   // 3. 加工して設計図に書く
   const records: PhotoRecord[] = [];
+  let regenerated = generated.filter((g) => /-fix\d+$/.test(g.key)).length;
   for (const r of reqs) {
     const x = byId.get(r.id)!;
     const page = a.plan.pages[r.page - 1];
@@ -196,10 +205,37 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
       records.push({ id: r.id, page: r.page, slot: r.slot, source, file: null });
       continue;
     }
-    const proc = a.catalog.types.find((t) => t.key === page.type)!.slots.find((s) => s.name === r.slot)!.process ?? { mono: true, multiply: null };
+    const slot = a.catalog.types.find((t) => t.key === page.type)!.slots.find((s) => s.name === r.slot)!;
+    const proc = slot.process ?? { mono: true, multiply: null };
     const name = `p${String(r.page).padStart(2, '0')}-${r.slot.replace(/[^\w.-]/g, '_')}.jpg`;
-    await processPhoto(src, path.join(photoDir, name), r.aspect, proc, resolveColor(proc.multiply, a.catalog.theme.colors));
+    const grid = a.visibility?.[page.type]?.[r.slot] ?? null;
+    // 描いたときに 96dpi を下回るほどは拡大しない（欄の幅は pt）
+    const fitOpts = { grid, allowFlip: source === 'generated', minCropWidth: (slot.box.w * 96) / 72 };
+    const color = resolveColor(proc.multiply, a.catalog.theme.colors);
+    let { fit } = await processPhoto(src, path.join(photoDir, name), r.aspect, proc, color, 1600, fitOpts);
+    // 生成した写真で顔が隠れるなら、人の位置を指定して作り直す（良くなったときだけ差し替える）
+    if (source === 'generated' && grid && a.generator && fit.faceVisible !== null && fit.faceVisible < a.cfg.photos.minFaceVisible && regenerated < a.cfg.photos.maxRegenerate) {
+      regenerated++;
+      const base = generated.find((g) => g.key === x.use)!;
+      const key = `${x.use}-fix${regenerated}`;
+      const hint = openAreaHint(grid);
+      log(`C段 写真の作り直し ${key}（${r.id}・顔の見えている割合 ${fit.faceVisible}）`);
+      const refs = [readFileSync(path.join(photoDir, base.file))];
+      const img = await a.generator({ prompt: photoPrompt(assign.cast, base.scene, true, hint), size: base.size, references: refs });
+      const file = `generated/${key.replace(':', '-')}.jpg`;
+      writeFileSync(path.join(photoDir, file), img.jpeg);
+      generated.push({ key, file, scene: base.scene, size: base.size, costUsd: img.costUsd, ms: img.ms, withReferences: img.withReferences, usage: img.usage });
+      writeFileSync(genPath, JSON.stringify(generated, null, 2) + '\n');
+      const tryName = name.replace(/\.jpg$/, '-fix.jpg');
+      const retry = await processPhoto(path.join(photoDir, file), path.join(photoDir, tryName), r.aspect, proc, color, 1600, fitOpts);
+      if ((retry.fit.faceVisible ?? 1) > fit.faceVisible) {
+        renameSync(path.join(photoDir, tryName), path.join(photoDir, name));
+        fit = retry.fit;
+        x.use = key;
+      } else rmSync(path.join(photoDir, tryName), { force: true });
+    }
     page.photoFiles[r.slot] = name;
+    (page.photoFit ??= {})[r.slot] = fit;
     records.push({ id: r.id, page: r.page, slot: r.slot, source, file: x.use, ...(x.scene ? { scene: x.scene } : {}) });
   }
 

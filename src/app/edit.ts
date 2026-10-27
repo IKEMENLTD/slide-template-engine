@@ -17,12 +17,13 @@ import { fitSlot } from '../fit/fit-slot.js';
 import { imageSlots, textSlots } from '../plan/describe.js';
 import { fixPage, type PlanArgs } from '../plan/plan.js';
 import type { DeckPlan, Outline } from '../plan/schema.js';
-import { processPhoto, resolveColor } from '../photos/prepare.js';
+import { processPhoto, resolveColor, type PhotoFit } from '../photos/prepare.js';
+import { ensureVisibility, type VisibilityMap } from '../photos/visibility.js';
 import type { PhotoRecord } from '../photos/plan-photos.js';
 import { renderDeck } from '../render/render.js';
 import { recheck } from '../run/build.js';
 import { checkBudget, editedPages, presentIssues, runDir, writeJson } from './runs.js';
-import { AppError, aiTransport, ROOT } from './settings.js';
+import { AppError, aiTransport, CACHE, ROOT } from './settings.js';
 import { slotLabel } from './words.js';
 
 type Page = DeckPlan['pages'][number];
@@ -242,7 +243,8 @@ export function aiRevise(id: string, n: number, instruction: string) {
       forced: [issue('VISUAL_REVIEW', `使う人からの依頼：${instruction.trim()}`, { page: n })],
     });
     snapshot(c, `${n}ページ目をAIに直してもらった（${instruction.trim().slice(0, 30)}）`, n);
-    c.plan.pages[n - 1] = { ...fixed, photoFiles: p.photoFiles, rewrites: p.rewrites + fixed.rewrites };
+    // 文言だけを直す（型は替えない）ので、写真・元の写真・切り抜きの記録は引き継ぐ
+    c.plan.pages[n - 1] = { ...fixed, photoFiles: p.photoFiles, photoSources: p.photoSources, photoFit: p.photoFit, rewrites: p.rewrites + fixed.rewrites };
     await commit(c, [n]);
     return result(c, n);
   });
@@ -269,14 +271,17 @@ export function changeType(id: string, n: number, typeKey: string) {
     const sources = imageSlots(from).map((s) => photoSource(c, n, s.name)).filter((x): x is string => !!x);
     const photoFiles: Record<string, string> = {};
     const photoSources: Record<string, string> = {};
+    const photoFit: Record<string, PhotoFit> = {};
     for (const [i, s] of imageSlots(to).entries()) {
       const src = sources[i % Math.max(1, sources.length)];
       if (!src) continue;
-      photoFiles[s.name] = await placePhoto(c, n, to, s.name, src);
+      const placed = await placePhoto(c, n, to, s.name, src);
+      photoFiles[s.name] = placed.name;
+      photoFit[s.name] = placed.fit;
       photoSources[s.name] = path.relative(c.dir, src);
     }
     snapshot(c, `${n}ページ目の形を「${to.label}」に替えた`, n);
-    c.plan.pages[n - 1] = { ...fixed, photoFiles, photoSources, retypedFrom: from.key };
+    c.plan.pages[n - 1] = { ...fixed, photoFiles, photoSources, photoFit, retypedFrom: from.key };
     await commit(c, [n]);
     return result(c, n);
   });
@@ -301,14 +306,22 @@ function photoSource(c: Ctx, n: number, slot: string): string | null {
   return lib ? path.join(lib, rec.file) : null;
 }
 
-/** 写真を枠に合わせて加工し、photos/ に置く（名前に版を付けて、前の写真を上書きしない＝戻せる） */
-async function placePhoto(c: Ctx, n: number, t: CatalogType, slot: string, src: string): Promise<string> {
+/** 欄の「図形に隠れず見えている部分」。測れなければ null（顔を枠に残すことだけ考えて切り抜く） */
+async function visibilityOf(c: Ctx): Promise<VisibilityMap | null> {
+  return ensureVisibility(path.join(c.dir, 'template.pptx'), c.catalog, CACHE).catch(() => null);
+}
+
+/** 写真を枠に合わせて加工し、photos/ に置く（名前に版を付けて、前の写真を上書きしない＝戻せる）。顔が図形に隠れない切り抜きを選ぶ */
+async function placePhoto(c: Ctx, n: number, t: CatalogType, slot: string, src: string): Promise<{ name: string; fit: PhotoFit }> {
   const s = t.slots.find((x) => x.name === slot && x.kind === 'img');
   if (!s?.aspect) throw new AppError('その写真の欄はありません');
   const proc = s.process ?? { mono: true, multiply: null };
   const name = `p${pad(n)}-${slot.replace(/[^\w.-]/g, '_')}-${Date.now()}.jpg`;
-  await processPhoto(src, path.join(c.dir, 'photos', name), s.aspect, proc, resolveColor(proc.multiply, c.catalog.theme.colors));
-  return name;
+  const grid = (await visibilityOf(c))?.[t.key]?.[slot] ?? null;
+  // 左右の反転は、この資料のために生成した写真だけ（支給・人が選んだ写真は向きを変えない）
+  const allowFlip = path.relative(path.join(c.dir, 'photos', 'generated'), src).split(path.sep)[0] !== '..';
+  const { fit } = await processPhoto(src, path.join(c.dir, 'photos', name), s.aspect, proc, resolveColor(proc.multiply, c.catalog.theme.colors), 1600, { grid, allowFlip, minCropWidth: (s.box.w * 96) / 72 });
+  return { name, fit };
 }
 
 export function replacePhoto(id: string, n: number, slot: string, upload: { name: string; data: Buffer }) {
@@ -322,16 +335,21 @@ export function replacePhoto(id: string, n: number, slot: string, upload: { name
     mkdirSync(up, { recursive: true });
     const src = path.join(up, `edit-p${pad(n)}-${Date.now()}${ext}`);
     writeFileSync(src, upload.data);
-    let name: string;
+    let placed: { name: string; fit: PhotoFit };
     try {
-      name = await placePhoto(c, n, t, slot, src);
+      placed = await placePhoto(c, n, t, slot, src);
     } catch (e) {
       rmSync(src, { force: true });
       if (e instanceof AppError) throw e;
       throw new AppError('この写真は読み込めませんでした。別の写真を選んでください');
     }
     snapshot(c, `${n}ページ目の写真（${slotLabel(slot)}）を替えた`, n);
-    c.plan.pages[n - 1] = { ...p, photoFiles: { ...p.photoFiles, [slot]: name }, photoSources: { ...p.photoSources, [slot]: path.relative(c.dir, src) } };
+    c.plan.pages[n - 1] = {
+      ...p,
+      photoFiles: { ...p.photoFiles, [slot]: placed.name },
+      photoSources: { ...p.photoSources, [slot]: path.relative(c.dir, src) },
+      photoFit: { ...p.photoFit, [slot]: placed.fit },
+    };
     await commit(c, [n]);
     return result(c, n);
   });

@@ -65,7 +65,7 @@ export async function readDeckTexts(buf: Buffer | Uint8Array): Promise<Array<Rec
   return out;
 }
 
-export async function checkDeck(buf: Buffer, plan: DeckPlan, catalog: Catalog, ctx: SlotCheckContext, maxSameTypeInRow: number): Promise<Issue[]> {
+export async function checkDeck(buf: Buffer, plan: DeckPlan, catalog: Catalog, ctx: SlotCheckContext, maxSameTypeInRow: number, minFaceVisible = 0.6): Promise<Issue[]> {
   const out: Issue[] = [];
   for (const s of await checkPptxStructure(buf)) out.push(issue('PPTX_REPAIR', `${s.code} ${s.part}: ${s.detail}`));
   const slides = await readDeckTexts(buf);
@@ -75,6 +75,10 @@ export async function checkDeck(buf: Buffer, plan: DeckPlan, catalog: Catalog, c
     if (!t || !slides[i]) return;
     out.push(...checkPage(i + 1, t, slides[i], ctx));
     for (const name of p.trimmed) out.push(issue('TRIMMED', `${name} は欄に入らず、最後の手段で丸めた: 「${slides[i][name] ?? ''}」`, { page: i + 1, slot: name }));
+    // 写真の切り抜きで、顔を見えている部分に入れきれなかった欄（C段・仕上げで写真を置いたときに記録）
+    for (const [name, fit] of Object.entries(p.photoFit ?? {}))
+      if (fit.faceVisible !== null && fit.faceVisible < minFaceVisible && p.photoFiles?.[name])
+        out.push(issue('FACE_COVERED', `${name} の写真で、人の顔の${Math.round((1 - fit.faceVisible) * 10)}割ほどが図形に隠れている`, { page: i + 1, slot: name }));
   });
   out.push(...checkTypeRuns(plan.pages.map((p) => p.type), maxSameTypeInRow));
   return out;

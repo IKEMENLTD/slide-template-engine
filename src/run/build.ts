@@ -37,6 +37,7 @@ import { makeOutline } from '../plan/outline.js';
 import { fixPage, planDeck, type PlanStore } from '../plan/plan.js';
 import type { DeckPlan, Outline } from '../plan/schema.js';
 import { preparePhotos, type GeneratedRecord, type PhotoRecord } from '../photos/plan-photos.js';
+import { ensureVisibility } from '../photos/visibility.js';
 import type { ImageGenerator } from '../photos/openai-image.js';
 
 export type RunInfo = {
@@ -78,6 +79,8 @@ export type BuildOptions = {
   runId?: string;
   /** false なら描画しない（描画・見た目の採点・明暗の比を飛ばす。試験用） */
   render?: boolean;
+  /** テンプレートごとに測った値（写真の欄の見えている部分）を保存する場所。無ければ <root>/.cache */
+  cacheDir?: string;
   /** 試験用：指定した段が終わったところで止める */
   stopAfter?: 'outline' | 'plan' | 'photos' | 'assemble';
 };
@@ -212,8 +215,16 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   if (!existsSync(photosDone)) {
     log('C段 写真の用意');
     progress('photos');
+    // 写真の上に図形が重なる欄の「見えている部分」を測る（テンプレートごとに1回だけ描画する）。測れなくても写真は用意する
+    const visibility =
+      o.render === false
+        ? null
+        : await ensureVisibility(path.join(dir, 'template.pptx'), catalog, o.cacheDir ?? path.join(o.root, '.cache')).catch((e: Error) => {
+            log(`  写真の欄の見えている部分を測れなかった（顔の位置は考えずに切り抜く）: ${e.message.split('\n')[0]}`);
+            return null;
+          });
     const res = await timed('C段', () =>
-      preparePhotos({ plan, catalog, cfg, manuscript, library: info.photos, dir, ai: ctx, generator: o.imageGenerator, log: (m) => log(`  ${m}`) })
+      preparePhotos({ plan, catalog, cfg, manuscript, library: info.photos, dir, ai: ctx, generator: o.imageGenerator, visibility, log: (m) => log(`  ${m}`) })
     );
     writeJson(planPath, plan);
     writeJson(photosDone, { at: new Date().toISOString(), records: res.records });
@@ -283,7 +294,8 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
             plan.pages[n - 1] = { ...cur, revertedByReview: (cur.revertedByReview ?? 0) + 1 };
             continue;
           }
-          plan.pages[n - 1] = { ...fixed, rewrites: cur.rewrites + fixed.rewrites, photoFiles: cur.photoFiles, revisedByReview: (cur.revisedByReview ?? 0) + 1 };
+          // 文言だけの作り直し（型は替えない）なので、写真とその切り抜きの記録はそのまま引き継ぐ
+          plan.pages[n - 1] = { ...fixed, rewrites: cur.rewrites + fixed.rewrites, photoFiles: cur.photoFiles, photoSources: cur.photoSources, photoFit: cur.photoFit, revisedByReview: (cur.revisedByReview ?? 0) + 1 };
         }
       });
       writeJson(planPath, plan);
@@ -300,7 +312,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   }
 
   progress('check');
-  const issues = await checkDeck(buffer, plan, catalog, check, cfg.deck.maxSameTypeInRow);
+  const issues = await checkDeck(buffer, plan, catalog, check, cfg.deck.maxSameTypeInRow, cfg.photos.minFaceVisible);
   if (render) {
     issues.push(...(await checkLightDark(render.pages, cfg.lightDarkRatio)));
     issues.push(...renderIssues(render, plan.pages.length));
@@ -436,7 +448,7 @@ export async function recheck(dirArg: string, root: string): Promise<BuildResult
     nameIgnoreSlots: cfg.checks.nameIgnoreSlots,
     unitSlots: cfg.checks.unitSlots,
     resolveFile: (p) => (path.isAbsolute(p) ? p : path.join(root, p)),
-  }, cfg.deck.maxSameTypeInRow);
+  }, cfg.deck.maxSameTypeInRow, cfg.photos.minFaceVisible);
   // 描画と見た目の採点は、保存してある結果を読む（check は AI も描画も呼ばない）
   const pngs = existsSync(path.join(dir, 'render.json')) ? readJson<{ pages: string[] }>(path.join(dir, 'render.json')).pages.map((p) => path.join(dir, p)) : [];
   if (pngs.length) issues.push(...(await checkLightDark(pngs, cfg.lightDarkRatio)));

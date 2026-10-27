@@ -67,6 +67,7 @@ export const ISSUE_WORDS: Record<IssueCode, IssueWords> = {
   PPTX_REPAIR: { title: 'ファイルの作りか字体に問題があります', action: '管理者に連絡してください（テンプレートか字体の設定の問題です）。' },
   SLIDE_COUNT: { title: 'ページ数が想定と違います', action: '管理者に連絡してください。' },
   SLOT_RULE: { title: '欄の使い方が決まりと違います', action: '単位の欄には単位だけ（例：%・万円）を入れ、説明は補足の欄に書いてください。' },
+  FACE_COVERED: { title: '人の顔が図形に隠れています', action: '「写真」で顔の位置が違う写真に替えるか、「形を替える」で写真の見え方が違う形を選んでください。' },
   GLYPH_MISSING: { title: 'この字体では表示できない記号があります', action: '別の書き方にしてください（例：「→」は「から」「へ」）。' },
 };
 

@@ -65,9 +65,13 @@ export const ConfigSchema = z
         maxGenerate: z.number().int().nonnegative(),
         model: z.string(),
         quality: z.enum(['low', 'medium', 'high']),
+        /** 写真の欄で、人の顔がこの割合より図形に隠れていたら注意（FACE_COVERED）。生成した写真なら作り直す */
+        minFaceVisible: z.number().min(0).max(1).default(0.6),
+        /** 顔が隠れる生成写真を、構図を指定して作り直す回数の上限（1資料あたり） */
+        maxRegenerate: z.number().int().nonnegative().default(3),
       })
       .strict()
-      .default({ maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium' }),
+      .default({ maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium', minFaceVisible: 0.6, maxRegenerate: 3 }),
     /** 見た目の採点と作り直し（11章 VISUAL_REVIEW・7章E） */
     review: z
       .object({
@@ -146,7 +150,7 @@ export function scaffoldConfig(opts: {
       lightDarkRatio: { enabled: false, target: 1.5, tolerance: 0.3, darkBelow: 0.5 },
       ai: { model: 'claude-sonnet-5-5', effort: 'medium', refusalFallback: true, maxRewrites: 2, callBudgetMs: 600000 },
       phraseBreak: ['txt.headline', 'txt.subtitle', 'txt.*.title', 'txt.*.lead', 'txt.*.main', 'txt.*.caption', 'txt.item.*', 'txt.note.*'],
-      photos: { maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium' },
+      photos: { maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium', minFaceVisible: 0.6, maxRegenerate: 3 },
       review: { enabled: true, maxRounds: 2, pagesPerCall: 5, dpi: 96 },
       checks: { nameIgnoreSlots: ['txt.eyebrow'], unitSlots: ['txt.unit.*'] },
     },

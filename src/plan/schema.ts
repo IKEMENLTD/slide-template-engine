@@ -3,6 +3,7 @@
  * ★色・位置・大きさ・字体の欄は作らない（17章「AI に色・位置・大きさ・フォントを決めさせない」）。
  */
 import { z } from 'zod';
+import type { PhotoFit } from '../photos/prepare.js';
 
 const str = z.string().trim();
 
@@ -72,6 +73,8 @@ export type DeckPlan = {
       photoFiles?: Record<string, string>;
       /** 写真の欄 → 加工する前の写真（実行のフォルダからの相対パス）。仕上げで人が替えた・形を替えたときに入る */
       photoSources?: Record<string, string>;
+      /** 写真の欄 → 切り抜きの結果（顔の数・見えている割合・反転）。FACE_COVERED の検査に使う */
+      photoFit?: Record<string, PhotoFit>;
     }
   >;
 };

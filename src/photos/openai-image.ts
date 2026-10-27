@@ -93,7 +93,7 @@ export function openAiImageGenerator(opts: { model: string; quality: string; api
  * 写真のプロンプトの決まり（10章の必須事項。AirLog の design-system.ts の写真の作法から移植）。
  * 文字を入れない・人物は日本人・業務を実際にしている場面・服装と場所を資料全体でそろえる・自然光・背景を消さない。
  */
-export function photoPrompt(cast: string, scene: string, withReferences: boolean): string {
+export function photoPrompt(cast: string, scene: string, withReferences: boolean, composition?: string | null): string {
   return [
     'Photorealistic documentary photograph for a Japanese corporate presentation.',
     'Absolutely no text, letters, numbers, logos, signage, labels or writing anywhere in the image, including on screens, papers, walls, machines and clothing.',
@@ -102,6 +102,7 @@ export function photoPrompt(cast: string, scene: string, withReferences: boolean
     `Cast and place, identical in every photo of this deck: ${cast}`,
     withReferences ? 'Use the reference images only to keep the same people, the same clothing and the same place. Make a new scene with a different camera angle and composition; do not copy the reference composition.' : '',
     `Scene: ${scene}`,
+    composition ?? '',
   ]
     .filter(Boolean)
     .join(' ');
