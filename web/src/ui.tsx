@@ -23,11 +23,12 @@ export function go(to: string) {
   dispatchEvent(new Event('app:navigate'));
 }
 
-export function Link({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
+export function Link({ to, className, title, children }: { to: string; className?: string; title?: string; children: ReactNode }) {
   return (
     <a
       href={to}
       className={className}
+      title={title}
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         e.preventDefault();

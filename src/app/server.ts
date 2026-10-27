@@ -240,7 +240,7 @@ function png(c: Context, f: string) {
   return c.body(readFileSync(f), 200, { 'content-type': 'image/png', 'cache-control': 'private, max-age=31536000, immutable' });
 }
 
-const TYPES: Record<string, string> = { '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
+const TYPES: Record<string, string> = { '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 app.get('*', (c) => {
   const p = decodeURIComponent(new URL(c.req.url).pathname);
   if (p.startsWith('/api/')) return c.json({ error: 'ありません' }, 404);

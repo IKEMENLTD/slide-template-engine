@@ -1,3 +1,4 @@
+import { IconAlert, IconBack, IconDoc, IconDocCheck, IconDownload, IconNext, IconNote, IconShield, IconUndo } from './icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api, type Fit, type Issue, type PageView, type RunView, type TypeChoice } from './api';
 import { Link, useElapsed, useToast } from './ui';
@@ -172,27 +173,46 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
   return (
     <div className="wrap-wide">
       <div className="ed-head">
-        <Link to="/" className="btn btn-ghost btn-sm">
-          ← 資料
-        </Link>
-        <div style={{ flex: 1, minWidth: 220 }}>
+        <div style={{ flex: 1, minWidth: 260 }}>
+          <Link to="/" className="backlink">
+            <IconBack />
+            資料
+          </Link>
           <h1>{run.title}</h1>
-          <div className="row row-wrap small muted">
-            <span>{run.slides}枚</span>
-            <span>{run.template}</span>
-            <span>費用 約{Math.max(1, run.costJpy).toLocaleString()}円</span>
-            {run.errors ? <span className="badge badge-err">直すところ {run.errors}</span> : <span className="badge badge-ok">止める指摘なし</span>}
-            {run.warnings ? <span className="badge badge-warn">確認 {run.warnings}</span> : null}
+          <div className="ed-meta">
+            <span>
+              {run.slides}枚・{run.template}・費用 約{Math.max(1, run.costJpy).toLocaleString()}円
+            </span>
+            {run.errors ? (
+              <span className="err">
+                <IconAlert />
+                直すところ {run.errors}
+              </span>
+            ) : (
+              <span className="ok">
+                <IconShield />
+                止める指摘なし
+              </span>
+            )}
+            {run.warnings ? (
+              <span className="warn">
+                <IconNote />
+                確認 {run.warnings}
+              </span>
+            ) : null}
           </div>
         </div>
-        <div className="row row-wrap">
+        <div className="actions">
           <button type="button" className="btn" disabled={!run.canUndo || !!busy} onClick={undo} title="いちばん最後の直しを取り消します">
-            ↶ 元に戻す
+            <IconUndo />
+            元に戻す
           </button>
           <button type="button" className="btn" disabled={!!busy} onClick={downloadPdf}>
+            <IconDoc />
             PDF
           </button>
           <a className="btn btn-primary" href={`/api/runs/${run.id}/download.pptx`} aria-disabled={!!busy}>
+            <IconDownload />
             PowerPoint をダウンロード
           </a>
         </div>
@@ -232,19 +252,23 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
             ))}
           </nav>
 
-          <div className="stack">
+          <div className="ed-center">
             <div className="stage">
-              <div className="stage-img">{page.image && <img src={page.image} alt={`${cur}ページ目`} />}</div>
+              <div className="stage-wrap">
+                <div className="stage-img">{page.image && <img src={page.image} alt={`${cur}ページ目`} />}</div>
+              </div>
               {busy && <BusyCover busy={busy} elapsed={elapsed} />}
               <div className="stage-nav">
-                <button type="button" className="btn btn-sm" disabled={cur <= 1} onClick={() => move(cur - 1)}>
-                  ← 前へ
+                <button type="button" className="btn" disabled={cur <= 1} onClick={() => move(cur - 1)}>
+                  <IconBack />
+                  前へ
                 </button>
-                <span className="small muted">
+                <span>
                   {cur} / {pages.length}ページ・{page.typeLabel}
                 </span>
-                <button type="button" className="btn btn-sm" disabled={cur >= pages.length} onClick={() => move(cur + 1)}>
-                  次へ →
+                <button type="button" className="btn btn-primary" disabled={cur >= pages.length} onClick={() => move(cur + 1)}>
+                  次へ
+                  <IconNext />
                 </button>
               </div>
             </div>
@@ -253,7 +277,12 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
               {shownIssues.map((i, k) => (
                 <IssueCard key={k} i={i} />
               ))}
-              {!shownIssues.length && <div className="notice" style={{ background: 'var(--ok-soft)', color: 'var(--ok)' }}>このページに気になるところはありません。</div>}
+              {!shownIssues.length && (
+                <div className="notice notice-ok">
+                  <IconDocCheck />
+                  このページに気になるところはありません。
+                </div>
+              )}
               {deckIssues.map((i, k) => (
                 <IssueCard key={`d${k}`} i={i} />
               ))}

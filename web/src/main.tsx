@@ -5,6 +5,7 @@ import { Home } from './Home';
 import { NewRun } from './NewRun';
 import { RunPage } from './RunPage';
 import { Settings } from './Settings';
+import { IconFolder, IconGear, IconPlus } from './icons';
 import { Link, ToastHost, usePath } from './ui';
 import './styles.css';
 
@@ -23,36 +24,44 @@ function App() {
 
   const on = (p: string) => (p === '/' ? path === '/' || !!run : path === p) ? 'on' : '';
   return (
-    <>
-      <header className="topbar">
-        <div className="topbar-in">
-          <Link to="/" className="brand">
-            <span className="brand-mark" />
-            <span>スライド自動生成</span>
+    <div className="shell">
+      <aside className="side">
+        <Link to="/" className="brand">
+          <span className="brand-mark" aria-hidden="true" />
+          <span>スライド自動生成</span>
+        </Link>
+        <nav className="nav" aria-label="メニュー">
+          <Link to="/" className={on('/')} title="資料">
+            <IconFolder />
+            <span>資料</span>
           </Link>
-          <nav className="nav">
-            <Link to="/" className={on('/')}>
-              資料
+          <Link to="/new" className={on('/new')} title="新しく作る">
+            <IconPlus />
+            <span>新しく作る</span>
+          </Link>
+          <Link to="/settings" className={on('/settings')} title="設定">
+            <IconGear />
+            <span>設定</span>
+          </Link>
+        </nav>
+        <div className="side-art" aria-hidden="true" />
+      </aside>
+      <div className="main">
+        <div className="topline">
+          {app && !app.settings.aiReady && (
+            <Link to="/settings" className="badge badge-err">
+              鍵が未設定
             </Link>
-            <Link to="/new" className={on('/new')}>
-              新しく作る
-            </Link>
-            <Link to="/settings" className={on('/settings')}>
-              設定
-            </Link>
-          </nav>
-          <div className="topbar-right small">
-            {app && !app.settings.aiReady && (
-              <Link to="/settings" className="badge badge-err">
-                鍵が未設定
-              </Link>
-            )}
-            {app && <span className="muted nowrap">今月 {yen(app.monthCostUsd, app.usdJpy)}</span>}
-          </div>
+          )}
+          {app && (
+            <span className="nowrap">
+              今月 <b>{yen(app.monthCostUsd, app.usdJpy)}</b>
+            </span>
+          )}
         </div>
-      </header>
-      <main>{body}</main>
-    </>
+        <main>{body}</main>
+      </div>
+    </div>
   );
 }
 

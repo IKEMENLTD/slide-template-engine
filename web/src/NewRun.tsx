@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, minutes, yen, type AppState, type Estimate, type Template } from './api';
+import { IconClock, IconCoins, IconImage, IconSlides, IconSpark, IconUpload } from './icons';
 import { go, Link, useToast } from './ui';
 
 type Photo = { file: File; url: string; note: string };
@@ -96,123 +97,141 @@ export function NewRun({ app }: { app: AppState | null }) {
   }
 
   return (
-    <>
-      <div className="wrap">
-        <div className="page-head">
-          <div>
-            <h1>新しく資料を作る</h1>
-            <p className="muted">上から順に入れて、いちばん下の「作成を始める」を押してください。</p>
-          </div>
+    <div className="wrap">
+      <div className="page-head">
+        <div>
+          <h1>新しく資料を作る</h1>
+          <p className="muted">上から順に入れて、いちばん下の「作成を始める」を押してください。</p>
         </div>
-        {!ready && (
-          <div className="notice notice-warn" style={{ marginBottom: 16 }}>
-            文章を作る AI の鍵がまだ入っていないため、作成を始められません。<Link to="/settings">設定</Link>で入れてください。
-          </div>
-        )}
-        <div className="card card-pad">
-          <section className="section">
+      </div>
+      {!ready && (
+        <div className="notice notice-warn" style={{ marginBottom: 16 }}>
+          文章を作る AI の鍵がまだ入っていないため、作成を始められません。<Link to="/settings">設定</Link>で入れてください。
+        </div>
+      )}
+      <div className="compose">
+        <div className="compose-main">
+          <section className="card section">
             <span className="num">1</span>
             <div className="stack">
               <div>
                 <h2>原稿</h2>
                 <p className="hint">伝えたいことを文章で書いてください。見出しや箇条書きがあると、ページに分けやすくなります。数字は原稿にあるものだけが使われます。</p>
               </div>
-              <div className="field">
+              <div className="form-grid">
                 <label className="label" htmlFor="title">
                   資料の名前（任意）
                 </label>
                 <input id="title" className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="空のままなら、AI が原稿から題を付けます" />
-              </div>
-              <div
-                className={`drop${dragText ? ' on' : ''}`}
-                onClick={() => fileRef.current?.click()}
-                onDragOver={(e) => (e.preventDefault(), setDragText(true))}
-                onDragLeave={() => setDragText(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragText(false);
-                  const f = e.dataTransfer.files[0];
-                  if (f) void loadFile(f);
-                }}
-              >
-                <b>Word・テキストのファイルから読み込む</b>
-                <div className="hint">ここにファイルを置くか、押して選んでください（.docx・.txt・.md）</div>
-                <input ref={fileRef} type="file" accept=".docx,.txt,.md" hidden onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])} />
-              </div>
-              <div className="field">
+                <span className="hide-sp" />
+                <div
+                  className={`drop${dragText ? ' on' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => fileRef.current?.click()}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), fileRef.current?.click())}
+                  onDragOver={(e) => (e.preventDefault(), setDragText(true))}
+                  onDragLeave={() => setDragText(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragText(false);
+                    const f = e.dataTransfer.files[0];
+                    if (f) void loadFile(f);
+                  }}
+                >
+                  <IconUpload />
+                  <div>
+                    <b>Word・テキストのファイルから読み込む（.docx・.txt・.md）</b>
+                    <div className="hint">ここにファイルを置くか、押して選んでください</div>
+                  </div>
+                  <input ref={fileRef} type="file" accept=".docx,.txt,.md" hidden onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])} />
+                </div>
                 <label className="label" htmlFor="ms">
                   原稿の本文
                 </label>
-                <textarea id="ms" className="textarea" rows={14} value={text} onChange={(e) => setText(e.target.value)} placeholder={'例：\n# 工場の現状\n受注は電話とファクスで受け、紙の指示書で回している。\n段取り替えに平均45分かかっている。\n\n# 3年後の目標\n稼働率を62%から80%へ。'} />
-                <div className="spread hint">
-                  <span>{chars ? `${chars.toLocaleString()}字` : 'まだ入っていません'}</span>
-                  {tooShort && <span style={{ color: 'var(--error)' }}>短すぎます（80字以上にしてください）</span>}
+                <div className="stack-sm">
+                  <textarea id="ms" className="textarea" rows={7} value={text} onChange={(e) => setText(e.target.value)} placeholder={'例：\n# 工場の現状\n受注は電話とファクスで受け、紙の指示書で回している。\n段取り替えに平均45分かかっている。\n\n# 3年後の目標\n稼働率を62%から80%へ。'} />
+                  <div className="spread hint">
+                    <span>{chars ? `${chars.toLocaleString()}字` : 'まだ入っていません'}</span>
+                    {tooShort && <span style={{ color: 'var(--error)' }}>短すぎます（80字以上にしてください）</span>}
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <section className="section">
+          <section className="card section">
             <span className="num">2</span>
             <div className="stack">
               <div>
                 <h2>テンプレートと枚数</h2>
                 <p className="hint">見た目（色・配置・字体）はテンプレートが決めます。</p>
               </div>
-              <div className="tpls">
-                {!templates && <p className="muted">読み込んでいます…</p>}
-                {templates?.map((t) => (
-                  <button key={t.id} type="button" className={`tpl${tpl === t.id ? ' on' : ''}`} onClick={() => setTpl(t.id)} aria-pressed={tpl === t.id}>
-                    <div className="run-thumb">{t.cover ? <img src={t.cover} alt="" /> : <span className="muted small">見本を用意しています…</span>}</div>
-                    <div className="tpl-name">
-                      <span>{t.name}</span>
-                      <span className="muted small nowrap">{t.types.length}種類のページ</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <div className="field">
-                <span className="label">枚数</span>
-                <div className="seg">
-                  <button type="button" className={!slides && !custom ? 'on' : ''} onClick={() => (setSlides(null), setCustom(false))}>
-                    おまかせ{est && chars ? `（${est.recommended}枚前後）` : ''}
-                  </button>
-                  {counts.map((n) => (
-                    <button key={n} type="button" className={slides === n && !custom ? 'on' : ''} onClick={() => (setSlides(n), setCustom(false))}>
-                      {n}枚
-                    </button>
-                  ))}
-                  <button type="button" className={custom ? 'on' : ''} onClick={() => (setCustom(true), setSlides(slides ?? est?.recommended ?? 10))}>
-                    枚数を指定
-                  </button>
-                  {custom && (
-                    <input
-                      className="input"
-                      style={{ width: 90 }}
-                      type="number"
-                      min={template?.minSlides ?? 4}
-                      max={template?.maxSlides ?? 20}
-                      value={slides ?? ''}
-                      onChange={(e) => setSlides(e.target.value ? Math.max(template?.minSlides ?? 4, Math.min(template?.maxSlides ?? 20, Number(e.target.value))) : null)}
-                      aria-label="枚数"
-                    />
-                  )}
+              <div className="tpl-row">
+                <div className="field">
+                  <span className="label">テンプレートを選ぶ</span>
+                  <div className="tpls">
+                    {!templates && <p className="muted">読み込んでいます…</p>}
+                    {templates?.map((t) => (
+                      <button key={t.id} type="button" className={`tpl${tpl === t.id ? ' on' : ''}`} onClick={() => setTpl(t.id)} aria-pressed={tpl === t.id}>
+                        <span className="tpl-radio" aria-hidden="true" />
+                        <div className="run-thumb">{t.cover ? <img src={t.cover} alt="" /> : <span className="muted small">見本を用意しています…</span>}</div>
+                        <div className="tpl-name">
+                          {t.name}
+                          <div className="muted">{t.types.length}種類のページ</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <p className="hint">おまかせにすると、原稿の量に合わせて AI が決めます（{template ? `${template.minSlides}〜${template.maxSlides}枚` : ''}）。枚数を決めても、前後1〜2枚ずれることがあります。</p>
+                <div className="field">
+                  <span className="label">枚数</span>
+                  <div className="seg">
+                    <button type="button" className={!slides && !custom ? 'on' : ''} onClick={() => (setSlides(null), setCustom(false))}>
+                      おまかせ{est && chars ? `（${est.recommended}枚前後）` : ''}
+                    </button>
+                    {counts.map((n) => (
+                      <button key={n} type="button" className={slides === n && !custom ? 'on' : ''} onClick={() => (setSlides(n), setCustom(false))}>
+                        {n}枚
+                      </button>
+                    ))}
+                    <button type="button" className={custom ? 'on' : ''} onClick={() => (setCustom(true), setSlides(slides ?? est?.recommended ?? 10))}>
+                      枚数を指定
+                    </button>
+                    {custom && (
+                      <input
+                        className="input"
+                        style={{ width: 90 }}
+                        type="number"
+                        min={template?.minSlides ?? 4}
+                        max={template?.maxSlides ?? 20}
+                        value={slides ?? ''}
+                        onChange={(e) => setSlides(e.target.value ? Math.max(template?.minSlides ?? 4, Math.min(template?.maxSlides ?? 20, Number(e.target.value))) : null)}
+                        aria-label="枚数"
+                      />
+                    )}
+                  </div>
+                  <p className="hint">おまかせにすると、原稿の量に合わせて AI が決めます（{template ? `${template.minSlides}〜${template.maxSlides}枚` : ''}）。枚数を決めても、前後1〜2枚ずれることがあります。</p>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="section">
+          <section className="card section">
             <span className="num">3</span>
             <div className="stack">
               <div>
-                <h2>写真（任意）</h2>
+                <h2>
+                  写真<small>（任意）</small>
+                </h2>
                 <p className="hint">使ってほしい写真があれば追加してください。写真は自動で白黒にし、枠に合わせて切り抜きます。</p>
               </div>
               <div
                 className={`drop${dragPhoto ? ' on' : ''}`}
+                role="button"
+                tabIndex={0}
                 onClick={() => photoRef.current?.click()}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), photoRef.current?.click())}
                 onDragOver={(e) => (e.preventDefault(), setDragPhoto(true))}
                 onDragLeave={() => setDragPhoto(false)}
                 onDrop={(e) => {
@@ -221,8 +240,11 @@ export function NewRun({ app }: { app: AppState | null }) {
                   addPhotos(e.dataTransfer.files);
                 }}
               >
-                <b>写真を追加する</b>
-                <div className="hint">ここに写真を置くか、押して選んでください（何枚でも）</div>
+                <IconImage />
+                <div>
+                  <b>写真を追加する</b>
+                  <div className="hint">ここに写真を置くか、押して選んでください（何枚でも）</div>
+                </div>
                 <input ref={photoRef} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden onChange={(e) => e.target.files && addPhotos(e.target.files)} />
               </div>
               {photos.length > 0 && (
@@ -249,30 +271,41 @@ export function NewRun({ app }: { app: AppState | null }) {
               </label>
             </div>
           </section>
-        </div>
-      </div>
 
-      <div className="footbar">
-        <div className="footbar-in">
-          <div className="est">
-            <span>
-              <span className="muted small">枚数 </span>
-              <b>{est && chars ? `${est.slides}枚${slides ? '' : '前後'}` : '―'}</b>
-            </span>
-            <span>
-              <span className="muted small">かかる時間 </span>
-              <b>{est && chars ? minutes(est.seconds) : '―'}</b>
-            </span>
-            <span>
-              <span className="muted small">費用の目安 </span>
-              <b>{est && app && chars ? yen(est.usd, app.usdJpy) : '―'}</b>
-            </span>
+          <div className="card estbar">
+            <div className="est">
+              <span>
+                <IconSlides />
+                <span>
+                  <small>枚数</small>
+                  <b>{est && chars ? `${est.slides}枚${slides ? '' : '前後'}` : '―'}</b>
+                </span>
+              </span>
+              <span>
+                <IconClock />
+                <span>
+                  <small>かかる時間</small>
+                  <b>{est && chars ? minutes(est.seconds) : '―'}</b>
+                </span>
+              </span>
+              <span>
+                <IconCoins />
+                <span>
+                  <small>費用の目安</small>
+                  <b>{est && app && chars ? yen(est.usd, app.usdJpy) : '―'}</b>
+                </span>
+              </span>
+            </div>
+            <button type="button" className="btn btn-primary btn-lg" disabled={!canStart} onClick={start}>
+              <IconSpark />
+              {sending ? '準備しています…' : '作成を始める'}
+            </button>
           </div>
-          <button type="button" className="btn btn-primary btn-lg" disabled={!canStart} onClick={start}>
-            {sending ? '準備しています…' : '作成を始める'}
-          </button>
+        </div>
+        <div className="art-panel" aria-hidden="true">
+          <img src="/art/slides.jpg" alt="" />
         </div>
       </div>
-    </>
+    </div>
   );
 }
