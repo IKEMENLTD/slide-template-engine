@@ -48,5 +48,5 @@ npm run app            # http://127.0.0.1:8787 を開く
 
 - 「設定」で Claude の鍵（必須）と OpenAI の鍵（写真を作るとき）を入れる。資料・設定は `data/` に置く（版管理しない）。
 - 箱で動かす：`docker build -f docker/app/Dockerfile -t slidegen-app .` → `docker run -p 8787:8787 -v slidegen-data:/data -e SLIDEGEN_PASSWORD=… -e SLIDEGEN_HOSTS=<公開に使う名前> slidegen-app`（パスワード無しでは起動しない。SLIDEGEN_HOSTS 以外の宛先と、別のサイトからの操作は断る）
-- URL で見せる（費用0・アカウント不要）：`bash scripts/share.sh start` → この PC のアプリを Cloudflare の一時トンネルで `https://…trycloudflare.com` に出す。ユーザー名 `slidegen`・パスワードは `data/share/password`。URL は起動のたびに変わり、この PC が止まると開けない（試してもらう間だけの形。先方の環境が決まったら箱で動かす）。`status`・`stop` もある
+- URL で見せる（費用0・アカウント不要）：`bash scripts/share.sh start` → この PC のアプリを Cloudflare の一時トンネルで `https://…trycloudflare.com` に出す。既定はパスワード無し（URL を知っていれば開ける）。`SHARE_PASSWORD=1` を付けるとユーザー名 `slidegen`・パスワード `data/share/password` をかける。URL は起動のたびに変わり、この PC が止まると開けない（試してもらう間だけの形。先方の環境が決まったら箱で動かす）。`status`・`stop` もある
 - 作りの説明は docs/DECISIONS.md の D-038。
