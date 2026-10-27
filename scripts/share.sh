@@ -2,6 +2,7 @@
 # この PC で動かしたまま、外から開ける URL を出す（Cloudflare の一時トンネル。アカウント不要・無料）。
 #   bash scripts/share.sh start   … 画面を組み直し、アプリとトンネルを起動して URL を出す
 #   bash scripts/share.sh status  … いまの URL と、外から開けるかを確かめる
+#   bash scripts/share.sh app     … アプリだけ起動し直す（URL は変わらない）
 #   bash scripts/share.sh stop    … 両方止める
 # パスワードは data/share/password（無ければ作る）。ユーザー名は slidegen。
 # 注意：URL は起動のたびに変わる。この PC が眠る・WSL が止まると開けなくなる。
@@ -24,6 +25,16 @@ stop() {
 }
 
 url() { grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$STATE/tunnel.log" 2>/dev/null | head -1; }
+
+start_app() {
+  local U H
+  U=$(url); H=${U#https://}
+  [ -n "$U" ] || { echo "トンネルが動いていません（start を使ってください）"; return 1; }
+  if [ -f "$STATE/app.pid" ]; then kill "$(cat "$STATE/app.pid")" 2>/dev/null || true; rm -f "$STATE/app.pid"; sleep 1; fi
+  docker info > /dev/null 2>&1 || echo "注意：Docker が動いていません。ページの描画で止まります（Docker Desktop を起動してください）"
+  setsid -f bash -c "echo \$\$ > '$STATE/app.pid'; cd '$ROOTDIR'; exec env HOST=127.0.0.1 PORT=$PORT SLIDEGEN_DEV_AI=claude-cli SLIDEGEN_HOSTS='$H' SLIDEGEN_PASSWORD=\"\$(cat '$STATE/password')\" npx tsx src/app/server.ts" >> "$STATE/app.log" 2>&1
+  for _ in $(seq 1 60); do curl -s -o /dev/null -m 3 "http://127.0.0.1:$PORT/" && break; sleep 1; done
+}
 
 check() {
   local u; u=$(url)
@@ -48,13 +59,12 @@ start)
   for _ in $(seq 1 60); do [ -n "$(url)" ] && break; sleep 1; done
   U=$(url)
   [ -n "$U" ] || { echo "トンネルの URL が出ませんでした（$STATE/tunnel.log）"; stop; exit 1; }
-  H=${U#https://}
-  setsid -f bash -c "echo \$\$ > '$STATE/app.pid'; cd '$ROOTDIR'; exec env HOST=127.0.0.1 PORT=$PORT SLIDEGEN_DEV_AI=claude-cli SLIDEGEN_HOSTS='$H' SLIDEGEN_PASSWORD=\"\$(cat '$STATE/password')\" npx tsx src/app/server.ts" > "$STATE/app.log" 2>&1
-  for _ in $(seq 1 60); do curl -s -o /dev/null -m 3 "http://127.0.0.1:$PORT/" && break; sleep 1; done
+  start_app
   # トンネルの名前が引けるまで少しかかる
   for _ in $(seq 1 30); do check > /dev/null 2>&1 && break; sleep 2; done
   check
   ;;
+app) start_app; check ;;
 status) check ;;
 stop) stop; echo "止めました" ;;
 *) echo "使い方: bash scripts/share.sh start|status|stop"; exit 1 ;;

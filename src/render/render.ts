@@ -76,6 +76,9 @@ export function renderDeck(pptx: Buffer, outDir: string, opts: { dpi?: number; i
     child.stdout.on('data', (d: Buffer) => chunks.push(d));
     child.stderr.on('data', (d) => (err += d));
     child.on('error', reject);
+    // 描画の箱が起動できない（Docker が止まっている等）と、書き込み先が先に閉じて EPIPE になる。
+    // ここで拾わないとアプリ全体が落ちる。失敗は close（終了コード）か error で報告される
+    child.stdin.on('error', (e) => (err += `\n${e.message}`));
     const timer = setTimeout(() => child.kill('SIGKILL'), 600_000);
     child.on('close', (code) => {
       clearTimeout(timer);
