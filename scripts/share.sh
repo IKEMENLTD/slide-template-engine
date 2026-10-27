@@ -4,8 +4,8 @@
 #   bash scripts/share.sh status  … いまの URL と、外から開けるかを確かめる
 #   bash scripts/share.sh app     … アプリだけ起動し直す（URL は変わらない）
 #   bash scripts/share.sh stop    … 両方止める
-# 既定はパスワード無し（URL を知っていれば誰でも開ける。ユーザー判断 2026-10-27）。
-# パスワードをかけるときは SHARE_PASSWORD=1 を付けて起動する（ユーザー名 slidegen・パスワードは data/share/password）。
+# 既定はパスワードあり（ユーザー名 slidegen・パスワードは data/share/password）。
+# 外すときだけ SHARE_NO_PASSWORD=1 を付ける（URL を知っていれば誰でも資料の作成・削除と設定の変更ができる。2026-10-27 はユーザー判断で外している）。
 # 注意：URL は起動のたびに変わる。この PC が眠る・WSL が止まると開けなくなる。
 # 文章の AI は SLIDEGEN_DEV_AI=claude-cli（この PC の claude -p）。先方の鍵を設定画面に入れればそちらを使う。
 set -euo pipefail
@@ -35,9 +35,9 @@ start_app() {
   if [ -f "$STATE/app.pid" ]; then kill -- "-$(cat "$STATE/app.pid")" 2>/dev/null || true; rm -f "$STATE/app.pid"; fi
   for _ in $(seq 1 20); do curl -s -o /dev/null -m 2 "http://127.0.0.1:$PORT/" || break; sleep 1; done
   docker info > /dev/null 2>&1 || echo "注意：Docker が動いていません。ページの描画で止まります（Docker Desktop を起動してください）"
-  local PW=''
-  [ "${SHARE_PASSWORD:-0}" = 1 ] && PW="SLIDEGEN_PASSWORD=\"\$(cat '$STATE/password')\""
-  echo "${SHARE_PASSWORD:-0}" > "$STATE/password_on"
+  local PW="SLIDEGEN_PASSWORD=\"\$(cat '$STATE/password')\"" ON=1
+  [ "${SHARE_NO_PASSWORD:-0}" = 1 ] && PW='' && ON=0 && echo "注意：パスワード無しで公開します（SHARE_NO_PASSWORD=1）"
+  echo "$ON" > "$STATE/password_on"
   setsid -f bash -c "echo \$\$ > '$STATE/app.pid'; cd '$ROOTDIR'; exec env HOST=127.0.0.1 PORT=$PORT SLIDEGEN_DEV_AI=claude-cli SLIDEGEN_HOSTS='$H' $PW npx tsx src/app/server.ts" >> "$STATE/app.log" 2>&1
   for _ in $(seq 1 60); do curl -s -o /dev/null -m 3 "http://127.0.0.1:$PORT/" && break; sleep 1; done
 }
