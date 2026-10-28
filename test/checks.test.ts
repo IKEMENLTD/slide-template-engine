@@ -9,7 +9,8 @@ import { emphasisCount, isDummy, namesNotIn, numbersIn, numbersNotIn, restoreNum
 import { checkPage, checkTypeRuns, type SlotCheckContext } from '../src/check/slots.js';
 import { breakByPhrase, phrases } from '../src/fit/phrase-break.js';
 import { lineWidth, wrapLines } from '../src/fit/measure.js';
-import { buildFixtureCatalog, ROOT } from './helpers.js';
+import { buildFixtureCatalog, CONFIG, ROOT } from './helpers.js';
+import { numbersNeeded, outlineProblems } from '../src/plan/outline.js';
 
 const cat: Catalog = await buildFixtureCatalog();
 const resolveFile = (p: string) => path.join(ROOT, p);
@@ -20,7 +21,9 @@ const T = (key: string) => cat.types.find((t) => t.key === key)!;
 /** 型の文言の欄を、正しい短い文言で埋めた1ページ */
 function goodPage(key: string): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const s of T(key).slots) if (s.kind !== 'img') out[s.name] = s.kind === 'num' ? '8' : s.name === 'txt.eyebrow' ? 'Results' : s.name.startsWith('txt.unit.') ? '時間' : '時間が減る';
+  const nums = ['8', '40', '2'];
+  let k = 0;
+  for (const s of T(key).slots) if (s.kind !== 'img') out[s.name] = s.kind === 'num' ? nums[k++ % nums.length] : s.name === 'txt.eyebrow' ? 'Results' : s.name.startsWith('txt.unit.') ? '時間' : '時間が減る';
   return out;
 }
 const codes = (key: string, slots: Record<string, string>) => checkPage(1, T(key), slots, ctx).map((i) => i.code);
@@ -31,6 +34,11 @@ describe('文言の中身の検査', () => {
     const src = sourceNumbers(manuscript);
     expect(numbersNotIn('開発費は2,000万円', src)).toEqual([]);
     expect(numbersNotIn('開発費は3,000万円・期間は2週間', src)).toEqual(['3000']);
+  });
+  it('数字：丸数字（①②③）で並べた原稿なら「3つの施策」の 3 は原稿にある数字（2026-10-27 実例：これを弾いて作成が止まった）', () => {
+    const src = sourceNumbers('施策は\n①TPSを学ぶ\n②IoTを導入する\n③標準作業を定める\n支援は半年300万円');
+    expect(numbersNotIn('3つの施策で300万円', src)).toEqual([]);
+    expect(numbersNotIn('4つの施策', src)).toEqual(['4']);
   });
   it('固有名詞らしき語：原稿にある語は通し、無い英字・カタカナ・会社名は返す', () => {
     expect(namesNotIn('業務の属人化', manuscript)).toEqual([]);
@@ -52,6 +60,14 @@ describe('文言の中身の検査', () => {
 describe('1ページの検査（B段と E段が同じものを使う）', () => {
   it('正しいページは何も出ない', () => {
     for (const t of cat.types) expect(codes(t.key, goodPage(t.key)), t.key).toEqual([]);
+  });
+  it('NUMBER_REPEATED：数字を並べる型で同じ数字＋単位を繰り返すと止める（2026-10-27「300万円」が3回並んだ実例）', () => {
+    const s = { ...goodPage('numbers/3'), 'num.value.1': '2,000', 'txt.unit.1': '万円', 'num.value.2': '2000', 'txt.unit.2': '万円', 'num.value.3': '2,000', 'txt.unit.3': '万円' };
+    const r = checkPage(1, T('numbers/3'), s, ctx).filter((i) => i.code === 'NUMBER_REPEATED');
+    expect(r.map((i) => i.slot)).toEqual(['num.value.2', 'num.value.3']);
+    expect(r[0].level).toBe('error');
+    // 数字が同じでも単位が違えば別の数（40時間と40人）
+    expect(codes('numbers/3', { ...goodPage('numbers/3'), 'num.value.2': '8', 'txt.unit.2': '週' })).not.toContain('NUMBER_REPEATED');
   });
   it('OVERFLOW：欄の行数を超えると落ちる', () => {
     const s = { ...goodPage('issues/3'), 'txt.item.1.body': 'あ'.repeat(60) };
@@ -155,3 +171,19 @@ describe('文節の改行（7章B-4）', () => {
 });
 
 
+
+describe('A段：数字を並べる役割に、並べるだけの数字があるか', () => {
+  const page = (numbers: { value: string; label: string }[]) => ({ purpose: '費用', role: 'number', catch: '支援プラン', body: '半年の伴走支援', details: [], numbers, emphasis: [], sourceQuotes: [] });
+  const src = '支援プランは半年300万円（仮）。導入は平均2週間で、月40時間が月8時間に。';
+  it('数字の型が並べる数（3）より少なければ、別の役割にするよう返す（2026-10-27 実例）', () => {
+    expect(numbersNeeded(cat, 'number')).toBe(3);
+    expect(numbersNeeded(cat, 'emphasis')).toBe(0);
+    const one = outlineProblems({ deckTitle: 't', pages: [page([{ value: '300万円', label: '費用' }])] } as never, cat, CONFIG, src) ?? '';
+    expect(one).toMatch(/p1: role "number" の型は数字を 3 つ並べるが、このページの数字は 1 つ/);
+    // 同じ数字を3回書いても 1 つと数える
+    const same = outlineProblems({ deckTitle: 't', pages: [page([1, 2, 3].map(() => ({ value: '300万円', label: '費用' })))] } as never, cat, CONFIG, src) ?? '';
+    expect(same).toMatch(/このページの数字は 1 つ/);
+    const three = outlineProblems({ deckTitle: 't', pages: [page([{ value: '300万円', label: '費用' }, { value: '2週間', label: '期間' }, { value: '月8時間', label: '時間' }])] } as never, cat, CONFIG, src) ?? '';
+    expect(three).not.toMatch(/数字を 3 つ並べる/);
+  });
+});

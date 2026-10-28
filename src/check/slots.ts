@@ -62,7 +62,28 @@ export function checkPage(page: number, type: CatalogType, slots: Record<string,
     if (!fit.ok) out.push(issue('OVERFLOW', `${s.name}: ${fit.reason}`, where));
     if (s.name === 'txt.headline' && fit.lineCount > c.headlineMaxLines) out.push(issue('HEADLINE_LINES', `見出しが ${fit.lineCount} 行（${c.headlineMaxLines} 行まで）`, where));
   }
+  out.push(...repeatedNumbers(page, type, slots));
   if (emphasis > c.catalog.emphasis.maxPerSlide) out.push(issue('EMPHASIS_TOO_MANY', `強調が ${emphasis} 個（1ページ ${c.catalog.emphasis.maxPerSlide} 個まで）`, { page }));
+  return out;
+}
+
+/**
+ * 数字を並べる型で、同じ数字＋単位を繰り返していないか（NUMBER_REPEATED）。
+ * 原稿に数字が1つしかないのに数字3つの型を選ぶと、原稿に無い数字は書けないので同じ数字が3回並ぶ（2026-10-27 実例）。
+ */
+export function repeatedNumbers(page: number, type: CatalogType, slots: Record<string, string>): Issue[] {
+  const out: Issue[] = [];
+  const seen = new Map<string, string>();
+  for (const s of type.slots) {
+    if (s.kind !== 'num') continue;
+    const v = numbersIn((slots[s.name] ?? '').replace(/\[\[|\]\]/g, '')).join('/');
+    if (!v) continue;
+    const unit = (slots[s.name.replace(/^num\.value\./, 'txt.unit.')] ?? '').replace(/\[\[|\]\]/g, '').trim();
+    const key = `${v}|${unit}`;
+    const first = seen.get(key);
+    if (first) out.push(issue('NUMBER_REPEATED', `${s.name} が ${first} と同じ数字「${slots[s.name]}${unit}」。並べる数字はそれぞれ別の数にする（原稿に別の数字が無ければ、数字を並べる型は使えない）`, { page, slot: s.name }));
+    else seen.set(key, s.name);
+  }
   return out;
 }
 

@@ -227,7 +227,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
       preparePhotos({ plan, catalog, cfg, manuscript, library: info.photos, dir, ai: ctx, generator: o.imageGenerator, visibility, log: (m) => log(`  ${m}`) })
     );
     writeJson(planPath, plan);
-    writeJson(photosDone, { at: new Date().toISOString(), records: res.records });
+    writeJson(photosDone, { at: new Date().toISOString(), records: res.records, ...(res.generationError ? { generationError: res.generationError } : {}) });
   }
   if (o.stopAfter === 'photos') return { dir, issues: [], errors: 0, warnings: 0, stoppedAfter: 'photos' };
 
@@ -313,6 +313,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
 
   progress('check');
   const issues = await checkDeck(buffer, plan, catalog, check, cfg.deck.maxSameTypeInRow, cfg.photos.minFaceVisible);
+  issues.push(...photoStageIssues(dir));
   if (render) {
     issues.push(...(await checkLightDark(render.pages, cfg.lightDarkRatio)));
     issues.push(...renderIssues(render, plan.pages.length));
@@ -449,6 +450,7 @@ export async function recheck(dirArg: string, root: string): Promise<BuildResult
     unitSlots: cfg.checks.unitSlots,
     resolveFile: (p) => (path.isAbsolute(p) ? p : path.join(root, p)),
   }, cfg.deck.maxSameTypeInRow, cfg.photos.minFaceVisible);
+  issues.push(...photoStageIssues(dir));
   // 描画と見た目の採点は、保存してある結果を読む（check は AI も描画も呼ばない）
   const pngs = existsSync(path.join(dir, 'render.json')) ? readJson<{ pages: string[] }>(path.join(dir, 'render.json')).pages.map((p) => path.join(dir, p)) : [];
   if (pngs.length) issues.push(...(await checkLightDark(pngs, cfg.lightDarkRatio)));
@@ -483,4 +485,15 @@ export async function slideHashes(buf: Buffer): Promise<string[]> {
     out.push(createHash('sha256').update(xml).update(media.join(',')).digest('hex'));
   }
   return out;
+}
+
+/** C段で写真を作れなかった欄（done.json に残した理由と、見本のままの欄）。PHOTO_NOT_GENERATED */
+function photoStageIssues(dir: string): Issue[] {
+  const f = path.join(dir, 'photos/done.json');
+  if (!existsSync(f)) return [];
+  const d = readJson<{ generationError?: string; records: Array<{ page: number; slot: string; source: string; file: string | null }> }>(f);
+  if (!d.generationError) return [];
+  return d.records
+    .filter((r) => r.file === null || r.source === 'template')
+    .map((r) => issue('PHOTO_NOT_GENERATED', `${r.slot}: 写真を作れなかったので見本の写真のまま（${d.generationError}）`, { page: r.page, slot: r.slot }));
 }

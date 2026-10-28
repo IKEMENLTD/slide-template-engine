@@ -124,7 +124,7 @@ export type PhotoStageArgs = {
 
 const readJson = <T>(p: string): T | undefined => (existsSync(p) ? (JSON.parse(readFileSync(p, 'utf8')) as T) : undefined);
 
-export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: PhotoRecord[]; generated: GeneratedRecord[] }> {
+export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: PhotoRecord[]; generated: GeneratedRecord[]; generationError?: string }> {
   const log = a.log ?? (() => {});
   const photoDir = path.join(a.dir, 'photos');
   const genDir = path.join(photoDir, 'generated');
@@ -156,6 +156,7 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
 
   // 2. 生成（1枚ずつ。作ったらすぐ保存）
   const genPath = path.join(photoDir, 'generated.json');
+  let generationError: string | undefined;
   const generated: GeneratedRecord[] = readJson<GeneratedRecord[]>(genPath) ?? [];
   const order = [...new Set(reqs.map((r) => byId.get(r.id)!.use).filter((u) => u.startsWith('gen:')))];
   if (order.length && a.generator) {
@@ -169,7 +170,15 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
       // 見本は、最初に作った写真と直前に作った写真（人物・服装・場所をそろえる。10章）
       const refs = [...new Set([generated[0], generated[generated.length - 1]].filter(Boolean).map((g) => g!.file))].map((f) => readFileSync(path.join(photoDir, f)));
       log(`C段 写真の生成 ${key}（${size}・見本 ${refs.length}枚）: ${scene}`);
-      const img = await a.generator({ prompt: photoPrompt(assign.cast, scene, refs.length > 0, grid ? openAreaHint(grid) : null), size, references: refs });
+      let img: Awaited<ReturnType<ImageGenerator>>;
+      try {
+        img = await a.generator({ prompt: photoPrompt(assign.cast, scene, refs.length > 0, grid ? openAreaHint(grid) : null), size, references: refs });
+      } catch (e) {
+        // 生成できない（残高切れ・鍵の誤り・通信）ときも資料は仕上げる。残りの欄は見本の写真のまま、注意 PHOTO_NOT_GENERATED で知らせる
+        generationError = genErrorText(e);
+        log(`C段 写真の生成ができなかった。残りの写真は見本のまま: ${generationError}`);
+        break;
+      }
       const file = `generated/${key.replace(':', '-')}.jpg`;
       writeFileSync(path.join(photoDir, file), img.jpeg);
       generated.push({ key, file, scene, size, costUsd: img.costUsd, ms: img.ms, withReferences: img.withReferences, usage: img.usage });
@@ -214,14 +223,22 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
     const color = resolveColor(proc.multiply, a.catalog.theme.colors);
     let { fit } = await processPhoto(src, path.join(photoDir, name), r.aspect, proc, color, 1600, fitOpts);
     // 生成した写真で顔が隠れるなら、人の位置を指定して作り直す（良くなったときだけ差し替える）
-    if (source === 'generated' && grid && a.generator && fit.faceVisible !== null && fit.faceVisible < a.cfg.photos.minFaceVisible && regenerated < a.cfg.photos.maxRegenerate) {
+    // 1つの欄で2回まで（1回目で直らない写真がある。2026-10-27 実例 0 → 0.35）
+    const base = source === 'generated' ? generated.find((g) => g.key === x.use)! : null;
+    for (let tries = 0; base && grid && a.generator && fit.faceVisible !== null && fit.faceVisible < a.cfg.photos.minFaceVisible && tries < 2 && regenerated < a.cfg.photos.maxRegenerate; tries++) {
       regenerated++;
-      const base = generated.find((g) => g.key === x.use)!;
       const key = `${x.use}-fix${regenerated}`;
       const hint = openAreaHint(grid);
       log(`C段 写真の作り直し ${key}（${r.id}・顔の見えている割合 ${fit.faceVisible}）`);
       const refs = [readFileSync(path.join(photoDir, base.file))];
-      const img = await a.generator({ prompt: photoPrompt(assign.cast, base.scene, true, hint), size: base.size, references: refs });
+      let img: Awaited<ReturnType<ImageGenerator>>;
+      try {
+        img = await a.generator({ prompt: photoPrompt(assign.cast, base.scene, true, hint), size: base.size, references: refs });
+      } catch (e) {
+        generationError ??= genErrorText(e);
+        log(`C段 写真の作り直しができなかった。いまの写真のまま: ${generationError}`);
+        break;
+      }
       const file = `generated/${key.replace(':', '-')}.jpg`;
       writeFileSync(path.join(photoDir, file), img.jpeg);
       generated.push({ key, file, scene: base.scene, size: base.size, costUsd: img.costUsd, ms: img.ms, withReferences: img.withReferences, usage: img.usage });
@@ -241,7 +258,7 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
 
   // 人が「文字が入っていないか」を見る一覧（生成した写真を加工前の色のまま並べる。15章 Phase 3）
   if (generated.length) await contactSheet(generated.map((g) => path.join(photoDir, g.file)), path.join(photoDir, 'generated-sheet.jpg'));
-  return { records, generated };
+  return { records, generated, ...(generationError ? { generationError } : {}) };
 }
 
 export async function contactSheet(files: string[], out: string, tile = 480) {
@@ -252,4 +269,12 @@ export async function contactSheet(files: string[], out: string, tile = 480) {
     .composite(tiles.map((t, i) => ({ input: t, left: (i % cols) * (tile + 8), top: Math.floor(i / cols) * (tile + 8) })))
     .jpeg({ quality: 85 })
     .toFile(out);
+}
+
+/** 生成の失敗を1行に（OpenAI の返す message を取り出す。鍵らしき文字列は伏せる） */
+export function genErrorText(e: unknown): string {
+  const m = String((e as Error)?.message ?? e);
+  const head = m.split('\n')[0].replace(/[:：]\s*\{\s*$/, '');
+  const msg = m.match(/"message"\s*:\s*"([^"]*)"/)?.[1];
+  return `${head}${msg ? `: ${msg}` : ''}`.replace(/sk-[\w*-]{6,}/g, 'sk-…').slice(0, 300);
 }

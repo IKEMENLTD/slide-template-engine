@@ -55,6 +55,18 @@ describe('見えている部分の測り方', () => {
     expect(openAreaHint(lowerLeft)).toMatch(/lower left/);
     expect(openAreaHint(leftHidden)).toMatch(/right/);
   });
+  it('構図の指示に「図形で隠れる」と書かない（書くと生成AIが写真に色ベタの図形を描き込む。2026-10-27 実例 11枚中6枚）', () => {
+    for (const g of [leftHidden, rightHidden]) {
+      const h = openAreaHint(g)!;
+      expect(h).not.toMatch(/hidden|cover(ed)? (by|under)|graphic shapes? will|solid graphic shapes, so/i);
+      expect(h).toMatch(/do not draw any graphic shapes/);
+    }
+  });
+  it('見えている部分が半分未満の欄では、顔を1人にするよう指示する／半分以上なら言わない', () => {
+    const narrow: VisGrid = { cols: 40, rows: 40, v: Array.from({ length: 1600 }, (_, i) => (i % 40 < 12 ? 1 : 0)) };
+    expect(openAreaHint(narrow)).toMatch(/Only ONE person's face/);
+    expect(openAreaHint(rightHidden)).not.toMatch(/Only ONE/);
+  });
 });
 
 describe('切り抜きの選び方', () => {
@@ -116,5 +128,27 @@ describe('FACE_COVERED：顔が隠れた写真を知らせる', () => {
     expect(bad[0]).toMatchObject({ level: 'warning', page: i + 1, slot });
     setFit(0.9);
     expect((await recheck(dir, ROOT)).issues.filter((x) => x.code === 'FACE_COVERED')).toEqual([]);
+  });
+});
+
+describe('写真を作れないとき（残高切れ・2026-10-27 実例）も資料は仕上げる', () => {
+  it('2枚目から生成が失敗しても作成は止まらず、作れなかった欄は見本の写真のまま PHOTO_NOT_GENERATED（注意）で知らせる', async () => {
+    const outline = readFileSync(path.join(ROOT, 'test/fixtures/short/outline.json'), 'utf8');
+    const draft = `{"pages": ${readFileSync(path.join(ROOT, 'test/fixtures/short/draft-01.json'), 'utf8')}}`;
+    const ok = fakeGenerator();
+    let n = 0;
+    const failing = async (req: { prompt: string; size: string; references: Buffer[] }) => {
+      if (++n > 1) throw new Error('写真の生成に失敗した（HTTP 429）: {\n  "error": {\n    "message": "You have no credits remaining. Key sk-proj-abcdefgh1234 was used.",\n    "code": "credit_balance_exhausted"\n  }\n}');
+      return ok(req);
+    };
+    const res = await build({ root: ROOT, outDir: tmp, input: path.join(ROOT, 'samples/manuscript-01-short.md'), template: TEMPLATE, transport: photoAwareFake([outline, draft]), imageGenerator: failing, render: false, log: () => {} });
+    expect(res.errors).toBe(0);
+    const miss = res.issues.filter((x) => x.code === 'PHOTO_NOT_GENERATED');
+    expect(miss.length).toBeGreaterThanOrEqual(1);
+    expect(miss[0].level).toBe('warning');
+    expect(miss[0].message).toMatch(/no credits remaining/);
+    expect(miss[0].message).not.toMatch(/sk-proj-abcdefgh/);
+    // 作り直しの検査でも同じ注意が出る
+    expect((await recheck(res.dir, ROOT)).issues.filter((x) => x.code === 'PHOTO_NOT_GENERATED')).toHaveLength(miss.length);
   });
 });

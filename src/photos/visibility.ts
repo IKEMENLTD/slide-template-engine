@@ -137,6 +137,9 @@ export function visibleIn(g: VisGrid, u0: number, v0: number, u1: number, v1: nu
   return n ? s / n : 0;
 }
 
+/** 見えている部分がこれ未満の欄は、顔を1人にする */
+export const NARROW = 0.5;
+
 /** 欄の中で見えている部分の言い方（写真を生成するときに、人をどこに置くかを伝える）。ほぼ全部見えているなら null */
 export function openAreaHint(g: VisGrid): string | null {
   if (visibleIn(g, 0, 0, 1, 1) > 0.9) return null;
@@ -148,5 +151,10 @@ export function openAreaHint(g: VisGrid): string | null {
     if (v > best.v + 0.02) best = { r, c, v };
   }
   const where = best.r === 1 && best.c === 1 ? 'center' : best.r === 1 ? H[best.c] : best.c === 1 ? V[best.r] : `${V[best.r]} ${H[best.c]}`;
-  return `Composition: put the main person's face in the ${where} part of the frame. Large parts of the rest of the frame will be hidden under solid graphic shapes, so keep faces out of them (background only there).`;
+  // 「図形で隠れる」と書くと、生成AIが写真の中に色ベタの図形を描き込む（2026-10-27 実測）。図形の話はせず、置き場所だけを言う
+  const base = `Composition: put the main person's face in the ${where} part of the frame, and keep every other face out of the rest of the frame (show only background, machines or people's backs there). This must be one natural, unedited photograph filling the whole frame edge to edge: do not draw any graphic shapes, color blocks, panels, borders, overlays or empty areas.`;
+  // 見えている部分が半分に満たない欄（斜めの帯の間だけ見える等）に、何人もの顔は収まらない（2026-10-27 実例：3人の場面で 0.35）
+  if (visibleIn(g, 0, 0, 1, 1) < NARROW)
+    return `${base} Only ONE person's face may appear in this photo, even if the scene mentions several people: any other people must be seen from behind or be far away with their faces not visible.`;
+  return base;
 }

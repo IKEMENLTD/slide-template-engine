@@ -11,6 +11,12 @@ import { OutlineSchema, type Outline } from './schema.js';
 /** A段の出力上限（トークン）。20枚で 1万字ほどになる */
 export const OUTLINE_MAX_OUTPUT_TOKENS = 24000;
 
+/** その役割の型が並べる数字の数（いちばん少ない型で数える。数字の欄が無ければ 0） */
+export function numbersNeeded(cat: Catalog, role: string): number {
+  const counts = cat.types.filter((t) => t.role.includes(role)).map((t) => t.slots.filter((s) => s.kind === 'num').length);
+  return counts.length ? Math.min(...counts) : 0;
+}
+
 /** A段の出力が決まりに合っているか。合っていなければ AI に返す理由の文 */
 export function outlineProblems(o: Outline, cat: Catalog, cfg: TemplateConfig, manuscript: string, target?: number): string | null {
   const out: string[] = [];
@@ -20,6 +26,10 @@ export function outlineProblems(o: Outline, cat: Catalog, cfg: TemplateConfig, m
   o.pages.forEach((p, i) => {
     const n = i + 1;
     if (!cat.roles.includes(p.role)) out.push(`p${n}: role "${p.role}" は一覧に無い（${cat.roles.join(', ')} から選ぶ）`);
+    // 数字を並べる役割に、並べるだけの別々の数字が無い（足りない分は同じ数字の繰り返しになる）
+    const need = numbersNeeded(cat, p.role);
+    const have = new Set((p.numbers ?? []).map((x) => x.value.trim())).size;
+    if (need > have) out.push(`p${n}: role "${p.role}" の型は数字を ${need} つ並べるが、このページの数字は ${have} つ。原稿に無い数字は作れないので、role を別のもの（${cat.roles.filter((r) => r !== p.role && numbersNeeded(cat, r) === 0 && r !== 'cover').join(', ')} など）にする`);
     const texts = [p.catch, p.body ?? '', ...(p.details ?? []), ...(p.numbers ?? []).map((x) => x.value)];
     const bad = [...new Set(texts.flatMap((t) => numbersNotIn(t, src)))];
     if (bad.length) out.push(`p${n}: 原稿に無い数字 ${bad.join(', ')} を使っている。原稿にある数字だけにする`);

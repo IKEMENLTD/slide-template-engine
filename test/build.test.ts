@@ -134,6 +134,40 @@ describe('B段：入らない欄の書き直し・型の替え・丸め', () => 
   });
 });
 
+describe('B段：同じ数字の繰り返し（NUMBER_REPEATED。2026-10-27 実例）', () => {
+  const pages = JSON.parse(readFileSync(path.join(FIX, 'draft-01.json'), 'utf8'));
+  const rep = { 'num.value.1': '8', 'txt.unit.1': '時間', 'num.value.2': '8', 'txt.unit.2': '時間', 'num.value.3': '8', 'txt.unit.3': '時間' };
+  const p3 = JSON.stringify({ ...pages[2], slots: { ...pages[2].slots, ...rep } });
+  const withP3 = JSON.stringify({ pages: pages.map((p: object, i: number) => (i === 2 ? JSON.parse(p3) : p)) });
+  const attention = JSON.stringify({ type: 'attention', slots: { 'txt.eyebrow': 'Results', 'txt.headline': '請求書づくりが[[月8時間]]に', 'txt.body': '導入後は、請求書づくりにかかる時間が月8時間になりました。' }, photos: { 'img.hero': '事務所で請求書を確認する担当者' } });
+
+  it('書き直しても同じ数字が並ぶなら、数字の欄を持たない型（attention など）に替える', async () => {
+    const t = photoAwareFake([outline, withP3, p3, p3, attention]);
+    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, imageGenerator: fakeGenerator(), render: false, log: quiet });
+    expect(t.requests.map((r) => r.feature)).toEqual(['A段 原稿の構造化', 'B段 下書き p1-5', 'B段 書き直し p3', 'B段 書き直し p3', 'B段 型の替え p3', 'C段 写真の割り当て']);
+    expect(t.requests[2].user).toMatch(/num\.value\.2 が num\.value\.1 と同じ数字/);
+    // 替え先の候補に数字の型は入れない
+    expect(t.requests[4].user).toMatch(/attention/);
+    expect(t.requests[4].user).not.toMatch(/型 numbers\/3 では下の指摘を直せませんでした。次の型のどれかに替えて[\s\S]*key: numbers\/3/);
+    const plan: DeckPlan = JSON.parse(readFileSync(path.join(res.dir, 'deck-plan.json'), 'utf8'));
+    expect(plan.pages[2]).toMatchObject({ type: 'attention', retypedFrom: 'numbers/3' });
+    expect(res.issues.filter((i) => i.code === 'NUMBER_REPEATED')).toEqual([]);
+    expect(res.errors).toBe(0);
+  });
+
+  it('替えずに出来上がった資料に同じ数字が並んでいれば、検査で止まる（逆側の試験）', async () => {
+    const good = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: photoAwareFake([outline, draft]), imageGenerator: fakeGenerator(), render: false, log: quiet });
+    const bad = path.join(tmp, 'repeated');
+    cpSync(good.dir, bad, { recursive: true });
+    const plan: DeckPlan = JSON.parse(readFileSync(path.join(bad, 'deck-plan.json'), 'utf8'));
+    Object.assign(plan.pages.find((x) => x.type.startsWith('numbers'))!.slots, rep);
+    writeFileSync(path.join(bad, 'deck-plan.json'), JSON.stringify(plan));
+    const res = await build({ root: ROOT, outDir: tmp, resume: bad, transport: photoAwareFake([]), imageGenerator: fakeGenerator(), render: false, log: quiet });
+    expect(res.issues.filter((i) => i.code === 'NUMBER_REPEATED').map((i) => i.slot)).toEqual(['num.value.2', 'num.value.3']);
+    expect(res.errors).toBeGreaterThan(0);
+  });
+});
+
 describe('大見出しの明朝（設定 headline.mincho。16章 #3）', () => {
   it('false なら、カタログはゴシックで測り、組み立てでテーマの本文用の字体（+mn）に差し替える', async () => {
     const cfg = { ...CONFIG, headline: { ...CONFIG.headline, mincho: false } };

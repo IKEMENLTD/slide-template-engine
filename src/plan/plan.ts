@@ -46,6 +46,9 @@ export type PlanArgs = {
 
 type FinalPage = DeckPlan['pages'][number];
 
+/** 数字が足りないときの替え先の役割（本文で伝える型） */
+const RETYPE_FOR_NUMBERS = ['emphasis', 'photo-text'];
+
 const findType = (cat: Catalog, key: string) => cat.types.find((t) => t.key === key);
 
 /** 下書きの形の検査（型が無い・欄が足りない・ページ数が違う・同じ型が続く）。合っていなければ AI に返す理由 */
@@ -121,7 +124,7 @@ function pageBrief(outline: Outline, n: number) {
 
 function rewriteUser(n: number, t: CatalogType, slots: Record<string, string>, problems: Issue[], outline: Outline, candidates?: CatalogType[]) {
   const head = candidates
-    ? `p${n} は型 ${t.key} では欄に収まりませんでした。次の型のどれかに替えて、1ページ分を書き直してください。\n${candidates.map(describeType).join('\n')}`
+    ? `p${n} は型 ${t.key} では下の指摘を直せませんでした。次の型のどれかに替えて、1ページ分を書き直してください。\n${candidates.map(describeType).join('\n')}`
     : `p${n}（型 ${t.key}）の文言を直してください。型は替えない。\n${describeType(t)}`;
   return (
     `${head}\n\nこのページのページ割り:\n${pageBrief(outline, n)}\n\n今の文言:\n<page>\n${JSON.stringify(slots, null, 1)}\n</page>\n\n指摘:\n` +
@@ -224,9 +227,13 @@ export async function fixPage(
     log(`${opts.stage} 書き直し p${n}（${rewrites}回目）: ${problems.map((p) => p.message).join(' / ')}`);
     await rewrite();
   }
-  if (opts.allowRetype && problems.some((p) => p.code === 'OVERFLOW' || p.code === 'HEADLINE_LINES')) {
+  const repeated = problems.some((p) => p.code === 'NUMBER_REPEATED');
+  if (opts.allowRetype && (repeated || problems.some((p) => p.code === 'OVERFLOW' || p.code === 'HEADLINE_LINES'))) {
     const role = outline.pages[n - 1].role;
-    const candidates = catalog.types.filter((c) => c.key !== t.key && c.role.includes(role));
+    // 同じ数字の繰り返し＝数字が足りない。数字の欄を持たない、本文で伝える型へ替える（同じ役割には数字の型しか無いことがある）
+    const candidates = repeated
+      ? catalog.types.filter((c) => c.key !== t.key && !c.slots.some((s) => s.kind === 'num') && c.role.some((r) => RETYPE_FOR_NUMBERS.includes(r)))
+      : catalog.types.filter((c) => c.key !== t.key && c.role.includes(role));
     if (candidates.length) {
       retypedFrom = t.key;
       log(`${opts.stage} 型の替え p${n}: ${t.key} → 候補 ${candidates.map((c) => c.key).join(', ')}`);

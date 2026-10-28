@@ -21,7 +21,11 @@ export type IssueCode =
   /** 欄の字体に無い文字（描画で別の字体に置き換わる） */
   | 'GLYPH_MISSING'
   /** 写真の人の顔が、上に重なる図形（色ベタ）に隠れている */
-  | 'FACE_COVERED';
+  | 'FACE_COVERED'
+  /** 数字を並べる型で、同じ数字（と単位）を繰り返している。原稿に数字が足りないのに数字の型を選んだとき */
+  | 'NUMBER_REPEATED'
+  /** 写真を生成できなかった（残高切れなど）。その欄は見本の写真のまま */
+  | 'PHOTO_NOT_GENERATED';
 
 export type Issue = { code: IssueCode; level: IssueLevel; page?: number; slot?: string; message: string };
 
@@ -42,6 +46,8 @@ export const LEVEL: Record<IssueCode, IssueLevel> = {
   SLOT_RULE: 'warning',
   FACE_COVERED: 'warning',
   GLYPH_MISSING: 'error',
+  NUMBER_REPEATED: 'error',
+  PHOTO_NOT_GENERATED: 'warning',
 };
 
 export const issue = (code: IssueCode, message: string, where: { page?: number; slot?: string } = {}): Issue => ({ code, level: LEVEL[code], ...where, message });
@@ -61,7 +67,15 @@ export function numbersNotIn(text: string, source: Set<string>): string[] {
   return [...new Set(numbersIn(text).filter((n) => !source.has(n)))];
 }
 
-export const sourceNumbers = (manuscript: string) => new Set(numbersIn(manuscript));
+/**
+ * 原稿にある数字。丸数字（①〜⑳）もその数として数える：「①②③」と並べた原稿から「3つの施策」と書くのは原稿どおり
+ * （2026-10-27 実例：丸数字を数えず「3」を原稿に無い数字として3回とも弾き、作成が止まった）
+ */
+export const sourceNumbers = (manuscript: string) => {
+  const s = new Set(numbersIn(manuscript));
+  for (const m of manuscript.matchAll(/[①-⑳]/g)) s.add(String(m[0].charCodeAt(0) - 0x2460 + 1));
+  return s;
+};
 
 /**
  * 固有名詞らしき語（英字の語・3字以上のカタカナ語・会社の表記）のうち、原稿に無いもの。
