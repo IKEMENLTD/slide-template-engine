@@ -12,7 +12,7 @@ import { basicAuth } from 'hono/basic-auth';
 import { HTTPException } from 'hono/http-exception';
 import { bodyLimit } from 'hono/body-limit';
 import mammoth from 'mammoth';
-import { aiRevise, changeType, checkDraft, ensurePdf, pagesView, replacePhoto, saveText, typeChoices, undo, versions } from './edit.js';
+import { aiRevise, changeType, checkDraft, ensurePdf, pagesView, replacePhoto, saveText, toggleMirror, typeChoices, undo, versions } from './edit.js';
 import { createRun, deleteRun, estimateSeconds, estimateUsd, listRuns, monthCostUsd, recommendedSlides, recoverOnBoot, resumeRun, runDir, runView } from './runs.js';
 import { AppError, publicSettings, readSettings, ROOT, writeSettings } from './settings.js';
 import { ensureThumbs, getTemplate, listTemplates, typeThumb } from './templates.js';
@@ -208,6 +208,7 @@ app.post('/api/runs/:id/pages/:n/check', async (c) => c.json(checkDraft(c.req.pa
 app.post('/api/runs/:id/pages/:n/text', async (c) => c.json(await saveText(c.req.param('id'), num(c, 'n'), (await c.req.json<{ slots: Record<string, string> }>()).slots)));
 app.post('/api/runs/:id/pages/:n/ai', async (c) => c.json(await aiRevise(c.req.param('id'), num(c, 'n'), (await c.req.json<{ instruction: string }>()).instruction ?? '')));
 app.post('/api/runs/:id/pages/:n/type', async (c) => c.json(await changeType(c.req.param('id'), num(c, 'n'), (await c.req.json<{ type: string }>()).type)));
+app.post('/api/runs/:id/pages/:n/mirror', async (c) => c.json(await toggleMirror(c.req.param('id'), num(c, 'n'))));
 app.post('/api/runs/:id/pages/:n/photo', async (c) => {
   const form = await c.req.formData();
   const f = await fileBuf(form.get('file'));

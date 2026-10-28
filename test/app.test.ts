@@ -20,7 +20,7 @@ import { buildCatalog } from '../src/catalog/build-catalog.js';
 import { readTemplate } from '../src/catalog/read-template.js';
 import { loadConfig } from '../src/catalog/config.js';
 import { issue } from '../src/check/content.js';
-import { checkDraft, saveText, undo, versions, pagesView } from '../src/app/edit.js';
+import { checkDraft, saveText, toggleMirror, undo, versions, pagesView } from '../src/app/edit.js';
 import { createRun, presentIssues, recommendedSlides, runView } from '../src/app/runs.js';
 import { AppError, publicSettings, readSettings, writeSettings } from '../src/app/settings.js';
 import { plainText, slotLabel } from '../src/app/words.js';
@@ -128,5 +128,31 @@ describe('仕上げ（文字を直す→そのページだけ描き直す→元�
     expect(versions(id)).toHaveLength(0);
     await expect(undo(id)).rejects.toThrow(/戻せる直しがありません/);
   }, 180_000);
+
+  it('左右を入れ替える（D-042）：許した形だけ押せる。押すと向きが変わり、写真の枠が反対側へ移り、写真は切り抜き直す。元に戻すと戻る', async () => {
+    const { orderedSlideParts, shapeBoxes } = await import('../src/assemble/mirror.js');
+    const JSZip = (await import('jszip')).default;
+    const view = pagesView(id);
+    const n = view.findIndex((p) => p.type === 'numbers/3') + 1;
+    const blocked = view.findIndex((p) => !p.canMirror) + 1;
+    await expect(toggleMirror(id, blocked)).rejects.toThrow(/入れ替えられません/);
+    const before = view[n - 1];
+    expect(before.canMirror).toBe(true);
+    const sideX = async () => {
+      const zip = await JSZip.loadAsync(readFileSync(path.join(dir, 'deck.pptx')));
+      return shapeBoxes(await zip.file((await orderedSlideParts(zip))[n - 1])!.async('string'))['img.side'].x;
+    };
+    const x0 = await sideX();
+    const plan0 = JSON.parse(readFileSync(path.join(dir, 'deck-plan.json'), 'utf8')) as DeckPlan;
+    const res = await toggleMirror(id, n);
+    expect(res.page.mirrored).toBe(!before.mirrored);
+    expect(await sideX()).not.toBe(x0);
+    const plan1 = JSON.parse(readFileSync(path.join(dir, 'deck-plan.json'), 'utf8')) as DeckPlan;
+    expect(plan1.pages[n - 1].photoFiles!['img.side']).not.toBe(plan0.pages[n - 1].photoFiles!['img.side']);
+    expect(plan1.pages.filter((_, i) => i !== n - 1)).toEqual(plan0.pages.filter((_, i) => i !== n - 1));
+    await undo(id);
+    expect(await sideX()).toBe(x0);
+    expect(pagesView(id)[n - 1].mirrored).toBe(before.mirrored);
+  }, 240_000);
 });
 

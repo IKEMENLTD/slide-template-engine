@@ -36,8 +36,9 @@ import { sourceNumbers } from '../check/content.js';
 import { makeOutline } from '../plan/outline.js';
 import { fixPage, planDeck, type PlanStore } from '../plan/plan.js';
 import type { DeckPlan, Outline } from '../plan/schema.js';
-import { preparePhotos, type GeneratedRecord, type PhotoRecord } from '../photos/plan-photos.js';
+import { isFaceProblem, preparePhotos, redoPhotosForReview, type GeneratedRecord, type PhotoRecord } from '../photos/plan-photos.js';
 import { ensureVisibility } from '../photos/visibility.js';
+import { chooseMirrors } from '../plan/mirror-plan.js';
 import type { ImageGenerator } from '../photos/openai-image.js';
 
 export type RunInfo = {
@@ -205,6 +206,8 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     progress('plan');
     const pages = await timed('B段', () => planDeck(ctx, { catalog, cfg, manuscript, outline, check, store, log: (m) => log(`  ${m}`) }));
     plan = { version: 1, deckTitle: outline.deckTitle, template: { file: catalog.template.file, sha256: catalog.template.sha256 }, pages };
+    // 左右の向き（D-042）。写真の寄る側を交互にする決まりで、コードが決める
+    chooseMirrors(plan, catalog, cfg);
     writeJson(planPath, plan);
   }
   log(`  設計図: ${plan.pages.map((p) => p.type).join(' / ')}`);
@@ -219,7 +222,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     const visibility =
       o.render === false
         ? null
-        : await ensureVisibility(path.join(dir, 'template.pptx'), catalog, o.cacheDir ?? path.join(o.root, '.cache')).catch((e: Error) => {
+        : await ensureVisibility(path.join(dir, 'template.pptx'), catalog, o.cacheDir ?? path.join(o.root, '.cache'), cfg.mirror).catch((e: Error) => {
             log(`  写真の欄の見えている部分を測れなかった（顔の位置は考えずに切り抜く）: ${e.message.split('\n')[0]}`);
             return null;
           });
@@ -261,16 +264,29 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
       if (!reviewed) {
         log(`E段 見た目の採点（${round}回目・${targets.length}ページ）`);
         progress('review', `${round}回目・${targets.length}ページ`);
-        const review = await timed('E段 採点', () => reviewPages(ctx, { plan, catalog, cfg, pages: targets, pngs: render!.pages, round }));
+        // 採点は仕上げの品質を上げるためのもの。採点ができなくても、資料は止めずに仕上げる（それまでの採点の結果で注意を出す）
+        let review: PageReview[];
+        try {
+          review = await timed('E段 採点', () => reviewPages(ctx, { plan, catalog, cfg, pages: targets, pngs: render!.pages, round }));
+        } catch (e) {
+          log(`  見た目の採点ができなかったので、ここで作り直しを終える: ${(e as Error).message.split('\n')[0]}`);
+          break;
+        }
         reviewed = { pages: targets, review };
         writeJson(rPath, reviewed);
       }
       // 採点の結果は、そのページの最新の結果で上書きして持つ
       lastReview = [...lastReview.filter((x) => !reviewed!.pages.includes(x.page)), ...reviewed.review].sort((x, y) => x.page - y.page);
       const redo = pagesToRedo(reviewed.review);
-      if (!redo.length || round > cfg.review.maxRounds) break;
-      log(`E段 作り直し（${round}回目）: p${redo.join(', p')}`);
-      progress('redo', `${redo.length}ページ`);
+      // 写真の指摘で、人の顔・頭が隠れる・切れるもの（顔の検出が見逃す横顔など）。生成した写真を作り直す
+      const facePhotos = o.imageGenerator
+        ? reviewed.review.flatMap((p) => p.problems.filter((x) => x.kind === 'photo' && isFaceProblem(x.message)).map((x) => ({ page: p.page, slot: x.slot })))
+        : [];
+      const photoPages = [...new Set(facePhotos.map((x) => x.page))];
+      if ((!redo.length && !photoPages.length) || round > cfg.review.maxRounds) break;
+      const touched = [...new Set([...redo, ...photoPages])].sort((x, y) => x - y);
+      log(`E段 作り直し（${round}回目）: p${touched.join(', p')}`);
+      progress('redo', `${touched.length}ページ`);
       const before = await slideHashes(buffer);
       await timed('E段 作り直し', async () => {
         for (const n of redo) {
@@ -295,7 +311,18 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
             continue;
           }
           // 文言だけの作り直し（型は替えない）なので、写真とその切り抜きの記録はそのまま引き継ぐ
-          plan.pages[n - 1] = { ...fixed, rewrites: cur.rewrites + fixed.rewrites, photoFiles: cur.photoFiles, photoSources: cur.photoSources, photoFit: cur.photoFit, revisedByReview: (cur.revisedByReview ?? 0) + 1 };
+          plan.pages[n - 1] = { ...fixed, rewrites: cur.rewrites + fixed.rewrites, photoFiles: cur.photoFiles, photoSources: cur.photoSources, photoFit: cur.photoFit, mirrored: cur.mirrored, revisedByReview: (cur.revisedByReview ?? 0) + 1 };
+        }
+        // 写真の作り直し（再開したときに二重に作らないよう、回ごとに記録を残す）
+        const photoDone = path.join(reviewDir, `photo-redo-${round}.json`);
+        if (photoPages.length && !existsSync(photoDone)) {
+          const visibility = await ensureVisibility(path.join(dir, 'template.pptx'), catalog, o.cacheDir ?? path.join(o.root, '.cache'), cfg.mirror).catch(() => null);
+          const redone: Array<{ page: number; slots: string[] }> = [];
+          for (const n of photoPages) {
+            const slots = await redoPhotosForReview({ plan, catalog, cfg, dir, generator: o.imageGenerator ?? null, visibility, log: (m) => log(`  ${m}`) }, n, facePhotos.find((x) => x.page === n && x.slot)?.slot);
+            redone.push({ page: n, slots });
+          }
+          writeJson(photoDone, redone);
         }
       });
       writeJson(planPath, plan);
@@ -303,11 +330,11 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
       // 作り直したページ以外は、スライドの中身が1バイトも変わっていないことを確かめて残す（15章 Phase 4）
       const after = await slideHashes(buffer);
       const changed = after.map((h, i) => (h !== before[i] ? i + 1 : 0)).filter(Boolean);
-      const unexpected = changed.filter((n) => !redo.includes(n));
-      writeJson(path.join(reviewDir, `changes-${round}.json`), { redo, changed, unexpected });
+      const unexpected = changed.filter((n) => !touched.includes(n));
+      writeJson(path.join(reviewDir, `changes-${round}.json`), { redo: touched, changed, unexpected });
       if (unexpected.length) log(`  注意: 作り直していないページ p${unexpected.join(', p')} の中身が変わった`);
       render = await doRender();
-      targets = redo;
+      targets = touched;
     }
   }
 

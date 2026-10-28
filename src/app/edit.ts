@@ -10,7 +10,9 @@ import path from 'node:path';
 import type { AiCallRecord, AiContext } from '../ai/call-json.js';
 import { assembleDeck } from '../assemble/build-deck.js';
 import type { Catalog, CatalogType } from '../catalog/build-catalog.js';
-import { ConfigSchema, type TemplateConfig } from '../catalog/config.js';
+import { createHash } from 'node:crypto';
+import { ConfigSchema, configPathFor, type TemplateConfig } from '../catalog/config.js';
+import { canMirror } from '../plan/mirror-plan.js';
 import { issue, sourceNumbers, type Issue } from '../check/content.js';
 import { checkPage, type SlotCheckContext } from '../check/slots.js';
 import { fitSlot } from '../fit/fit-slot.js';
@@ -18,7 +20,7 @@ import { imageSlots, textSlots } from '../plan/describe.js';
 import { fixPage, type PlanArgs } from '../plan/plan.js';
 import type { DeckPlan, Outline } from '../plan/schema.js';
 import { processPhoto, resolveColor, type PhotoFit } from '../photos/prepare.js';
-import { ensureVisibility, type VisibilityMap } from '../photos/visibility.js';
+import { ensureVisibility, visKey, type VisibilityMap } from '../photos/visibility.js';
 import type { PhotoRecord } from '../photos/plan-photos.js';
 import { renderDeck } from '../render/render.js';
 import { recheck } from '../run/build.js';
@@ -57,6 +59,8 @@ function load(id: string): Ctx {
   if (!existsSync(path.join(dir, 'deck.pptx'))) throw new AppError('この資料はまだ出来上がっていません', 409);
   const cfg = ConfigSchema.parse(readJson(path.join(dir, 'config.json')));
   const catalog = readJson<Catalog>(path.join(dir, 'catalog.json'));
+  // 左右反転（D-042）より前に作った資料は、設定に mirror が無い。テンプレートが同じ中身なら、いまの設定の決まりを使う
+  if (!Object.keys(cfg.mirror).length) cfg.mirror = currentMirrorRules(catalog);
   const manuscript = readFileSync(path.join(dir, 'input.md'), 'utf8');
   return {
     id,
@@ -75,6 +79,16 @@ function load(id: string): Ctx {
       resolveFile,
     },
   };
+}
+
+function currentMirrorRules(catalog: Catalog): TemplateConfig['mirror'] {
+  try {
+    const tpl = resolveFile(catalog.template.file);
+    if (createHash('sha256').update(readFileSync(tpl)).digest('hex') !== catalog.template.sha256) return {};
+    return ConfigSchema.parse(readJson(configPathFor(tpl))).mirror;
+  } catch {
+    return {};
+  }
 }
 
 function pageAt(c: Ctx, n: number): Page {
@@ -104,6 +118,9 @@ function pageView(c: Ctx, n: number, p: Page) {
     n,
     type: p.type,
     typeLabel: t.label,
+    /** 左右を入れ替えた向きか／入れ替えられる形か（D-042） */
+    mirrored: !!p.mirrored,
+    canMirror: canMirror(c.cfg, p.type),
     image: existsSync(png) ? `/api/runs/${c.id}/pages/${n}.png?v=${mtime(png)}` : null,
     slots: textSlots(t).map((s) => ({
       name: s.name,
@@ -272,16 +289,17 @@ export function changeType(id: string, n: number, typeKey: string) {
     const photoFiles: Record<string, string> = {};
     const photoSources: Record<string, string> = {};
     const photoFit: Record<string, PhotoFit> = {};
+    const mirrored = !!p.mirrored && canMirror(c.cfg, to.key);
     for (const [i, s] of imageSlots(to).entries()) {
       const src = sources[i % Math.max(1, sources.length)];
       if (!src) continue;
-      const placed = await placePhoto(c, n, to, s.name, src);
+      const placed = await placePhoto(c, n, to, s.name, src, mirrored);
       photoFiles[s.name] = placed.name;
       photoFit[s.name] = placed.fit;
       photoSources[s.name] = path.relative(c.dir, src);
     }
     snapshot(c, `${n}ページ目の形を「${to.label}」に替えた`, n);
-    c.plan.pages[n - 1] = { ...fixed, photoFiles, photoSources, photoFit, retypedFrom: from.key };
+    c.plan.pages[n - 1] = { ...fixed, photoFiles, photoSources, photoFit, retypedFrom: from.key, mirrored };
     await commit(c, [n]);
     return result(c, n);
   });
@@ -308,16 +326,16 @@ function photoSource(c: Ctx, n: number, slot: string): string | null {
 
 /** 欄の「図形に隠れず見えている部分」。測れなければ null（顔を枠に残すことだけ考えて切り抜く） */
 async function visibilityOf(c: Ctx): Promise<VisibilityMap | null> {
-  return ensureVisibility(path.join(c.dir, 'template.pptx'), c.catalog, CACHE).catch(() => null);
+  return ensureVisibility(path.join(c.dir, 'template.pptx'), c.catalog, CACHE, c.cfg.mirror).catch(() => null);
 }
 
 /** 写真を枠に合わせて加工し、photos/ に置く（名前に版を付けて、前の写真を上書きしない＝戻せる）。顔が図形に隠れない切り抜きを選ぶ */
-async function placePhoto(c: Ctx, n: number, t: CatalogType, slot: string, src: string): Promise<{ name: string; fit: PhotoFit }> {
+async function placePhoto(c: Ctx, n: number, t: CatalogType, slot: string, src: string, mirrored = !!c.plan.pages[n - 1]?.mirrored): Promise<{ name: string; fit: PhotoFit }> {
   const s = t.slots.find((x) => x.name === slot && x.kind === 'img');
   if (!s?.aspect) throw new AppError('その写真の欄はありません');
   const proc = s.process ?? { mono: true, multiply: null };
   const name = `p${pad(n)}-${slot.replace(/[^\w.-]/g, '_')}-${Date.now()}.jpg`;
-  const grid = (await visibilityOf(c))?.[t.key]?.[slot] ?? null;
+  const grid = (await visibilityOf(c))?.[visKey({ type: t.key, mirrored })]?.[slot] ?? null;
   // 左右の反転は、この資料のために生成した写真だけ（支給・人が選んだ写真は向きを変えない）
   const allowFlip = path.relative(path.join(c.dir, 'photos', 'generated'), src).split(path.sep)[0] !== '..';
   const { fit } = await processPhoto(src, path.join(c.dir, 'photos', name), s.aspect, proc, resolveColor(proc.multiply, c.catalog.theme.colors), 1600, { grid, allowFlip, minCropWidth: (s.box.w * 96) / 72 });
@@ -350,6 +368,37 @@ export function replacePhoto(id: string, n: number, slot: string, upload: { name
       photoSources: { ...p.photoSources, [slot]: path.relative(c.dir, src) },
       photoFit: { ...p.photoFit, [slot]: placed.fit },
     };
+    await commit(c, [n]);
+    return result(c, n);
+  });
+}
+
+// ---------------------------------------------------------------- 左右を入れ替える（D-042）
+
+/**
+ * ページの左右を入れ替える。写真と図形のかたまりが反対側に移り、文字のそろいと順番は変わらない。
+ * 写真は、新しい向きで図形に隠れる部分を測り直して切り抜き直す（顔が隠れないように）
+ */
+export function toggleMirror(id: string, n: number) {
+  return serial(id, async () => {
+    const c = load(id);
+    const p = pageAt(c, n);
+    if (!canMirror(c.cfg, p.type)) throw new AppError('このページの形は、左右を入れ替えられません');
+    const t = typeOf(c, p.type);
+    const mirrored = !p.mirrored;
+    const photoFiles = { ...p.photoFiles };
+    const photoSources = { ...p.photoSources };
+    const photoFit = { ...p.photoFit };
+    for (const s of imageSlots(t)) {
+      const src = photoSource(c, n, s.name);
+      if (!src || !p.photoFiles?.[s.name]) continue; // 見本の写真のままの欄は、そのまま
+      const placed = await placePhoto(c, n, t, s.name, src, mirrored);
+      photoFiles[s.name] = placed.name;
+      photoFit[s.name] = placed.fit;
+      photoSources[s.name] = path.relative(c.dir, src);
+    }
+    snapshot(c, `${n}ページ目の左右を入れ替えた`, n);
+    c.plan.pages[n - 1] = { ...p, mirrored, photoFiles, photoSources, photoFit };
     await commit(c, [n]);
     return result(c, n);
   });

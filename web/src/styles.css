@@ -402,3 +402,5 @@ input[type='number'] { color-scheme: dark; }
   .key-row .btn { min-width: 84px; }
   .hide-sp { display: none; }
 }
+.mirror { padding: 12px; margin-bottom: 14px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--surface-2); }
+.mirror .hint { margin-top: 0; }

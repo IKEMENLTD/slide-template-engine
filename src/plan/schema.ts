@@ -75,6 +75,8 @@ export type DeckPlan = {
       photoSources?: Record<string, string>;
       /** 写真の欄 → 切り抜きの結果（顔の数・見えている割合・反転）。FACE_COVERED の検査に使う */
       photoFit?: Record<string, PhotoFit>;
+      /** ページを左右反転して組むか（D-042）。決めるのはコードの決まり（mirror-plan.ts）か、仕上げの画面で人 */
+      mirrored?: boolean;
     }
   >;
 };

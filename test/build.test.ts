@@ -237,6 +237,37 @@ describe('E段：見た目の採点で指摘されたページだけを作り直
     expect(report.totalMs).toBeGreaterThan(0);
   }, 300_000);
 
+  it('採点で「顔が隠れている」と指摘された写真は作り直し、次の採点で確かめる（顔の検出が見逃す横顔の受け皿・D-042）', async () => {
+    const t = photoAwareFake([outline, draft]);
+    const orig = t.complete.bind(t);
+    const reviews: string[] = [];
+    t.complete = async (req) => {
+      const usage = { feature: req.feature, model: req.modelId, inputTokens: 10, outputTokens: 10, cacheReadTokens: 0, cacheWriteTokens: 0, cacheDeclared: false, cacheHit: false, cacheIneffective: false };
+      if (req.feature.startsWith('E段 見た目の採点')) {
+        t.requests.push(req);
+        reviews.push(req.feature);
+        const pages = [...req.user.matchAll(/= p(\d+)（/g)].map((m) => Number(m[1]));
+        const first = reviews.length === 1;
+        const body = { pages: pages.map((page) => (first && page === 5 ? { page, verdict: 'ok', problems: [{ kind: 'photo', slot: 'img.hero', message: '主役の男性の顔がひし形の白い線に横切られて隠れている' }] } : { page, verdict: 'ok', problems: [] })) };
+        return { text: JSON.stringify(body), stopReason: 'end_turn', model: req.modelId, ms: 1, usage };
+      }
+      return orig(req);
+    };
+    const gen = fakeGenerator();
+    const res = await build({ root: ROOT, outDir: tmp, input, template: TEMPLATE, transport: t, imageGenerator: gen, log: quiet });
+    expect(reviews).toEqual(['E段 見た目の採点 r1 p1-5', 'E段 見た目の採点 r2 p5-5']);
+    const changes = JSON.parse(readFileSync(path.join(res.dir, 'review/changes-1.json'), 'utf8'));
+    expect(changes).toEqual({ redo: [5], changed: [5], unexpected: [] });
+    const plan: DeckPlan = JSON.parse(readFileSync(path.join(res.dir, 'deck-plan.json'), 'utf8'));
+    expect(plan.pages[4].photoFiles!['img.hero']).toMatch(/-rv\d+\.jpg$/);
+    // 支給の写真（1ページ目）は作り直さない＝この試験の写真は生成したもの
+    expect(plan.pages[4].type).toBe('collage');
+    const generated = JSON.parse(readFileSync(path.join(res.dir, 'photos/generated.json'), 'utf8')) as Array<{ key: string }>;
+    expect(generated.filter((g) => /-rv\d+$/.test(g.key))).toHaveLength(1);
+    // 最後の採点で指摘が残っていないので VISUAL_REVIEW は出ない
+    expect(res.issues.filter((i) => i.code === 'VISUAL_REVIEW')).toEqual([]);
+  }, 300_000);
+
   it('作り直しは1ページ2回まで。直らない指摘は VISUAL_REVIEW としてレポートに残す', async () => {
     const t = photoAwareFake([outline, draft]);
     const orig = t.complete.bind(t);

@@ -8,7 +8,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { z } from 'zod';
 import { detectFaces, type Face } from './faces.js';
-import { visibleIn, type VisGrid } from './visibility.js';
+import { showsThroughIn, visibleIn, type VisGrid } from './visibility.js';
 
 export const PhotoLibrarySchema = z.array(
   z.object({
@@ -65,6 +65,9 @@ export type FitOptions = {
 };
 
 const ZOOMS = [1, 1.15, 1.3, 1.5];
+
+/** 顔の箱のうち、目・鼻・口のある中心部分（上の 35%＝おでこ・髪・帽子のつば、下の 20%＝首、左右 15% を除く。検出の箱はヘルメットの上から首までを含む） */
+export const core = (f: Face) => ({ x0: f.x + f.w * 0.15, x1: f.x + f.w * 0.85, y0: f.y + f.h * 0.35, y1: f.y + f.h * 0.8 });
 const STEPS = 24;
 
 /**
@@ -95,18 +98,45 @@ export function chooseCrop(w: number, h: number, aspect: number, faces: Face[], 
             const iy1 = Math.min(f.y + f.h, top + ch);
             const inside = ix1 > ix0 && iy1 > iy0 ? ((ix1 - ix0) * (iy1 - iy0)) / (f.w * f.h) : 0;
             let vis = 1;
+            const c = core(f);
             if (inside > 0 && opts.grid) {
-              let u0 = (ix0 - left) / cw;
-              let u1 = (ix1 - left) / cw;
-              if (flipped) [u0, u1] = [1 - u1, 1 - u0];
-              vis = visibleIn(opts.grid, u0, (iy0 - top) / ch, u1, (iy1 - top) / ch);
+              // 図形に隠れるかは、目・鼻・口の中心部分で測る（顔の箱はおでこ・帽子のつばまで含む。
+              // ヘルメットの上が帯にかかっただけで 0.64 と出た。2026-10-28 表紙）。枠からのはみ出しは顔全体で測る（上の inside）
+              const cx0 = Math.max(c.x0, left);
+              const cy0 = Math.max(c.y0, top);
+              const cx1 = Math.min(c.x1, left + cw);
+              const cy1 = Math.min(c.y1, top + ch);
+              if (cx1 <= cx0 || cy1 <= cy0) vis = 0;
+              else {
+                let u0 = (cx0 - left) / cw;
+                let u1 = (cx1 - left) / cw;
+                if (flipped) [u0, u1] = [1 - u1, 1 - u0];
+                vis = visibleIn(opts.grid, u0, (cy0 - top) / ch, u1, (cy1 - top) / ch);
+              }
+            }
+            // 顔も体も図形（白い切り抜きなど）の向こうで見えない人は、枠の外に出た人と同じ＝画面に出ていない。
+            // 顔だけが隠れて体が見えている（首から上が無い人に見える）なら、隠れた顔として数える
+            let offStage = false;
+            // 半透明の色の図形の下（色越しに透けて見える＝「色ベタで潰れた顔」）は数える。測るのは「写真が透けて見えるか」
+            if (inside > 0.05 && vis < 0.05 && opts.grid) {
+              let bu0 = (Math.max(f.x, left) - left) / cw;
+              let bu1 = (Math.min(f.x + f.w, left + cw) - left) / cw;
+              if (flipped) [bu0, bu1] = [1 - bu1, 1 - bu0];
+              const bv0 = Math.min(1, (f.y + f.h - top) / ch);
+              const bv1 = Math.min(1, (f.y + f.h * 2.2 - top) / ch);
+              let fu0 = (Math.max(c.x0, left) - left) / cw;
+              let fu1 = (Math.min(c.x1, left + cw) - left) / cw;
+              if (flipped) [fu0, fu1] = [1 - fu1, 1 - fu0];
+              const faceThrough = showsThroughIn(opts.grid, fu0, Math.max(0, (c.y0 - top) / ch), fu1, Math.min(1, (c.y1 - top) / ch));
+              offStage = faceThrough < 0.05 && (bv1 <= bv0 || showsThroughIn(opts.grid, bu0, bv0, bu1, bv1) < 0.3);
             }
             const seen = inside * vis;
             const weight = (f.w * f.h) / maxArea;
             score += weight * seen;
             // 枠の端で顔が半分だけ切れるのは、全部入るより・全部外れるより悪い
             if (inside > 0.05 && inside < 0.9) score -= weight * 0.6;
-            if (major.includes(f)) worst = Math.min(worst, seen);
+            // 枠の外に外した顔は「隠れた」のではない（握手の相手を枠の外に出したのに 0 と出ていた。2026-10-28）。一部だけ入る顔は数える
+            if (major.includes(f) && inside > 0.05 && !offStage) worst = Math.min(worst, seen);
           }
           score -= (zoom - 1) * 0.08 + (flipped ? 0.03 : 0);
           if (score > best.score + 1e-9) best = { left, top, width: cw, height: ch, zoom, flipped, score, faceVisible: worst };

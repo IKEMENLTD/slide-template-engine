@@ -1,6 +1,6 @@
 /**
  * D段：組み立て（REQUIREMENTS 7章D）。見本スライドを複製し、名前の付いた図形の文字・写真だけを差し替える。
- * 飾りの図形には触らない。出力は必ず掃除（sanitize）と構造検査を通す（D-004）。
+ * 飾りの図形には触らない（左右反転するページは、テンプレートの形をそのまま写す＝D-042）。出力は必ず掃除（sanitize）と構造検査を通す（D-004）。
  */
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -9,6 +9,7 @@ import type { Catalog } from '../catalog/build-catalog.js';
 import type { TemplateConfig } from '../catalog/config.js';
 import type { DeckPlan } from '../plan/schema.js';
 import { checkPptxStructure, type StructureIssue } from '../check/pptx-structure.js';
+import { mirrorPptx } from './mirror.js';
 import { replaceImage } from './replace-image.js';
 import { replaceText } from './replace-text.js';
 import { sanitizePptx } from './sanitize.js';
@@ -60,7 +61,9 @@ export async function assembleDeck(args: {
   }
   const rawName = 'deck.raw.pptx';
   await pres.write(rawName);
-  const { buffer } = await sanitizePptx(readFileSync(path.join(workDir, rawName)));
+  const clean = (await sanitizePptx(readFileSync(path.join(workDir, rawName)))).buffer;
+  // 左右反転するページ（D-042）。飾りの図形の位置はテンプレートの形を写すだけで、新しく決めない
+  const buffer = await mirrorPptx(clean, plan.pages.flatMap((p, i) => (p.mirrored && cfg.mirror[p.type] ? [{ page: i + 1, fixed: cfg.mirror[p.type].fixed }] : [])));
   writeFileSync(args.outFile, buffer);
   rmSync(workDir, { recursive: true, force: true });
   const structure = await checkPptxStructure(buffer);

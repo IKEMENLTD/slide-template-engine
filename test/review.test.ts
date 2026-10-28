@@ -88,3 +88,18 @@ describe('描画の結果の検査', () => {
   });
 });
 
+
+describe('見た目の採点の呼び出し', () => {
+  it('見せたページが全部そろっていれば、見せていないページを足して返しても受け取り、余分は捨てる（20ページの資料が止まった実例）', async () => {
+    const { reviewPages } = await import('../src/review/visual.js');
+    const { buildFixtureCatalog, CONFIG, fakeTransport } = await import('./helpers.js');
+    const catalog = await buildFixtureCatalog();
+    const page = (type: string) => ({ type, slots: {}, photos: {}, outlinePage: 1, trimmed: [], phraseBroken: [], rewrites: 0 });
+    const plan = { version: 1 as const, deckTitle: 't', template: { file: 'x', sha256: 'x' }, pages: ['cover', 'section', 'section'].map(page) };
+    const png = await split('rv.png', 0.4);
+    const t = fakeTransport([JSON.stringify({ pages: [1, 2, 3].map((p) => ({ page: p, verdict: 'ok', problems: [] })) })]);
+    const r = await reviewPages({ transport: t, modelId: 'claude-sonnet-5-5', record: () => {} }, { plan, catalog, cfg: CONFIG, pages: [1, 3], pngs: [png, png, png], round: 2 });
+    expect(r.map((x) => x.page)).toEqual([1, 3]);
+    expect(t.requests).toHaveLength(1);
+  });
+});

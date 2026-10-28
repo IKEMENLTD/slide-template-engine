@@ -65,7 +65,7 @@ export async function readDeckTexts(buf: Buffer | Uint8Array): Promise<Array<Rec
   return out;
 }
 
-export async function checkDeck(buf: Buffer, plan: DeckPlan, catalog: Catalog, ctx: SlotCheckContext, maxSameTypeInRow: number, minFaceVisible = 0.6): Promise<Issue[]> {
+export async function checkDeck(buf: Buffer, plan: DeckPlan, catalog: Catalog, ctx: SlotCheckContext, maxSameTypeInRow: number, minFaceVisible = 0.75): Promise<Issue[]> {
   const out: Issue[] = [];
   for (const s of await checkPptxStructure(buf)) out.push(issue('PPTX_REPAIR', `${s.code} ${s.part}: ${s.detail}`));
   const slides = await readDeckTexts(buf);

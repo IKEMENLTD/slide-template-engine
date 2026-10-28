@@ -93,7 +93,42 @@
     "maxUsesPerFile": 2,
     "maxGenerate": 12,
     "model": "gpt-image-2.5-flare",
-    "quality": "medium"
+    "quality": "medium",
+    "faceless": {
+      "numbers/3": [
+        "img.side"
+      ],
+      "photo-text/b": [
+        "img.hero"
+      ],
+      "collage": [
+        "img.hero"
+      ]
+    }
+  },
+  "mirror": {
+    "numbers/3": {
+      "fixed": [
+        "deco.end-triangle"
+      ]
+    },
+    "attention": {
+      "fixed": [
+        "txt.eyebrow",
+        "deco.end-triangle"
+      ]
+    },
+    "section": {
+      "fixed": []
+    },
+    "photo-text/a": {
+      "fixed": [
+        "deco.end-triangle"
+      ]
+    },
+    "photo-text/b": {
+      "fixed": []
+    }
   },
   "review": {
     "enabled": true,

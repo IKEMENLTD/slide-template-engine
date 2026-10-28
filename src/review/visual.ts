@@ -78,11 +78,14 @@ export async function reviewPages(
       maxTokens: REVIEW_MAX_OUTPUT_TOKENS,
       budgetMs: a.cfg.ai.callBudgetMs,
       images: batch.map((n) => a.pngs[n - 1]),
+      // 見せたページが全部あれば足りる。見せていないページ（p17 と p19 を見せたのに p18 も返す）は捨てる（2026-10-28 実例：3回とも p18 を足して資料が止まった）
       validate: (v) => {
-        const got = v.pages.map((p) => p.page).sort((x, y) => x - y);
-        return JSON.stringify(got) === JSON.stringify([...batch].sort((x, y) => x - y)) ? null : `page は ${batch.join(', ')} の ${batch.length} 件にする`;
+        const got = new Set(v.pages.map((p) => p.page));
+        const missing = batch.filter((n) => !got.has(n));
+        return missing.length ? `page は ${batch.join(', ')} の ${batch.length} 件にする（p${missing.join(', p')} が無い）` : null;
       },
     });
+    res.pages = res.pages.filter((p, i) => batch.includes(p.page) && res.pages.findIndex((q) => q.page === p.page) === i);
     // 欄の名前は、そのページの型に実在するものだけ残す（AI が「photo」などを作ることがある）。本文の頭の重複も外す
     for (const r of res.pages) {
       const t = a.catalog.types.find((x) => x.key === a.plan.pages[r.page - 1]?.type);

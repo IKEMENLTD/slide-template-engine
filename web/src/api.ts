@@ -38,7 +38,7 @@ export type RunView = {
 
 export type SlotView = { name: string; label: string; kind: string; text: string; maxChars: number | null; maxLines: number | null; perLine: number | null };
 export type PhotoView = { name: string; label: string; image: string | null; aspect: number | null };
-export type PageView = { n: number; type: string; typeLabel: string; image: string | null; slots: SlotView[]; photos: PhotoView[] };
+export type PageView = { n: number; type: string; typeLabel: string; mirrored: boolean; canMirror: boolean; image: string | null; slots: SlotView[]; photos: PhotoView[] };
 export type Fit = { ok: boolean; chars: number; maxChars: number | null; lines: number; maxLines: number | null; reason: string | null };
 export type TypeChoice = { key: string; label: string; sameRole: boolean; current: boolean };
 
@@ -106,6 +106,7 @@ export const api = {
   saveText: (id: string, n: number, slots: Record<string, string>) => call<{ page: PageView }>('POST', `/api/runs/${id}/pages/${n}/text`, { slots }),
   aiRevise: (id: string, n: number, instruction: string) => call<{ page: PageView }>('POST', `/api/runs/${id}/pages/${n}/ai`, { instruction }),
   changeType: (id: string, n: number, type: string) => call<{ page: PageView }>('POST', `/api/runs/${id}/pages/${n}/type`, { type }),
+  toggleMirror: (id: string, n: number) => call<{ page: PageView }>('POST', `/api/runs/${id}/pages/${n}/mirror`),
   replacePhoto: (id: string, n: number, slot: string, file: File) => {
     const f = new FormData();
     f.append('slot', slot);

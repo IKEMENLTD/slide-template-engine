@@ -397,6 +397,21 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
 
             {tab === 'type' && (
               <div className="panel-body">
+                {page.canMirror && (
+                  <div className="mirror">
+                    <p className="hint">
+                      写真と図形のかたまりを左右反対側に移します（いま：{page.mirrored ? '左右を入れ替えた向き' : '見本どおりの向き'}）。文字の並びと、左上のラベル・右下の三角の位置は変わりません。写真は、顔が図形に隠れないように切り抜き直します（約20秒）。
+                    </p>
+                    <button
+                      type="button"
+                      className="btn"
+                      disabled={!!busy}
+                      onClick={() => void act({ label: '左右を入れ替えています', about: '約20秒' }, () => api.toggleMirror(run.id, cur), `${cur}ページ目の左右を入れ替えました`)}
+                    >
+                      左右を入れ替える
+                    </button>
+                  </div>
+                )}
                 <p className="hint">ページの形（レイアウト）を替えます。文字は AI が新しい形に合わせて書き直します（約1分）。上のほうが、いまのページに合う形です。項目の少ない形を選ぶと、入りきらない内容は外れます（「元に戻す」で戻せます）。</p>
                 {!types && <p className="muted">読み込んでいます…</p>}
                 <div className="types">

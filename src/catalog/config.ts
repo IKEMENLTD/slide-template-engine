@@ -65,13 +65,27 @@ export const ConfigSchema = z
         maxGenerate: z.number().int().nonnegative(),
         model: z.string(),
         quality: z.enum(['low', 'medium', 'high']),
-        /** 写真の欄で、人の顔がこの割合より図形に隠れていたら注意（FACE_COVERED）。生成した写真なら作り直す */
-        minFaceVisible: z.number().min(0).max(1).default(0.6),
-        /** 顔が隠れる生成写真を、構図を指定して作り直す回数の上限（1資料あたり） */
-        maxRegenerate: z.number().int().nonnegative().default(4),
+        /**
+         * 写真の欄で、人の顔の見えている割合がこれ未満なら注意（FACE_COVERED）。生成した写真なら作り直す。
+         * 顔は目・鼻・口の部分で測る（prepare.ts の core）。この測り方で、目で見て問題の無い顔は 0.78 以上、欠けていた顔は 0.7 前後以下だった（2026-10-28 実測・D-042）。
+         * 細かい欠け（横顔・文字が重なる等）は、描いた画面の採点が拾って作り直す
+         */
+        minFaceVisible: z.number().min(0).max(1).default(0.75),
+        /** 顔が隠れる生成写真を、構図を指定して作り直す回数の上限（1資料あたり）。20ページの資料で 4 では足りなかった（2026-10-28） */
+        maxRegenerate: z.number().int().nonnegative().default(12),
+        /**
+         * 人の顔を入れない写真の欄（型ID → 欄の名前）。半透明の色の図形が写真全体にかかる枠など、顔を置ける場所が無い欄。
+         * 先方の見本 PDF でも、こうした枠には人の写らない写真（建物・室内・街並み）を使っている（D-042）
+         */
+        faceless: z.record(z.string(), z.array(z.string())).default({}),
       })
       .strict()
-      .default({ maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium', minFaceVisible: 0.6, maxRegenerate: 4 }),
+      .default({ maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium', minFaceVisible: 0.75, maxRegenerate: 12, faceless: {} }),
+    /**
+     * 左右反転してよい型（D-042）。キーは型ID、fixed は反転しても動かさない部品の名前（角の英字ラベル・右下の三角など）。
+     * ここに無い型は反転しない。どのページを反転するかは AI ではなくコードが決まりで決める（plan/mirror-plan.ts）
+     */
+    mirror: z.record(z.string(), z.object({ fixed: z.array(z.string()) }).strict()).default({}),
     /** 見た目の採点と作り直し（11章 VISUAL_REVIEW・7章E） */
     review: z
       .object({
@@ -150,7 +164,8 @@ export function scaffoldConfig(opts: {
       lightDarkRatio: { enabled: false, target: 1.5, tolerance: 0.3, darkBelow: 0.5 },
       ai: { model: 'claude-sonnet-5-5', effort: 'medium', refusalFallback: true, maxRewrites: 2, callBudgetMs: 600000 },
       phraseBreak: ['txt.headline', 'txt.subtitle', 'txt.*.title', 'txt.*.lead', 'txt.*.main', 'txt.*.caption', 'txt.item.*', 'txt.note.*'],
-      photos: { maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium', minFaceVisible: 0.6, maxRegenerate: 4 },
+      photos: { maxUsesPerFile: 2, maxGenerate: 12, model: 'gpt-image-2.5-flare', quality: 'medium', minFaceVisible: 0.75, maxRegenerate: 12, faceless: {} },
+      mirror: {},
       review: { enabled: true, maxRounds: 2, pagesPerCall: 5, dpi: 96 },
       checks: { nameIgnoreSlots: ['txt.eyebrow'], unitSlots: ['txt.unit.*'] },
     },
