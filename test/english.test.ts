@@ -126,3 +126,10 @@ describe('インドの原稿（D-043 再確認）', () => {
     expect(Math.abs(recommendedSlides(en) - recommendedSlides(ja))).toBeLessThanOrEqual(2);
   });
 });
+
+describe('INR と見出しだけの表紙（D-043 再確認）', () => {
+  it('原稿の ₹ を INR と書いても「原稿に無い語」にしない', () => {
+    expect(namesNotIn('INR 12 lakh for one line', 'The pilot costs ₹12 lakh.', 'en')).toEqual([]);
+    expect(namesNotIn('INR 12 lakh', 'The pilot costs 12 lakh.', 'en')).toEqual(['INR']);
+  });
+});

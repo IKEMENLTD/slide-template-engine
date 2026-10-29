@@ -97,7 +97,8 @@ export const sourceNumbers = (manuscript: string) => {
  */
 export function namesNotIn(text: string, manuscript: string, language: 'ja' | 'en' = 'ja'): string[] {
   const plain = text.replace(/\[\[|\]\]/g, '');
-  const src = manuscript.toLowerCase();
+  // 原稿の ₹ は資料では INR と書く（字体に ₹ が無い。D-043）。INR を「原稿に無い語」にしない
+  const src = manuscript.toLowerCase() + (/₹/.test(manuscript) ? ' inr' : '');
   const found = new Set<string>();
   // 英語の資料では英単語はどれも原稿に無くて当然（訳した語・言い換えた語）。固有名詞らしい形だけを拾う：
   // 略語（ABC）・語の途中に大文字（TaskMate）・英字と数字の混じり（ISO9001）
