@@ -219,6 +219,7 @@ export const TYPE_LABELS_EN: Record<string, string> = {
   'toc/5': 'Contents (5 items)',
   'photo-text/a': 'Photo + text A (heading and paragraph)',
   'photo-text/b': 'Photo + text B (heading and 3 points)',
+  'cover/plain': 'Cover (photo + title only)',
 };
 
 export function typeLabel(key: string, jaLabel: string, lang: UiLang = currentLang()): string {
