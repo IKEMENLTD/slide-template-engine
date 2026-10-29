@@ -121,7 +121,7 @@ export const FALLBACK_FONTS = /^DejaVu/i;
 export function renderIssues(r: Pick<RenderResult, 'fonts' | 'pages'>, slides: number): Issue[] {
   const out: Issue[] = [];
   const fallback = r.fonts.filter((f) => FALLBACK_FONTS.test(f));
-  if (fallback.length) out.push(issue('PPTX_REPAIR', `描画でテンプレートの字体が見つからず、代わりの字体 ${fallback.join(', ')} で描かれた（fonts/ と設定を確かめる）`));
-  if (r.pages.length !== slides) out.push(issue('SLIDE_COUNT', `描画したページが ${r.pages.length} 枚（設計図は ${slides} 枚）`));
+  if (fallback.length) out.push(issue('PPTX_REPAIR', `描画でテンプレートの字体が見つからず、代わりの字体 ${fallback.join(', ')} で描かれた（fonts/ と設定を確かめる）`, {}, `A template font was missing when drawing, so ${fallback.join(', ')} was used instead`));
+  if (r.pages.length !== slides) out.push(issue('SLIDE_COUNT', `描画したページが ${r.pages.length} 枚（設計図は ${slides} 枚）`, {}, `${r.pages.length} pages were drawn (the plan has ${slides})`));
   return out;
 }

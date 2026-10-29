@@ -19,7 +19,7 @@ import { fitSlot } from '../fit/fit-slot.js';
 import { breakByPhrase } from '../fit/phrase-break.js';
 import { describeType, imageSlots, textSlots } from './describe.js';
 import { catalogBlock, manuscriptBlock, planInstruction, rewriteInstruction } from './prompts.js';
-import type { DeckLanguage } from './locale.js';
+import { normalizeSymbols, type DeckLanguage } from './locale.js';
 import { PlanPageSchema, PlanSchema, type DeckPlan, type Outline, type PlanPage } from './schema.js';
 
 /** 1回の呼び出しで書かせるページ数。多いと出力が長くなり、途中で切れやすい */
@@ -84,6 +84,7 @@ function normalize(t: CatalogType, p: PlanPage, a: PlanArgs): { slots: Record<st
     if (s.name !== 'txt.eyebrow') text = text.replace(/\s*\n\s*/g, '');
     // 数字の表記（桁区切り）を原稿に合わせる
     text = restoreNumberNotation(text, a.manuscript);
+    text = normalizeSymbols(text);
     // 英語は語の切れ目（空白）で折り返すので、文節の改行は入れない（D-043）
     if (a.check.language !== 'en' && matchesAny(a.cfg.phraseBreak, s.name)) {
       const r = breakByPhrase(s, text, a.catalog.fit, a.check.resolveFile);

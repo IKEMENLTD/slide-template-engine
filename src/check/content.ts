@@ -27,7 +27,8 @@ export type IssueCode =
   /** 写真を生成できなかった（残高切れなど）。その欄は見本の写真のまま */
   | 'PHOTO_NOT_GENERATED';
 
-export type Issue = { code: IssueCode; level: IssueLevel; page?: number; slot?: string; message: string };
+/** messageEn：英語の画面で出す文（D-043）。無ければ message を出す */
+export type Issue = { code: IssueCode; level: IssueLevel; page?: number; slot?: string; message: string; messageEn?: string };
 
 /** 11章の「止める／注意」。コードごとに1か所で決める */
 export const LEVEL: Record<IssueCode, IssueLevel> = {
@@ -50,7 +51,7 @@ export const LEVEL: Record<IssueCode, IssueLevel> = {
   PHOTO_NOT_GENERATED: 'warning',
 };
 
-export const issue = (code: IssueCode, message: string, where: { page?: number; slot?: string } = {}): Issue => ({ code, level: LEVEL[code], ...where, message });
+export const issue = (code: IssueCode, message: string, where: { page?: number; slot?: string } = {}, messageEn?: string): Issue => ({ code, level: LEVEL[code], ...where, message, ...(messageEn ? { messageEn } : {}) });
 
 const toHalf = (s: string) => s.replace(/[０-９，．％]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
 
@@ -58,7 +59,8 @@ const toHalf = (s: string) => s.replace(/[０-９，．％]/g, (c) => String.fro
 export function numbersIn(text: string): string[] {
   const t = toHalf(text);
   const out: string[] = [];
-  for (const m of t.matchAll(/\d+(?:,\d{3})*(?:\.\d+)?/g)) out.push(m[0].replace(/,/g, ''));
+  // インドの桁区切り（5,00,000＝50万・12,34,567）も1つの数として読む（D-043）
+  for (const m of t.matchAll(/\d{1,3}(?:,\d{2})+,\d{3}(?!\d)(?:\.\d+)?|\d+(?:,\d{3})*(?:\.\d+)?/g)) out.push(m[0].replace(/,/g, ''));
   return out;
 }
 
@@ -78,6 +80,12 @@ export const sourceNumbers = (manuscript: string) => {
   const unit: Record<string, number> = { 千: 1e3, 万: 1e4, 億: 1e8 };
   for (const m of toHalf(manuscript).matchAll(/(\d+(?:,\d{3})*(?:\.\d+)?)\s*(千|万|億)/g)) {
     const v = Number(m[1].replace(/,/g, '')) * unit[m[2]];
+    if (Number.isFinite(v)) s.add(String(Math.round(v)));
+  }
+  // 「5 lakh」「1.2 crore」も同じ（インドの原稿。5 lakh＝500,000）
+  const indian: Record<string, number> = { lakh: 1e5, lakhs: 1e5, lac: 1e5, crore: 1e7, crores: 1e7 };
+  for (const m of toHalf(manuscript).matchAll(/(\d+(?:,\d{2,3})*(?:\.\d+)?)\s*(lakhs?|lac|crores?)\b/gi)) {
+    const v = Number(m[1].replace(/,/g, '')) * indian[m[2].toLowerCase()];
     if (Number.isFinite(v)) s.add(String(Math.round(v)));
   }
   return s;

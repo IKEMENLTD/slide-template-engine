@@ -67,19 +67,19 @@ export async function readDeckTexts(buf: Buffer | Uint8Array): Promise<Array<Rec
 
 export async function checkDeck(buf: Buffer, plan: DeckPlan, catalog: Catalog, ctx: SlotCheckContext, maxSameTypeInRow: number, minFaceVisible = 0.75): Promise<Issue[]> {
   const out: Issue[] = [];
-  for (const s of await checkPptxStructure(buf)) out.push(issue('PPTX_REPAIR', `${s.code} ${s.part}: ${s.detail}`));
+  for (const s of await checkPptxStructure(buf)) out.push(issue('PPTX_REPAIR', `${s.code} ${s.part}: ${s.detail}`, {}, `File structure problem: ${s.code} ${s.part}`));
   const slides = await readDeckTexts(buf);
-  if (slides.length !== plan.pages.length) out.push(issue('SLIDE_COUNT', `スライドが ${slides.length} 枚（設計図は ${plan.pages.length} 枚）`));
+  if (slides.length !== plan.pages.length) out.push(issue('SLIDE_COUNT', `スライドが ${slides.length} 枚（設計図は ${plan.pages.length} 枚）`, {}, `The file has ${slides.length} slides (the plan has ${plan.pages.length})`));
   plan.pages.forEach((p, i) => {
     const t = catalog.types.find((x) => x.key === p.type);
     if (!t || !slides[i]) return;
     out.push(...checkPage(i + 1, t, slides[i], ctx));
-    for (const name of p.trimmed) out.push(issue('TRIMMED', `${name} は欄に入らず、最後の手段で丸めた: 「${slides[i][name] ?? ''}」`, { page: i + 1, slot: name }));
+    for (const name of p.trimmed) out.push(issue('TRIMMED', `${name} は欄に入らず、最後の手段で丸めた: 「${slides[i][name] ?? ''}」`, { page: i + 1, slot: name }, `${name} did not fit, so it was shortened: "${slides[i][name] ?? ''}"`));
     // 写真の切り抜きで、顔を見えている部分に入れきれなかった欄（C段・仕上げで写真を置いたときに記録）
     for (const [name, fit] of Object.entries(p.photoFit ?? {}))
       if (fit.faceVisible !== null && fit.faceVisible < minFaceVisible && p.photoFiles?.[name])
         out.push(
-          issue('FACE_COVERED', `${name}: ${fit.faceVisible < 0.15 ? '人の顔がほとんど図形に隠れている' : `人の顔の約${Math.round((1 - fit.faceVisible) * 10)}割が図形に隠れている`}`, { page: i + 1, slot: name })
+          issue('FACE_COVERED', `${name}: ${fit.faceVisible < 0.15 ? '人の顔がほとんど図形に隠れている' : `人の顔の約${Math.round((1 - fit.faceVisible) * 10)}割が図形に隠れている`}`, { page: i + 1, slot: name }, `${name}: ${fit.faceVisible < 0.15 ? "a person's face is almost fully covered by a shape" : `about ${Math.round((1 - fit.faceVisible) * 100)}% of a person's face is covered by a shape`}`)
         );
   });
   out.push(...checkTypeRuns(plan.pages.map((p) => p.type), maxSameTypeInRow));

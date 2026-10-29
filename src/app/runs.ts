@@ -61,7 +61,8 @@ let current: string | null = null;
 
 /** 原稿の長さから、おすすめの枚数（実測：527字→5枚・1,005字→10枚・1,592字→20枚で作った） */
 export function recommendedSlides(text: string, min = 4, max = 20): number {
-  const n = [...text.replace(/\s/g, '')].length;
+  // 英字は和文の約半分の情報量（同じ原稿を英訳すると字数が約2.2倍）なので、0.45字と数える（D-043）
+  const n = [...text.replace(/\s/g, '')].reduce((a, ch) => a + (/[\x21-\x7e]/.test(ch) ? 0.45 : 1), 0);
   return Math.max(min, Math.min(max, Math.round(n / 85)));
 }
 
@@ -273,7 +274,7 @@ export function presentIssues(issues: Issue[], edited: number[], lang: UiLang = 
       title: ISSUE_WORDS[lang][i.code].title,
       action: ISSUE_WORDS[lang][i.code].action,
       // 欄の名前は slotLabel に出すので、文の頭の「欄の名前:」は外す
-      detail: plainText(i.message, lang).replace(/^(?:「[^」]+」|"[^"]+")\s*[:：]\s*/, ''),
+      detail: plainText(lang === 'en' && i.messageEn ? i.messageEn : i.message, lang).replace(/^(?:「[^」]+」|"[^"]+")\s*[:：]\s*/, ''),
     }))
     .sort((a, b) => (a.level === b.level ? (a.page ?? 0) - (b.page ?? 0) : a.level === 'error' ? -1 : 1));
 }

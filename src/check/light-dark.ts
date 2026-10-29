@@ -21,7 +21,7 @@ export async function checkLightDark(pngs: string[], cfg: TemplateConfig['lightD
   for (const [i, png] of pngs.entries()) {
     const r = await lightDarkRatio(png, cfg.darkBelow);
     if (Math.abs(r - cfg.target) > cfg.tolerance)
-      out.push(issue('LIGHT_DARK_RATIO', `白：黒＝${r === Infinity ? '黒なし' : `${r.toFixed(2)}：1`}（目安 ${cfg.target}±${cfg.tolerance}：1）`, { page: i + 1 }));
+      out.push(issue('LIGHT_DARK_RATIO', `白：黒＝${r === Infinity ? '黒なし' : `${r.toFixed(2)}：1`}（目安 ${cfg.target}±${cfg.tolerance}：1）`, { page: i + 1 }, `White to black = ${r === Infinity ? 'no black' : `${r.toFixed(2)} : 1`} (target ${cfg.target}±${cfg.tolerance} : 1)`));
   }
   return out;
 }

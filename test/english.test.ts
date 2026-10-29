@@ -104,3 +104,25 @@ describe('英文の丸め・写真・ファイル', () => {
     expect(xml).toMatch(/altLang="en-US"|lang="en-US"/);
   });
 });
+
+describe('インドの原稿（D-043 再確認）', () => {
+  it('インドの桁区切り（5,00,000）と lakh・crore を、原稿どおりの数として扱う', () => {
+    const src = sourceNumbers('Budget is ₹5,00,000 for the pilot and Rs 1.2 crore for rollout. Savings of 12,34,567 a year, 3 lakh per line.');
+    expect(numbersNotIn('INR 5,00,000', src)).toEqual([]);
+    expect(numbersNotIn('INR 500,000', src)).toEqual([]);
+    expect(numbersNotIn('INR 12,000,000', src)).toEqual([]);
+    expect(numbersNotIn('12,34,567 per year', src)).toEqual([]);
+    expect(numbersNotIn('300,000 per line', src)).toEqual([]);
+    expect(numbersNotIn('1,234,567', src)).toEqual(['1234567'].filter((n) => !src.has(n)));
+  });
+  it('字体に無い ₹ は INR に直す', async () => {
+    const { normalizeSymbols } = await import('../src/plan/locale.js');
+    expect(normalizeSymbols('₹5 lakh and ₹ 50,000')).toBe('INR 5 lakh and INR 50,000');
+  });
+  it('英語の原稿の推奨枚数は、同じ内容の日本語と同じくらいになる（英字を多く数えない）', async () => {
+    const { recommendedSlides } = await import('../src/app/runs.js');
+    const ja = '請求書づくりの時間を、月40時間から月8時間に減らします。'.repeat(20);
+    const en = 'We cut the time spent on invoices from 40 hours to 8 hours a month. '.repeat(20);
+    expect(Math.abs(recommendedSlides(en) - recommendedSlides(ja))).toBeLessThanOrEqual(2);
+  });
+});

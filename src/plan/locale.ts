@@ -52,6 +52,7 @@ export function languageRules(language: DeckLanguage): string {
     '- ★資料の文言（txt.* と num.* の欄、deckTitle）は、すべて英語で書く。原稿が日本語なら英語に訳す。ビジネスの資料として自然で簡潔な英語にする（見出しは短い句でよい。インドの読み手にも自然な、平易なビジネス英語）。',
     '- 欄の最大字数は、英語では「英字なら◯字」の数を目安にする（英字は全角の約半分の幅）。単語の途中では折り返さないので、長い単語を避けて短く言い換える。',
     '- 数字は原稿の数字をそのまま使う。「万」「億」は桁を数字で書く（300万円 → 3,000,000 yen。million や lakh などの語で桁を言い換えない）。円は yen（または JPY）と書く。',
+    '- 「₹」（ルピーの記号）は資料の字体に無いので使わない。INR と書く（₹5 lakh → INR 5 lakh、₹50,000 → INR 50,000）。lakh・crore は原稿にあればそのまま使ってよい。',
     '- txt.unit.* には英語の単位だけ（"%" "hours" "cases" "yen" など）を入れる。',
     '- 写真の欄（photos）の説明は、日本語でよい（写真を選ぶためのメモ）。',
   ].join('\n');
@@ -60,4 +61,12 @@ export function languageRules(language: DeckLanguage): string {
 /** A段（ページ割り）に足す一文 */
 export function outlineLanguageRule(language: DeckLanguage): string {
   return language === 'ja' ? '' : '\n- ★資料は英語で作る。catch・body・details・emphasis・deckTitle は英語で書く（原稿が日本語なら英語に訳す）。数字は原稿の数字をそのまま使い、「万」「億」は桁を数字で書く（300万 → 3,000,000）。sourceQuotes だけは原稿の文をそのまま写す。';
+}
+
+/**
+ * 字体に無い記号を、資料の文字として使える書き方に直す（AI が守らなかったときの保険）。
+ * ₹ は資料の字体（Barlow・Noto）に無い（2026-10-29 実測）。インドの資料では INR と書く。
+ */
+export function normalizeSymbols(text: string): string {
+  return text.replace(/₹\s?/g, 'INR ');
 }

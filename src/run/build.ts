@@ -531,5 +531,5 @@ function photoStageIssues(dir: string): Issue[] {
   if (!d.generationError) return [];
   return d.records
     .filter((r) => r.file === null || r.source === 'template')
-    .map((r) => issue('PHOTO_NOT_GENERATED', `${r.slot}: 写真を作れなかったので見本の写真のまま（${d.generationError}）`, { page: r.page, slot: r.slot }));
+    .map((r) => issue('PHOTO_NOT_GENERATED', `${r.slot}: 写真を作れなかったので見本の写真のまま（${d.generationError}）`, { page: r.page, slot: r.slot }, `${r.slot}: the photo could not be created, so the template's sample photo is kept`));
 }

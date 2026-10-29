@@ -117,7 +117,7 @@ export const pagesToRedo = (r: PageReview[]) => r.filter((p) => p.verdict === 'r
 
 /** 最後の採点に残った指摘を、レポートの注意（VISUAL_REVIEW）にする。黙って出さない（7章E） */
 export function reviewIssues(r: PageReview[]): Issue[] {
-  return r.flatMap((x) => x.problems.map((p) => issue('VISUAL_REVIEW', `${p.kind === 'photo' ? '写真: ' : ''}${p.slot ? `${p.slot}: ` : ''}${p.message}`, { page: x.page, slot: p.slot })));
+  return r.flatMap((x) => x.problems.map((p) => issue('VISUAL_REVIEW', `${p.kind === 'photo' ? '写真: ' : ''}${p.slot ? `${p.slot}: ` : ''}${p.message}`, { page: x.page, slot: p.slot }, `${p.kind === 'photo' ? 'Photo: ' : ''}${p.slot ? `${p.slot}: ` : ''}${p.message}`)));
 }
 
 /** 保存した採点（review/round-N.json）から、ページごとの最新の結果を読む */

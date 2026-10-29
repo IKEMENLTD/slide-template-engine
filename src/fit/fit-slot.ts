@@ -15,6 +15,8 @@ export type FitResult = {
   maxChars: number;
   /** 収まらないときの理由（AI への書き直し指示にそのまま使える日本語） */
   reason?: string;
+  /** reason の英語（英語の画面で出す。D-043） */
+  reasonEn?: string;
 };
 
 export function fitSlot(slot: CatalogSlot, text: string, fit: Catalog['fit'], resolveFile: (p: string) => string): FitResult {
@@ -35,23 +37,35 @@ export function fitSlot(slot: CatalogSlot, text: string, fit: Catalog['fit'], re
   const paras = text.split('\n');
   let lines: string[];
   let widthProblem: string | undefined;
+  let widthProblemEn: string | undefined;
   if (st.wrap) {
     lines = paras.flatMap((p) => (p === '' ? [''] : wrapLines(p, opts)));
     // 折り返せないひとかたまり（「4,800」のような数字・英単語）は、行に入らなくても1行と予測される。
     // 実物の描画はそこで無理に折り返す（「4,80／0」）ので、行ごとの幅も測る。行末にぶら下げる句読点は数えない
     const limit = st.innerWidthPt * (1 - fit.slackRatio);
     const over = lines.find((l) => lineWidth(l.replace(/[、。，．,.」』）】]$/, ''), opts) > limit);
-    if (over) widthProblem = `「${over.replace(/\[\[|\]\]/g, '')}」が1行に入らない（数字や英単語は途中で折り返せない）`;
+    if (over) {
+      widthProblem = `「${over.replace(/\[\[|\]\]/g, '')}」が1行に入らない（数字や英単語は途中で折り返せない）`;
+      widthProblemEn = `"${over.replace(/\[\[|\]\]/g, '')}" does not fit on one line (numbers and words cannot be split)`;
+    }
   } else {
     lines = paras;
     const limit = st.innerWidthPt * (1 - fit.slackRatio);
     const over = paras.find((p) => lineWidth(p, opts) > limit);
-    if (over) widthProblem = `「${over}」が1行に入らない（この欄は折り返さない）`;
+    if (over) {
+      widthProblem = `「${over}」が1行に入らない（この欄は折り返さない）`;
+      widthProblemEn = `"${over}" does not fit on one line (this field does not wrap)`;
+    }
   }
   const chars = [...text.replace(/\n/g, '').replace(/\[\[|\]\]/g, '')].length;
   const res: FitResult = { ok: true, lines, lineCount: lines.length, maxLines: slot.maxLines, chars, maxChars: slot.maxChars };
-  if (widthProblem) res.reason = widthProblem;
-  else if (lines.length > slot.maxLines) res.reason = `この欄は最大${slot.maxCharsPerLine}字×${slot.maxLines}行。いまは${chars}字で${lines.length}行になる`;
+  if (widthProblem) {
+    res.reason = widthProblem;
+    res.reasonEn = widthProblemEn;
+  } else if (lines.length > slot.maxLines) {
+    res.reason = `この欄は最大${slot.maxCharsPerLine}字×${slot.maxLines}行。いまは${chars}字で${lines.length}行になる`;
+    res.reasonEn = `This field holds up to ${slot.maxLines} line(s). The text now takes ${lines.length} lines`;
+  }
   res.ok = !res.reason;
   return res;
 }

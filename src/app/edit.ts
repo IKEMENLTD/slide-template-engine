@@ -130,9 +130,10 @@ function pageView(c: Ctx, n: number, p: Page, lang: UiLang = currentLang()) {
       label: slotLabel(s.name, lang),
       kind: s.kind,
       text: p.slots[s.name] ?? '',
-      maxChars: s.maxChars ?? null,
+      // 英語の資料は英字の数で（D-043）
+      maxChars: (c.plan.language === 'en' && s.kind !== 'num' ? s.maxCharsLatin : s.maxChars) ?? null,
       maxLines: s.maxLines ?? null,
-      perLine: s.maxCharsPerLine ?? null,
+      perLine: (c.plan.language === 'en' && s.kind !== 'num' && s.maxCharsLatin && s.maxLines ? Math.floor(s.maxCharsLatin / s.maxLines) : s.maxCharsPerLine) ?? null,
     })),
     photos: imageSlots(t).map((s) => {
       const f = p.photoFiles?.[s.name];
@@ -156,12 +157,15 @@ export function typeChoices(id: string, n: number, lang: UiLang = currentLang())
 export function checkDraft(id: string, n: number, slots: Record<string, string>, lang: UiLang = currentLang()) {
   const c = load(id);
   const t = typeOf(c, pageAt(c, n).type);
+  // 英語の資料は、目安の字数を英字の数で出す（全角の字数だと、収まっているのに上限を超えて見える。D-043）
+  const en = c.plan.language === 'en';
+  const cap = (s: { kind: string; maxChars?: number; maxCharsLatin?: number }) => (en && s.kind !== 'num' ? s.maxCharsLatin : s.maxChars) ?? null;
   const fits = Object.fromEntries(
     textSlots(t).map((s) => {
       const text = slots[s.name] ?? '';
-      if (!s.style || !text.trim()) return [s.name, { ok: !!text.trim(), chars: [...text].length, maxChars: s.maxChars ?? null, lines: 0, maxLines: s.maxLines ?? null, reason: text.trim() ? null : fitReason('空です', { chars: 0, lines: 0, maxLines: null, perLine: null }, lang) }];
+      if (!s.style || !text.trim()) return [s.name, { ok: !!text.trim(), chars: [...text].length, maxChars: cap(s), lines: 0, maxLines: s.maxLines ?? null, reason: text.trim() ? null : fitReason('空です', { chars: 0, lines: 0, maxLines: null, perLine: null }, lang) }];
       const r = fitSlot(s, text, c.catalog.fit, resolveFile);
-      return [s.name, { ok: r.ok, chars: r.chars, maxChars: r.maxChars, lines: r.lineCount, maxLines: r.maxLines, reason: fitReason(r.reason ?? null, { chars: r.chars, lines: r.lineCount, maxLines: r.maxLines, perLine: s.maxCharsPerLine ?? null }, lang) }];
+      return [s.name, { ok: r.ok, chars: r.chars, maxChars: cap(s) ?? r.maxChars, lines: r.lineCount, maxLines: r.maxLines, reason: fitReason(r.reason ?? null, { chars: r.chars, lines: r.lineCount, maxLines: r.maxLines, perLine: en && s.maxCharsLatin && s.maxLines ? Math.floor(s.maxCharsLatin / s.maxLines) : s.maxCharsPerLine ?? null }, lang) }];
     })
   );
   return { fits, issues: presentIssues(checkPage(n, t, slots, c.check), [], lang) };
