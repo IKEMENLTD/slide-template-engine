@@ -133,3 +133,16 @@ describe('INR と見出しだけの表紙（D-043 再確認）', () => {
     expect(namesNotIn('INR 12 lakh', 'The pilot costs 12 lakh.', 'en')).toEqual(['INR']);
   });
 });
+
+describe('英語の資料の字間（D-043 再確認）', () => {
+  it('日本語用の広い字間を英語の見出しから外す。飾りの英字ラベルの字間は残す', async () => {
+    const out = await setTextLanguage(readFileSync(TEMPLATE), 'en-US', { keepTracking: ['txt.eyebrow'] });
+    const xml = await (await JSZip.loadAsync(out)).file('ppt/slides/slide3.xml')!.async('string');
+    const shape = (n: string) => xml.match(new RegExp(`<p:sp>(?:(?!</p:sp>)[\\s\\S])*name="${n.replace(/\./g, '\\.')}"[\\s\\S]*?</p:sp>`))![0];
+    expect(shape('txt.item.1.title')).not.toMatch(/spc="/);
+    expect(shape('txt.eyebrow')).toMatch(/spc="400"/);
+    // 字間の指定を渡さなければ、字間はそのまま（日本語の資料はこれまでどおり）
+    const same = await (await JSZip.loadAsync(await setTextLanguage(readFileSync(TEMPLATE), 'en-US'))).file('ppt/slides/slide3.xml')!.async('string');
+    expect(same).toMatch(/name="txt\.item\.1\.title"[\s\S]*?spc="350"/);
+  });
+});

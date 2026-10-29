@@ -15,12 +15,23 @@ import { replaceImage } from './replace-image.js';
 import { replaceText } from './replace-text.js';
 import { sanitizePptx } from './sanitize.js';
 
-/** スライドの文字の言語（lang）を替える。altLang（東アジアの字の言語）は残す */
-export async function setTextLanguage(buf: Buffer, lang: string): Promise<Buffer> {
+/**
+ * スライドの文字の言語（lang）を替える。altLang（東アジアの字の言語）は残す。
+ * keepTracking を渡すと、それ以外の欄の字間（spc）を外す：日本語の見出し用の広い字間は、英語の小文字にかかると
+ * 「L a t e  q u a l i t y」と間延びして読みにくい（2026-10-29 英語の見本で確認）。飾りの英字ラベルの字間は残す
+ */
+export async function setTextLanguage(buf: Buffer, lang: string, opts: { keepTracking?: string[] } = {}): Promise<Buffer> {
   const zip = await JSZip.loadAsync(buf);
   for (const name of Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))) {
-    const xml = await zip.file(name)!.async('string');
-    zip.file(name, xml.replace(/(<a:(?:rPr|endParaRPr|defRPr)\b[^>]*?\s)lang="[^"]*"/g, `$1lang="${lang}"`));
+    let xml = await zip.file(name)!.async('string');
+    xml = xml.replace(/(<a:(?:rPr|endParaRPr|defRPr)\b[^>]*?\s)lang="[^"]*"/g, `$1lang="${lang}"`);
+    if (opts.keepTracking)
+      xml = xml.replace(/<p:sp>[\s\S]*?<\/p:sp>/g, (sp) => {
+        const shape = sp.match(/<p:cNvPr\b[^>]*\sname="([^"]*)"/)?.[1] ?? '';
+        if (!shape.startsWith('txt.') || opts.keepTracking!.includes(shape)) return sp;
+        return sp.replace(/(<a:(?:rPr|endParaRPr|defRPr)\b[^>]*?)\sspc="-?\d+"/g, '$1');
+      });
+    zip.file(name, xml);
   }
   return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 6 } });
 }
@@ -76,7 +87,7 @@ export async function assembleDeck(args: {
   // 左右反転するページ（D-042）。飾りの図形の位置はテンプレートの形を写すだけで、新しく決めない
   const buffer = await mirrorPptx(clean, plan.pages.flatMap((p, i) => (p.mirrored && cfg.mirror[p.type] ? [{ page: i + 1, fixed: cfg.mirror[p.type].fixed }] : [])));
   // 英語の資料は、文字の言語を英語にする（PowerPoint の校正・字体の選び方が日本語扱いにならないように。D-043）
-  const final = plan.language === 'en' ? await setTextLanguage(buffer, 'en-US') : buffer;
+  const final = plan.language === 'en' ? await setTextLanguage(buffer, 'en-US', { keepTracking: ['txt.eyebrow'] }) : buffer;
   writeFileSync(args.outFile, final);
   rmSync(workDir, { recursive: true, force: true });
   const structure = await checkPptxStructure(final);
