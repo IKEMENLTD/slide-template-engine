@@ -146,3 +146,19 @@ describe('英語の資料の字間（D-043 再確認）', () => {
     expect(same).toMatch(/name="txt\.item\.1\.title"[\s\S]*?spc="350"/);
   });
 });
+
+describe('検査の文脈に資料の言語を渡し忘れない（2026-10-29 実例：仕上げのあとの検査で英単語を「原稿に無い語」にした）', () => {
+  it('検査の文脈（nameIgnoreSlots を持つもの）を作る所は、すべて language も渡す', async () => {
+    const { readdirSync, readFileSync: rf, statSync } = await import('node:fs');
+    const path = await import('node:path');
+    const files: string[] = [];
+    const walk = (d: string) => readdirSync(d).forEach((f) => (statSync(path.join(d, f)).isDirectory() ? walk(path.join(d, f)) : f.endsWith('.ts') && files.push(path.join(d, f))));
+    walk('src');
+    const missing: string[] = [];
+    for (const f of files) {
+      const src = rf(f, 'utf8');
+      for (const m of src.matchAll(/nameIgnoreSlots: cfg\.checks\.nameIgnoreSlots,[\s\S]{0,400}?\n\s*\}/g)) if (!/language:/.test(m[0])) missing.push(f);
+    }
+    expect(missing).toEqual([]);
+  });
+});

@@ -485,6 +485,8 @@ export async function recheck(dirArg: string, root: string): Promise<BuildResult
     nameIgnoreSlots: cfg.checks.nameIgnoreSlots,
     unitSlots: cfg.checks.unitSlots,
     resolveFile: (p) => (path.isAbsolute(p) ? p : path.join(root, p)),
+    // 仕上げで直したあとの検査も、資料の言語で（英語の資料の普通の英単語を「原稿に無い語」にしない。2026-10-29 実例）
+    language: plan.language ?? localeOf(info).language,
   }, cfg.deck.maxSameTypeInRow, cfg.photos.minFaceVisible);
   issues.push(...photoStageIssues(dir));
   // 描画と見た目の採点は、保存してある結果を読む（check は AI も描画も呼ばない）
