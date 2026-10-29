@@ -7,6 +7,7 @@ import type { Catalog } from '../catalog/build-catalog.js';
 import type { TemplateConfig } from '../catalog/config.js';
 import { neutralizeFenceTags } from '../ai/fence.js';
 import { describeCatalog, describeRoles } from './describe.js';
+import { languageRules, outlineLanguageRule, type DeckLanguage } from './locale.js';
 
 /** 材料①：原稿。信用できない入力として囲い、囲いのタグは潰す（9-7） */
 export function manuscriptBlock(manuscript: string): string {
@@ -18,8 +19,8 @@ export function manuscriptBlock(manuscript: string): string {
 }
 
 /** 材料②：型カタログ（A段・B段で同じ文字列） */
-export function catalogBlock(cat: Catalog): string {
-  return `<catalog>\n${describeCatalog(cat)}\n</catalog>`;
+export function catalogBlock(cat: Catalog, language: DeckLanguage = 'ja'): string {
+  return `<catalog>\n${describeCatalog(cat, language)}\n</catalog>`;
 }
 
 /** 目安の枚数（--slides）から外れてよい幅。±10%（少なくとも1枚）。設定の最小・最大は超えない */
@@ -32,7 +33,7 @@ export function slideRange(cfg: TemplateConfig, target?: number): [number, numbe
 
 const DESIGN_STANCE = `あなたはデザインを決めません。色・位置・大きさ・字体はテンプレートが決めます。あなたが決めるのは、ページ割り・型の選択・欄ごとの文言・強調する語だけです。`;
 
-export function outlineInstruction(cat: Catalog, cfg: TemplateConfig, target?: number): string {
+export function outlineInstruction(cat: Catalog, cfg: TemplateConfig, target?: number, language: DeckLanguage = 'ja'): string {
   const [lo, hi] = slideRange(cfg, target);
   return `あなたは、資料の原稿（<manuscript>）から「ページ割り」を作る編集者です。${DESIGN_STANCE}
 
@@ -51,13 +52,13 @@ ${describeRoles(cat)}
 - 原稿の情報を全部は載せない。そのページの目的に関係のないものは落とす（何を置かないかも判断する）。
 - 同じ役割のページを3枚以上続けない。
 - emphasis には、そのページでいちばん見てほしい語を1〜2個入れる（catch か body にそのまま含まれる語）。
-- sourceQuotes には、根拠にした原稿の文をそのまま写す（1つ以上）。
+- sourceQuotes には、根拠にした原稿の文をそのまま写す（1つ以上）。${outlineLanguageRule(language)}
 
 出力（JSON のみ）:
 {"deckTitle": "資料の題", "pages": [{"purpose": "このページで伝えること", "role": "役割", "catch": "...", "body": "...", "details": ["..."], "numbers": [{"value": "原稿の数字", "label": "何の数字か"}], "emphasis": ["..."], "sourceQuotes": ["..."]}]}`;
 }
 
-export function planRules(cat: Catalog, cfg: TemplateConfig): string {
+export function planRules(cat: Catalog, cfg: TemplateConfig, language: DeckLanguage = 'ja'): string {
   return `決まり:
 - 各ページについて、<catalog> の型から type（key。例 "issues/3"）を1つ選ぶ。ページの役割（role）が型の役割に含まれ、項目の件数が合う型を選ぶ。
 - 同じ型ID（"/" の前の部分）を ${cfg.deck.maxSameTypeInRow} 枚より多く続けない。
@@ -70,24 +71,24 @@ export function planRules(cat: Catalog, cfg: TemplateConfig): string {
 - num.* の欄には数字だけを、原稿の表記のまま入れる（桁区切りも原稿どおり）。単位は txt.unit.* に入れる。txt.unit.* には単位だけ（「件」「%」「時間」「万円」など）を入れ、数字や文（「件に減少」など）は入れない。変化（前→後）を言うときは、num.* には伝えたいほうの数字（改善を伝えるなら改善後の値）を1つだけ入れ、前後は txt.note.* に書く。
 - img.* の欄には文言を入れず、photos に「どんな写真が合うか」を日本語で短く書く（人物・場面・物。写真の中に文字は入らない）。
 - 記号は句読点・括弧・「・」「%」「/」程度にする。「→」「①」「★」「●」などは欄の字体に無いことがあるので使わない（変化は「から」「へ」で書く）。
-- 原稿の言葉づかいを生かし、資料として自然な日本語にする。体言止めや短い句でよい。`;
+${languageRules(language)}`;
 }
 
-export function planInstruction(cat: Catalog, cfg: TemplateConfig): string {
+export function planInstruction(cat: Catalog, cfg: TemplateConfig, language: DeckLanguage = 'ja'): string {
   return `あなたは、ページ割り（<outline>）にもとづいて、テンプレートの型を選び、欄ごとの文言を書く担当です。${DESIGN_STANCE}
 
-${planRules(cat, cfg)}
+${planRules(cat, cfg, language)}
 
 出力（JSON のみ）:
 {"pages": [{"type": "型のkey", "slots": {"欄の名前": "文言"}, "photos": {"img.欄の名前": "合う写真"}}]}`;
 }
 
-export function rewriteInstruction(cat: Catalog, cfg: TemplateConfig): string {
+export function rewriteInstruction(cat: Catalog, cfg: TemplateConfig, language: DeckLanguage = 'ja'): string {
   return `あなたは、資料の1ページの文言を直す担当です。${DESIGN_STANCE}
 直前に書いた文言が、欄に収まらない・決まりに反するため、指摘を直して1ページ分を書き直してください。
 収まらない欄は、意味を保ったまま言い換えて短くします（字を小さくしたり欄を広げたりはできない）。指摘の無い欄も、必要なら直してよい。
 
-${planRules(cat, cfg)}
+${planRules(cat, cfg, language)}
 
 出力（JSON のみ。1ページ分）:
 {"type": "型のkey", "slots": {"欄の名前": "文言"}, "photos": {"img.欄の名前": "合う写真"}}`;

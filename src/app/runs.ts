@@ -9,6 +9,7 @@ import { ConfigSchema } from '../catalog/config.js';
 import type { Issue } from '../check/content.js';
 import type { DeckPlan } from '../plan/schema.js';
 import { costUsd } from '../ai/models.js';
+import { localeOf, type DeckLanguage, type PhotoPeople } from '../plan/locale.js';
 import { build, readCalls, type BuildStep, type RunInfo } from '../run/build.js';
 import { AppError, aiTransport, CACHE, imageGenerator, readSettings, ROOT, RUNS } from './settings.js';
 import { getTemplate } from './templates.js';
@@ -74,6 +75,9 @@ export type NewRun = {
   targetSlides: number | null;
   generatePhotos: boolean;
   photos: Array<{ name: string; data: Buffer; description: string }>;
+  /** 資料の言語と写真の人物（D-043）。無ければ日本語・日本人 */
+  language?: DeckLanguage;
+  people?: PhotoPeople;
 };
 
 function newId(title: string) {
@@ -106,7 +110,7 @@ export async function createRun(r: NewRun): Promise<string> {
     });
     writeJson(path.join(up, 'photos.json'), lib);
   }
-  writeJson(path.join(dir, 'request.json'), { template: r.template, templateSha256: tpl.sha256, targetSlides: r.targetSlides, generatePhotos: r.generatePhotos, photos: r.photos.length });
+  writeJson(path.join(dir, 'request.json'), { template: r.template, templateSha256: tpl.sha256, targetSlides: r.targetSlides, generatePhotos: r.generatePhotos, photos: r.photos.length, ...localeOf(r) });
   writeJson(path.join(dir, 'status.json'), {
     state: 'queued',
     step: null,
@@ -141,7 +145,7 @@ async function pump() {
 
 async function runOne(id: string) {
   const dir = path.join(RUNS, id);
-  const req = readJson<{ template: string; targetSlides: number | null; generatePhotos: boolean }>(path.join(dir, 'request.json'));
+  const req = readJson<{ template: string; targetSlides: number | null; generatePhotos: boolean; language?: string; people?: string }>(path.join(dir, 'request.json'));
   const resume = existsSync(path.join(dir, 'run.json'));
   patchStatus(dir, { state: 'running', startedAt: readStatus(dir).startedAt ?? new Date().toISOString(), error: undefined });
   const logFile = path.join(dir, 'log.txt');
@@ -160,6 +164,7 @@ async function runOne(id: string) {
             template: tpl.file,
             photos: existsSync(path.join(dir, 'uploads')) ? path.join(dir, 'uploads') : null,
             targetSlides: req.targetSlides ?? undefined,
+            locale: localeOf(req),
           }),
       transport: aiTransport(),
       imageGenerator: req.generatePhotos ? imageGenerator(cfg) : null,

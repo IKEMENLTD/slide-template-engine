@@ -10,6 +10,7 @@
  *   - input_fidelity は送らない（2.5-flare では 400。D-007）
  *   - 紙面ではなく「文字の無い写真」だけを作る
  */
+import { PEOPLE_PROMPT, type PhotoPeople } from '../plan/locale.js';
 import { existsSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -91,13 +92,14 @@ export function openAiImageGenerator(opts: { model: string; quality: string; api
 
 /**
  * 写真のプロンプトの決まり（10章の必須事項。AirLog の design-system.ts の写真の作法から移植）。
- * 文字を入れない・人物は日本人・業務を実際にしている場面・服装と場所を資料全体でそろえる・自然光・背景を消さない。
+ * 文字を入れない・人物は資料の相手に合わせる（既定は日本人。D-043）・業務を実際にしている場面・服装と場所を資料全体でそろえる・自然光・背景を消さない。
  */
-export function photoPrompt(cast: string, scene: string, withReferences: boolean, composition?: string | null): string {
+export function photoPrompt(cast: string, scene: string, withReferences: boolean, composition?: string | null, people: PhotoPeople = 'japanese'): string {
+  const p = PEOPLE_PROMPT[people];
   return [
-    'Photorealistic documentary photograph for a Japanese corporate presentation.',
+    `Photorealistic documentary photograph for ${p.audience}.`,
     'Absolutely no text, letters, numbers, logos, signage, labels or writing anywhere in the image, including on screens, papers, walls, machines and clothing.',
-    'All people are Japanese. They are actually doing their work, not posing for the camera.',
+    `${p.people} They are actually doing their work, not posing for the camera.`,
     'Natural daylight. Keep the real background; do not blur it out or remove it.',
     `Cast and place, identical in every photo of this deck: ${cast}`,
     withReferences ? 'Use the reference images only to keep the same people, the same clothing and the same place. Make a new scene with a different camera angle and composition; do not copy the reference composition.' : '',

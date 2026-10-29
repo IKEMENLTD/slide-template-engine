@@ -7,6 +7,7 @@ import { callForJson, type AiContext } from '../ai/call-json.js';
 import { numbersNotIn, sourceNumbers } from '../check/content.js';
 import { catalogBlock, manuscriptBlock, outlineInstruction, slideRange } from './prompts.js';
 import { OutlineSchema, type Outline } from './schema.js';
+import type { DeckLanguage } from './locale.js';
 
 /** A段の出力上限（トークン）。20枚で 1万字ほどになる */
 export const OUTLINE_MAX_OUTPUT_TOKENS = 24000;
@@ -40,13 +41,13 @@ export function outlineProblems(o: Outline, cat: Catalog, cfg: TemplateConfig, m
 
 export async function makeOutline(
   ctx: AiContext,
-  args: { catalog: Catalog; cfg: TemplateConfig; manuscript: string; targetSlides?: number }
+  args: { catalog: Catalog; cfg: TemplateConfig; manuscript: string; targetSlides?: number; language?: DeckLanguage }
 ): Promise<Outline> {
   const { catalog, cfg, manuscript } = args;
   return callForJson(ctx, {
     stage: 'A段 原稿の構造化',
-    materials: [manuscriptBlock(manuscript), catalogBlock(catalog)],
-    instruction: outlineInstruction(catalog, cfg, args.targetSlides),
+    materials: [manuscriptBlock(manuscript), catalogBlock(catalog, args.language)],
+    instruction: outlineInstruction(catalog, cfg, args.targetSlides, args.language),
     user: '原稿からページ割りを作ってください。',
     schema: OutlineSchema,
     maxTokens: OUTLINE_MAX_OUTPUT_TOKENS,

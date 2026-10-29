@@ -2,6 +2,7 @@
  * D段：組み立て（REQUIREMENTS 7章D）。見本スライドを複製し、名前の付いた図形の文字・写真だけを差し替える。
  * 飾りの図形には触らない（左右反転するページは、テンプレートの形をそのまま写す＝D-042）。出力は必ず掃除（sanitize）と構造検査を通す（D-004）。
  */
+import JSZip from 'jszip';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { Automizer } from 'pptx-automizer';
@@ -13,6 +14,16 @@ import { mirrorPptx } from './mirror.js';
 import { replaceImage } from './replace-image.js';
 import { replaceText } from './replace-text.js';
 import { sanitizePptx } from './sanitize.js';
+
+/** スライドの文字の言語（lang）を替える。altLang（東アジアの字の言語）は残す */
+export async function setTextLanguage(buf: Buffer, lang: string): Promise<Buffer> {
+  const zip = await JSZip.loadAsync(buf);
+  for (const name of Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))) {
+    const xml = await zip.file(name)!.async('string');
+    zip.file(name, xml.replace(/(<a:(?:rPr|endParaRPr|defRPr)\b[^>]*?\s)lang="[^"]*"/g, `$1lang="${lang}"`));
+  }
+  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+}
 
 export async function assembleDeck(args: {
   templatePath: string;
@@ -64,8 +75,10 @@ export async function assembleDeck(args: {
   const clean = (await sanitizePptx(readFileSync(path.join(workDir, rawName)))).buffer;
   // 左右反転するページ（D-042）。飾りの図形の位置はテンプレートの形を写すだけで、新しく決めない
   const buffer = await mirrorPptx(clean, plan.pages.flatMap((p, i) => (p.mirrored && cfg.mirror[p.type] ? [{ page: i + 1, fixed: cfg.mirror[p.type].fixed }] : [])));
-  writeFileSync(args.outFile, buffer);
+  // 英語の資料は、文字の言語を英語にする（PowerPoint の校正・字体の選び方が日本語扱いにならないように。D-043）
+  const final = plan.language === 'en' ? await setTextLanguage(buffer, 'en-US') : buffer;
+  writeFileSync(args.outFile, final);
   rmSync(workDir, { recursive: true, force: true });
-  const structure = await checkPptxStructure(buffer);
-  return { buffer, structure };
+  const structure = await checkPptxStructure(final);
+  return { buffer: final, structure };
 }

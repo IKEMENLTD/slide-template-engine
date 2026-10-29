@@ -3,6 +3,7 @@
  * ★色・位置・大きさ・字体の欄は作らない（17章「AI に色・位置・大きさ・フォントを決めさせない」）。
  */
 import { z } from 'zod';
+import type { DeckLanguage } from './locale.js';
 import type { PhotoFit } from '../photos/prepare.js';
 
 const str = z.string().trim();
@@ -52,6 +53,8 @@ export type PlanPage = z.infer<typeof PlanPageSchema>;
 export type DeckPlan = {
   version: 1;
   deckTitle: string;
+  /** 資料の言語（D-043）。無ければ日本語（古い実行） */
+  language?: DeckLanguage;
   template: { file: string; sha256: string };
   pages: Array<
     PlanPage & {

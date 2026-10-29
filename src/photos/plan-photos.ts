@@ -20,6 +20,7 @@ import { callForJson, type AiContext } from '../ai/call-json.js';
 import { manuscriptBlock } from '../plan/prompts.js';
 import type { DeckPlan } from '../plan/schema.js';
 import { photoPrompt, sizeFor, type ImageGenerator } from './openai-image.js';
+import { PEOPLE_RULE, type PhotoPeople } from '../plan/locale.js';
 import { loadPhotoLibrary, processPhoto, resolveColor, type PhotoEntry, type PhotoFit } from './prepare.js';
 import { NO_FACE_HINT, openAreaHint, visKey, type VisibilityMap } from './visibility.js';
 
@@ -177,14 +178,14 @@ export function assignProblems(a: PhotoAssign, reqs: PhotoRequest[], lib: PhotoE
   return out.length ? out.join('\n') : null;
 }
 
-function assignInstruction(cfg: TemplateConfig) {
+function assignInstruction(cfg: TemplateConfig, people: PhotoPeople) {
   return `あなたは、資料の写真を選ぶ担当です。写真の欄ごとに、支給の写真を使うか、新しく生成するかを決めます。
 決まり:
 - 欄の「求めるもの」に合う支給の写真があれば、それを使う（use にファイル名）。合わなければ生成する（use に "gen:1" のような番号と、scene に場面）。
 - 同じページで同じ写真を2回使わない。1枚の写真（支給・生成とも）を使うのは資料全体で ${cfg.photos.maxUsesPerFile} 回まで。
 - 生成は ${cfg.photos.maxGenerate} 枚まで。同じ生成写真（同じ番号）を別のページで使い回してよい。2回目以降は scene を省く。
 - 写真には文字・数字・ロゴ・看板を入れない。紙面・図・グラフを写真で作らない。
-- cast には、資料全体で同じにする登場人物・服装・場所を英語で書く（原稿の業種に合わせる。例: 作業着の色と形、制服、職場の場所）。人物は日本人。
+- cast には、資料全体で同じにする登場人物・服装・場所を英語で書く（原稿の業種に合わせる。例: 作業着の色と形、制服、職場の場所）。${PEOPLE_RULE[people]}
 - scene は英語で1〜2文。その場面で人が実際に業務をしている様子を書く（カメラに向かってポーズをとらない）。
 - 「顔を写さない」と書いた欄は、人の顔が写らない場面にする（職場・機械・物・手元・後ろ姿・遠景）。顔の写る写真をその欄に使わない。
 出力（JSON のみ）:
@@ -203,6 +204,8 @@ export type PhotoStageArgs = {
   generator: ImageGenerator | null;
   /** 欄ごとの「図形に隠れず見えている部分」（visibility.ts）。無ければ顔を枠に残すことだけを考える */
   visibility?: VisibilityMap | null;
+  /** 写真に写る人物（D-043）。無ければ日本人 */
+  people?: PhotoPeople;
   log?: (m: string) => void;
 };
 
@@ -226,7 +229,7 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
     assign = await callForJson(a.ai, {
       stage: 'C段 写真の割り当て',
       materials: [manuscriptBlock(a.manuscript)],
-      instruction: assignInstruction(a.cfg),
+      instruction: assignInstruction(a.cfg, a.people ?? 'japanese'),
       user:
         `支給の写真（${lib.length}枚）:\n${lib.map((e) => `- ${e.file}: ${e.description || '（説明なし）'}`).join('\n') || '（なし）'}\n\n` +
         `写真の欄（${reqs.length}個。aspect は幅÷高さ）:\n${reqs.map((r) => `- id=${r.id} aspect=${r.aspect}${isFaceless(a.cfg, a.plan.pages[r.page - 1].type, r.slot) ? ' 顔を写さない' : ''} 求めるもの: ${r.want || '（指定なし）'}`).join('\n')}`,
@@ -263,7 +266,7 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
       let img: Awaited<ReturnType<ImageGenerator>>;
       try {
         const composition = isFaceless(a.cfg, firstPage.type, first.slot) ? NO_FACE_HINT : grid ? openAreaHint(grid) : null;
-        img = await a.generator({ prompt: photoPrompt(assign.cast, scene, refs.length > 0, composition), size, references: refs });
+        img = await a.generator({ prompt: photoPrompt(assign.cast, scene, refs.length > 0, composition, a.people), size, references: refs });
       } catch (e) {
         // 生成できない（残高切れ・鍵の誤り・通信）ときも資料は仕上げる。残りの欄は見本の写真のまま、注意 PHOTO_NOT_GENERATED で知らせる
         generationError = genErrorText(e);
@@ -329,7 +332,7 @@ export async function preparePhotos(a: PhotoStageArgs): Promise<{ records: Photo
       const refs = [readFileSync(path.join(photoDir, base.file))];
       let img: Awaited<ReturnType<ImageGenerator>>;
       try {
-        img = await a.generator({ prompt: photoPrompt(assign.cast, base.scene, true, hint), size: base.size, references: refs });
+        img = await a.generator({ prompt: photoPrompt(assign.cast, base.scene, true, hint, a.people), size: base.size, references: refs });
       } catch (e) {
         generationError ??= genErrorText(e);
         log(`C段 写真の作り直しができなかった。いまの写真のまま: ${generationError}`);
@@ -376,7 +379,7 @@ export function genErrorText(e: unknown): string {
 }
 
 /** 見た目の採点の写真の指摘のうち、人の顔・頭が隠れる・切れるもの（顔の検出が横顔やうつむいた顔を見逃すときの受け皿） */
-export const isFaceProblem = (message: string) => /顔|頭/.test(message);
+export const isFaceProblem = (message: string) => /顔|頭|\bfaces?\b|\bheads?\b/i.test(message);
 
 /**
  * 見た目の採点で「顔が隠れている」と指摘されたページの写真を作り直す（E段・D-042）。
@@ -385,7 +388,7 @@ export const isFaceProblem = (message: string) => /顔|頭/.test(message);
  * 作り直した欄の名前を返す
  */
 export async function redoPhotosForReview(
-  a: { plan: DeckPlan; catalog: Catalog; cfg: TemplateConfig; dir: string; generator: ImageGenerator | null; visibility: VisibilityMap | null; log?: (m: string) => void },
+  a: { plan: DeckPlan; catalog: Catalog; cfg: TemplateConfig; dir: string; generator: ImageGenerator | null; visibility: VisibilityMap | null; people?: PhotoPeople; log?: (m: string) => void },
   pageNo: number,
   slot: string | undefined
 ): Promise<string[]> {
@@ -415,7 +418,7 @@ export async function redoPhotosForReview(
     log(`E段 写真の作り直し ${key}（p${pageNo}/${s.name}・見た目の採点で顔の指摘）`);
     let img: Awaited<ReturnType<ImageGenerator>>;
     try {
-      img = await a.generator({ prompt: photoPrompt(assign.cast, base.scene, true, hint), size: base.size, references: [readFileSync(path.join(photoDir, base.file))] });
+      img = await a.generator({ prompt: photoPrompt(assign.cast, base.scene, true, hint, a.people), size: base.size, references: [readFileSync(path.join(photoDir, base.file))] });
     } catch (e) {
       log(`E段 写真の作り直しができなかった。いまの写真のまま: ${genErrorText(e)}`);
       break;

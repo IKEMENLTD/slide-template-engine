@@ -74,6 +74,12 @@ export function numbersNotIn(text: string, source: Set<string>): string[] {
 export const sourceNumbers = (manuscript: string) => {
   const s = new Set(numbersIn(manuscript));
   for (const m of manuscript.matchAll(/[①-⑳]/g)) s.add(String(m[0].charCodeAt(0) - 0x2460 + 1));
+  // 「300万」「1.5億」は桁を数字で書いた値も原稿どおりとする（英語の資料では 3,000,000 と書くため。D-043）
+  const unit: Record<string, number> = { 千: 1e3, 万: 1e4, 億: 1e8 };
+  for (const m of toHalf(manuscript).matchAll(/(\d+(?:,\d{3})*(?:\.\d+)?)\s*(千|万|億)/g)) {
+    const v = Number(m[1].replace(/,/g, '')) * unit[m[2]];
+    if (Number.isFinite(v)) s.add(String(Math.round(v)));
+  }
   return s;
 };
 
@@ -81,11 +87,14 @@ export const sourceNumbers = (manuscript: string) => {
  * 固有名詞らしき語（英字の語・3字以上のカタカナ語・会社の表記）のうち、原稿に無いもの。
  * 「らしき」なので注意どまり（11章）。一般のカタカナ語も拾うので、レポートで人が見る。
  */
-export function namesNotIn(text: string, manuscript: string): string[] {
+export function namesNotIn(text: string, manuscript: string, language: 'ja' | 'en' = 'ja'): string[] {
   const plain = text.replace(/\[\[|\]\]/g, '');
   const src = manuscript.toLowerCase();
   const found = new Set<string>();
-  for (const m of plain.matchAll(/[A-Za-z][A-Za-z0-9&'.\-]*[A-Za-z0-9]|[A-Za-z]{2,}/g)) found.add(m[0]);
+  // 英語の資料では英単語はどれも原稿に無くて当然（訳した語・言い換えた語）。固有名詞らしい形だけを拾う：
+  // 略語（ABC）・語の途中に大文字（TaskMate）・英字と数字の混じり（ISO9001）
+  const latin = language === 'en' ? /\b(?:[A-Z]{2,}[A-Za-z0-9]*|[A-Za-z]+[a-z][A-Z][A-Za-z0-9]*|[A-Za-z]+\d+[A-Za-z0-9]*)\b/g : /[A-Za-z][A-Za-z0-9&'.\-]*[A-Za-z0-9]|[A-Za-z]{2,}/g;
+  for (const m of plain.matchAll(latin)) found.add(m[0]);
   for (const m of plain.matchAll(/[ァ-ヴ][ァ-ヴー・]{2,}/g)) found.add(m[0]);
   // 会社の表記（名前の部分は漢字・カタカナ・英数字。ひらがなで止める＝「の」「が」などの助詞を含めない）
   for (const m of plain.matchAll(/(?:株式会社|有限会社|合同会社)[一-龥ァ-ヴーA-Za-z0-9&]{1,12}|[一-龥ァ-ヴーA-Za-z0-9&]{1,12}(?:株式会社|有限会社|合同会社)/g)) found.add(m[0]);

@@ -3,6 +3,7 @@
  * 色・位置・大きさ・字体は渡さない（AI に決めさせないものは、見せもしない）。
  */
 import type { Catalog, CatalogSlot, CatalogType } from '../catalog/build-catalog.js';
+import type { DeckLanguage } from './locale.js';
 
 /** 欄の名前の意味（テンプレート契約 6-2 の名前の付け方の説明。型ごとの値ではない） */
 export const SLOT_GLOSSARY = `欄の名前の意味:
@@ -17,17 +18,22 @@ export const SLOT_GLOSSARY = `欄の名前の意味:
 - num.*: 数字だけを入れる欄（桁区切りや小数点・%・/ は可。原稿にある数字だけ）
 - img.*: 写真の欄（文言は入れない。写真に求めるものを短く書く）`;
 
-const slotLine = (s: CatalogSlot) =>
-  s.kind === 'img'
-    ? `${s.name}: 写真（縦横比 ${s.aspect}）`
-    : `${s.name}: 最大${s.maxChars}字（1行${s.maxCharsPerLine}字×${s.maxLines}行${s.kind === 'num' ? `・英数字なら${s.maxCharsLatin}字` : ''}）`;
+const slotLine = (s: CatalogSlot, language: DeckLanguage) => {
+  if (s.kind === 'img') return `${s.name}: 写真（縦横比 ${s.aspect}）`;
+  // 英語の資料では、英字の数で上限を伝える（全角の字数だと英文には短すぎる）
+  if (language === 'en' && s.kind !== 'num' && s.maxCharsLatin && s.maxLines) {
+    const perLine = Math.floor(s.maxCharsLatin / s.maxLines);
+    return `${s.name}: 英字なら最大約${s.maxCharsLatin}字（1行約${perLine}字×${s.maxLines}行）`;
+  }
+  return `${s.name}: 最大${s.maxChars}字（1行${s.maxCharsPerLine}字×${s.maxLines}行${s.kind === 'num' ? `・英数字なら${s.maxCharsLatin}字` : ''}）`;
+};
 
-export function describeType(t: CatalogType): string {
-  return `■ ${t.key}（${t.label}）役割: ${t.role.join(', ')}\n` + t.slots.map((s) => `  - ${slotLine(s)}`).join('\n');
+export function describeType(t: CatalogType, language: DeckLanguage = 'ja'): string {
+  return `■ ${t.key}（${t.label}）役割: ${t.role.join(', ')}\n` + t.slots.map((s) => `  - ${slotLine(s, language)}`).join('\n');
 }
 
-export function describeCatalog(cat: Catalog): string {
-  return `${SLOT_GLOSSARY}\n\n使える型（${cat.types.length}種）:\n` + cat.types.map(describeType).join('\n');
+export function describeCatalog(cat: Catalog, language: DeckLanguage = 'ja'): string {
+  return `${SLOT_GLOSSARY}\n\n使える型（${cat.types.length}種）:\n` + cat.types.map((t) => describeType(t, language)).join('\n');
 }
 
 /** A段に渡す役割の一覧（どの役割に何件の項目を並べられるか） */

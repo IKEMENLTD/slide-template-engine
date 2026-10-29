@@ -4,6 +4,7 @@
  * 画面は web/ を Vite で組んだもの（web/dist）を配る。API は /api/*。
  * SLIDEGEN_PASSWORD を入れると、画面と API にパスワード（Basic 認証）をかける（社外に出すときは必須）。
  */
+import { detectLanguage, localeOf } from '../plan/locale.js';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { serve } from '@hono/node-server';
@@ -145,7 +146,7 @@ app.post('/api/estimate', async (c) => {
   const rec = recommendedSlides(b.text ?? '');
   const slides = b.slides ?? rec;
   const usd = estimateUsd(slides, b.generatePhotos);
-  return c.json({ recommended: rec, slides, seconds: estimateSeconds(slides), usd, jpy: Math.round(usd * readSettings().usdJpy), chars: [...(b.text ?? '').replace(/\s/g, '')].length });
+  return c.json({ recommended: rec, slides, seconds: estimateSeconds(slides), usd, jpy: Math.round(usd * readSettings().usdJpy), chars: [...(b.text ?? '').replace(/\s/g, '')].length, language: detectLanguage(b.text ?? '') });
 });
 
 // ---------------------------------------------------------------- 資料
@@ -170,6 +171,7 @@ app.post('/api/runs', async (c) => {
     targetSlides: Number.isInteger(slides) && slides > 0 ? slides : null,
     generatePhotos: form.get('generatePhotos') === '1',
     photos,
+    ...localeOf({ language: String(form.get('language') ?? ''), people: String(form.get('people') ?? '') }),
   });
   return c.json({ id });
 });

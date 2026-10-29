@@ -1,11 +1,12 @@
 /**
  * slidegen の入口（REQUIREMENTS 12章）。
  *   slidegen catalog --template templates/provisional.pptx [--out <catalog.json>] [--config <config.json>]
- *   slidegen build   --template templates/provisional.pptx --input samples/manuscript-01.md [--photos assets/photos] [--out out/] [--slides 10] [--ai anthropic|claude-cli] [--model <id>]
+ *   slidegen build   --template templates/provisional.pptx --input samples/manuscript-01.md [--photos assets/photos] [--out out/] [--slides 10] [--ai anthropic|claude-cli] [--model <id>] [--language ja|en] [--people japanese|indian|mixed]
  *   slidegen build   --resume out/<実行ID> [--ai ...]
  *   slidegen check   out/<実行ID>
  *   slidegen theme   --template templates/provisional.pptx --out templates/provisional-green.pptx --set accent1=1E8C4E,accent2=E5508A
  */
+import { localeOf } from './plan/locale.js';
 import { createHash } from 'node:crypto';
 import { retheme } from './catalog/theme.js';
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -99,6 +100,7 @@ async function buildCmd(args: string[]) {
       template: { type: 'string' }, input: { type: 'string' }, photos: { type: 'string' }, 'no-photos': { type: 'boolean' },
       out: { type: 'string' }, config: { type: 'string' }, slides: { type: 'string' }, resume: { type: 'string' },
       ai: { type: 'string' }, model: { type: 'string' }, 'stop-after': { type: 'string' }, 'no-generate': { type: 'boolean' },
+      language: { type: 'string' }, people: { type: 'string' },
     },
   });
   const res = await build({
@@ -110,6 +112,7 @@ async function buildCmd(args: string[]) {
     photos: values['no-photos'] ? null : values.photos && path.resolve(values.photos),
     targetSlides: values.slides ? Number(values.slides) : undefined,
     resume: values.resume,
+    locale: localeOf({ language: values.language, people: values.people }),
     transport: transportFor(values.ai),
     model: values.model,
     imageGenerator: values['no-generate'] ? null : imageGenerator(values.config ?? (values.template ? values.template.replace(/\.pptx$/i, '.config.json') : undefined), values.resume),

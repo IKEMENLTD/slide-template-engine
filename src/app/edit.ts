@@ -62,12 +62,13 @@ function load(id: string): Ctx {
   // 左右反転（D-042）より前に作った資料は、設定に mirror が無い。テンプレートが同じ中身なら、いまの設定の決まりを使う
   if (!Object.keys(cfg.mirror).length) cfg.mirror = currentMirrorRules(catalog);
   const manuscript = readFileSync(path.join(dir, 'input.md'), 'utf8');
+  const plan = readJson<DeckPlan>(path.join(dir, 'deck-plan.json'));
   return {
     id,
     dir,
     cfg,
     catalog,
-    plan: readJson<DeckPlan>(path.join(dir, 'deck-plan.json')),
+    plan,
     manuscript,
     check: {
       catalog,
@@ -77,6 +78,7 @@ function load(id: string): Ctx {
       nameIgnoreSlots: cfg.checks.nameIgnoreSlots,
       unitSlots: cfg.checks.unitSlots,
       resolveFile,
+      language: plan.language ?? 'ja',
     },
   };
 }

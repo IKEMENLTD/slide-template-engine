@@ -39,6 +39,7 @@ import type { DeckPlan, Outline } from '../plan/schema.js';
 import { isFaceProblem, preparePhotos, redoPhotosForReview, type GeneratedRecord, type PhotoRecord } from '../photos/plan-photos.js';
 import { ensureVisibility } from '../photos/visibility.js';
 import { chooseMirrors } from '../plan/mirror-plan.js';
+import { localeOf, type DeckLanguage, type DeckLocale, type PhotoPeople } from '../plan/locale.js';
 import type { ImageGenerator } from '../photos/openai-image.js';
 
 export type RunInfo = {
@@ -50,6 +51,9 @@ export type RunInfo = {
   targetSlides?: number;
   transport: string;
   model: string;
+  /** 資料の言語と写真の人物（D-043）。無ければ日本語・日本人 */
+  language?: DeckLanguage;
+  people?: PhotoPeople;
 };
 
 /** 進み具合の段（画面に出す）。done は検査まで終わったとき */
@@ -64,6 +68,8 @@ export type BuildOptions = {
   config?: string;
   photos?: string | null;
   targetSlides?: number;
+  /** 資料の言語と写真の人物（D-043）。新しく作るときだけ使う（再開は run.json の記録に従う） */
+  locale?: Partial<DeckLocale>;
   /** 続きから再開するとき（out/<実行ID>） */
   resume?: string;
   transport: AiTransport;
@@ -146,6 +152,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
       ...(o.targetSlides ? { targetSlides: o.targetSlides } : {}),
       transport: o.transport.name,
       model: cfg.ai.model,
+      ...localeOf(o.locale),
     };
     writeJson(path.join(dir, 'run.json'), info);
     log(`実行ID: ${id}`);
@@ -154,6 +161,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   const cfg = ConfigSchema.parse(readJson(path.join(dir, 'config.json')));
   const catalog = readJson<Catalog>(path.join(dir, 'catalog.json'));
   const manuscript = readFileSync(path.join(dir, 'input.md'), 'utf8');
+  const locale = localeOf(info);
 
   const callsFile = path.join(dir, 'ai-calls.jsonl');
   const ctx: AiContext = {
@@ -182,7 +190,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
   else {
     log('A段 原稿の構造化');
     progress('outline');
-    outline = await timed('A段', () => makeOutline(ctx, { catalog, cfg, manuscript, targetSlides: info.targetSlides }));
+    outline = await timed('A段', () => makeOutline(ctx, { catalog, cfg, manuscript, targetSlides: info.targetSlides, language: locale.language }));
     writeJson(outlinePath, outline);
   }
   log(`  ページ割り ${outline.pages.length} 枚: ${outline.pages.map((p) => p.role).join(' / ')}`);
@@ -197,6 +205,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     nameIgnoreSlots: cfg.checks.nameIgnoreSlots,
     unitSlots: cfg.checks.unitSlots,
     resolveFile: resolveRepo,
+    language: locale.language,
   };
   const planPath = path.join(dir, 'deck-plan.json');
   let plan: DeckPlan;
@@ -205,7 +214,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
     log('B段 型の選択と流し込み');
     progress('plan');
     const pages = await timed('B段', () => planDeck(ctx, { catalog, cfg, manuscript, outline, check, store, log: (m) => log(`  ${m}`) }));
-    plan = { version: 1, deckTitle: outline.deckTitle, template: { file: catalog.template.file, sha256: catalog.template.sha256 }, pages };
+    plan = { version: 1, deckTitle: outline.deckTitle, language: locale.language, template: { file: catalog.template.file, sha256: catalog.template.sha256 }, pages };
     // 左右の向き（D-042）。写真の寄る側を交互にする決まりで、コードが決める
     chooseMirrors(plan, catalog, cfg);
     writeJson(planPath, plan);
@@ -227,7 +236,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
             return null;
           });
     const res = await timed('C段', () =>
-      preparePhotos({ plan, catalog, cfg, manuscript, library: info.photos, dir, ai: ctx, generator: o.imageGenerator, visibility, log: (m) => log(`  ${m}`) })
+      preparePhotos({ plan, catalog, cfg, manuscript, library: info.photos, dir, ai: ctx, generator: o.imageGenerator, visibility, people: locale.people, log: (m) => log(`  ${m}`) })
     );
     writeJson(planPath, plan);
     writeJson(photosDone, { at: new Date().toISOString(), records: res.records, ...(res.generationError ? { generationError: res.generationError } : {}) });
@@ -267,7 +276,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
         // 採点は仕上げの品質を上げるためのもの。採点ができなくても、資料は止めずに仕上げる（それまでの採点の結果で注意を出す）
         let review: PageReview[];
         try {
-          review = await timed('E段 採点', () => reviewPages(ctx, { plan, catalog, cfg, pages: targets, pngs: render!.pages, round }));
+          review = await timed('E段 採点', () => reviewPages(ctx, { plan, catalog, cfg, pages: targets, pngs: render!.pages, round, language: locale.language }));
         } catch (e) {
           log(`  見た目の採点ができなかったので、ここで作り直しを終える: ${(e as Error).message.split('\n')[0]}`);
           break;
@@ -319,7 +328,7 @@ export async function build(o: BuildOptions): Promise<BuildResult> {
           const visibility = await ensureVisibility(path.join(dir, 'template.pptx'), catalog, o.cacheDir ?? path.join(o.root, '.cache'), cfg.mirror).catch(() => null);
           const redone: Array<{ page: number; slots: string[] }> = [];
           for (const n of photoPages) {
-            const slots = await redoPhotosForReview({ plan, catalog, cfg, dir, generator: o.imageGenerator ?? null, visibility, log: (m) => log(`  ${m}`) }, n, facePhotos.find((x) => x.page === n && x.slot)?.slot);
+            const slots = await redoPhotosForReview({ plan, catalog, cfg, dir, generator: o.imageGenerator ?? null, visibility, people: locale.people, log: (m) => log(`  ${m}`) }, n, facePhotos.find((x) => x.page === n && x.slot)?.slot);
             redone.push({ page: n, slots });
           }
           writeJson(photoDone, redone);

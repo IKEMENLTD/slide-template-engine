@@ -19,6 +19,7 @@ import { fitSlot } from '../fit/fit-slot.js';
 import { breakByPhrase } from '../fit/phrase-break.js';
 import { describeType, imageSlots, textSlots } from './describe.js';
 import { catalogBlock, manuscriptBlock, planInstruction, rewriteInstruction } from './prompts.js';
+import type { DeckLanguage } from './locale.js';
 import { PlanPageSchema, PlanSchema, type DeckPlan, type Outline, type PlanPage } from './schema.js';
 
 /** 1回の呼び出しで書かせるページ数。多いと出力が長くなり、途中で切れやすい */
@@ -76,7 +77,8 @@ function normalize(t: CatalogType, p: PlanPage, a: PlanArgs): { slots: Record<st
     if (s.name !== 'txt.eyebrow') text = text.replace(/\s*\n\s*/g, '');
     // 数字の表記（桁区切り）を原稿に合わせる
     text = restoreNumberNotation(text, a.manuscript);
-    if (matchesAny(a.cfg.phraseBreak, s.name)) {
+    // 英語は語の切れ目（空白）で折り返すので、文節の改行は入れない（D-043）
+    if (a.check.language !== 'en' && matchesAny(a.cfg.phraseBreak, s.name)) {
       const r = breakByPhrase(s, text, a.catalog.fit, a.check.resolveFile);
       text = r.text;
       if (r.applied) broken.push(s.name);
@@ -95,6 +97,22 @@ function capEmphasis(slots: Record<string, string>, max: number, order: string[]
   }
 }
 
+/** 英文を max 字以内に、単語の途中で切らずに丸める（末尾に …）。1語目すら入らなければ字で切る（D-043） */
+export function trimWords(text: string, max: number): string {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  if ([...flat].length <= max) return flat;
+  const room = Math.max(1, max - 1);
+  const words = flat.split(' ');
+  let out = '';
+  for (const w of words) {
+    const next = out ? `${out} ${w}` : w;
+    if ([...next].length > room) break;
+    out = next;
+  }
+  if (!out) out = [...flat].slice(0, room).join('');
+  return out.replace(/[\s,;:–—\-]+$/, '') + '…';
+}
+
 /** 最後の手段：欄に入るまで、語の途中で切らずに丸める（trimTo）。強調の印は外す */
 function trimToFit(t: CatalogType, slots: Record<string, string>, a: PlanArgs): string[] {
   const trimmed: string[] = [];
@@ -106,7 +124,7 @@ function trimToFit(t: CatalogType, slots: Record<string, string>, a: PlanArgs): 
     let cand = plain;
     while (max > 1) {
       max--;
-      cand = trimTo(plain, max);
+      cand = a.check.language === 'en' ? trimWords(plain, max) : trimTo(plain, max);
       if (fitSlot(s, cand, a.catalog.fit, a.check.resolveFile).ok) break;
     }
     slots[s.name] = cand;
@@ -122,10 +140,10 @@ function pageBrief(outline: Outline, n: number) {
   return `<outline>\n${JSON.stringify(outline.pages[n - 1], null, 1)}\n</outline>`;
 }
 
-function rewriteUser(n: number, t: CatalogType, slots: Record<string, string>, problems: Issue[], outline: Outline, candidates?: CatalogType[]) {
+function rewriteUser(n: number, t: CatalogType, slots: Record<string, string>, problems: Issue[], outline: Outline, candidates?: CatalogType[], language: DeckLanguage = 'ja') {
   const head = candidates
-    ? `p${n} は型 ${t.key} では下の指摘を直せませんでした。次の型のどれかに替えて、1ページ分を書き直してください。\n${candidates.map(describeType).join('\n')}`
-    : `p${n}（型 ${t.key}）の文言を直してください。型は替えない。\n${describeType(t)}`;
+    ? `p${n} は型 ${t.key} では下の指摘を直せませんでした。次の型のどれかに替えて、1ページ分を書き直してください。\n${candidates.map((x) => describeType(x, language)).join('\n')}`
+    : `p${n}（型 ${t.key}）の文言を直してください。型は替えない。\n${describeType(t, language)}`;
   return (
     `${head}\n\nこのページのページ割り:\n${pageBrief(outline, n)}\n\n今の文言:\n<page>\n${JSON.stringify(slots, null, 1)}\n</page>\n\n指摘:\n` +
     problems.map((p) => `- ${p.message}`).join('\n')
@@ -135,7 +153,7 @@ function rewriteUser(n: number, t: CatalogType, slots: Record<string, string>, p
 export async function planDeck(ctx: AiContext, a: PlanArgs): Promise<DeckPlan['pages']> {
   const { catalog, cfg, outline, store } = a;
   const log = a.log ?? (() => {});
-  const materials = [manuscriptBlock(a.manuscript), catalogBlock(catalog)];
+  const materials = [manuscriptBlock(a.manuscript), catalogBlock(catalog, a.check.language)];
   const total = outline.pages.length;
 
   // 1. 下書き（数ページずつ）
@@ -150,7 +168,7 @@ export async function planDeck(ctx: AiContext, a: PlanArgs): Promise<DeckPlan['p
       const res = await callForJson(ctx, {
         stage: `B段 下書き p${from}-${to}`,
         materials,
-        instruction: planInstruction(catalog, cfg),
+        instruction: planInstruction(catalog, cfg, a.check.language),
         user:
           `資料の題: ${outline.deckTitle}\n全 ${total} ページのうち、p${from}〜p${to} の ${to - from + 1} ページ分を書いてください（pages は ${to - from + 1} 件）。\n` +
           (before.length ? `直前のページの型: ${before.join(' → ')}（同じ型ID の連続に数える）\n` : '') +
@@ -194,7 +212,7 @@ export async function fixPage(
 ): Promise<FinalPage> {
   const { catalog, cfg, outline } = a;
   const log = a.log ?? (() => {});
-  const materials = [manuscriptBlock(a.manuscript), catalogBlock(catalog)];
+  const materials = [manuscriptBlock(a.manuscript), catalogBlock(catalog, a.check.language)];
   let page: PlanPage = draft;
   let t = findType(catalog, page.type)!;
   let { slots, broken } = normalize(t, page, a);
@@ -205,8 +223,8 @@ export async function fixPage(
     const res = await callForJson(ctx, {
       stage: `${opts.stage} ${candidates ? '型の替え' : '書き直し'} p${n}`,
       materials,
-      instruction: rewriteInstruction(catalog, cfg),
-      user: rewriteUser(n, t, slots, problems, outline, candidates),
+      instruction: rewriteInstruction(catalog, cfg, a.check.language),
+      user: rewriteUser(n, t, slots, problems, outline, candidates, a.check.language),
       schema: PlanPageSchema,
       maxTokens: REWRITE_MAX_OUTPUT_TOKENS,
       budgetMs: cfg.ai.callBudgetMs,
