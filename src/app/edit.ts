@@ -26,7 +26,8 @@ import { renderDeck } from '../render/render.js';
 import { recheck } from '../run/build.js';
 import { checkBudget, editedPages, presentIssues, runDir, writeJson } from './runs.js';
 import { AppError, aiTransport, CACHE, ROOT } from './settings.js';
-import { slotLabel } from './words.js';
+import { currentLang, type UiLang } from './i18n.js';
+import { fitReason, historyLabel, slotLabel, typeLabel, type HistoryEvent } from './words.js';
 
 type Page = DeckPlan['pages'][number];
 
@@ -56,7 +57,7 @@ type Ctx = {
 
 function load(id: string): Ctx {
   const dir = runDir(id);
-  if (!existsSync(path.join(dir, 'deck.pptx'))) throw new AppError('この資料はまだ出来上がっていません', 409);
+  if (!existsSync(path.join(dir, 'deck.pptx'))) throw new AppError('notFinished', 409);
   const cfg = ConfigSchema.parse(readJson(path.join(dir, 'config.json')));
   const catalog = readJson<Catalog>(path.join(dir, 'catalog.json'));
   // 左右反転（D-042）より前に作った資料は、設定に mirror が無い。テンプレートが同じ中身なら、いまの設定の決まりを使う
@@ -95,12 +96,12 @@ function currentMirrorRules(catalog: Catalog): TemplateConfig['mirror'] {
 
 function pageAt(c: Ctx, n: number): Page {
   const p = c.plan.pages[n - 1];
-  if (!p) throw new AppError(`${n}ページ目はありません`, 404);
+  if (!p) throw new AppError('pageMissing', 404, { n });
   return p;
 }
 const typeOf = (c: Ctx, key: string): CatalogType => {
   const t = c.catalog.types.find((x) => x.key === key);
-  if (!t) throw new AppError(`ページの形「${key}」はこのテンプレートにありません`);
+  if (!t) throw new AppError('typeMissing', 400, { key });
   return t;
 };
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -108,25 +109,25 @@ const mtime = (f: string) => (existsSync(f) ? Math.round(statSync(f).mtimeMs) : 
 
 // ---------------------------------------------------------------- 画面に返すページの形
 
-export function pagesView(id: string) {
+export function pagesView(id: string, lang: UiLang = currentLang()) {
   const c = load(id);
-  return c.plan.pages.map((p, i) => pageView(c, i + 1, p));
+  return c.plan.pages.map((p, i) => pageView(c, i + 1, p, lang));
 }
 
-function pageView(c: Ctx, n: number, p: Page) {
+function pageView(c: Ctx, n: number, p: Page, lang: UiLang = currentLang()) {
   const t = typeOf(c, p.type);
   const png = path.join(c.dir, 'pages', `${pad(n)}.png`);
   return {
     n,
     type: p.type,
-    typeLabel: t.label,
+    typeLabel: typeLabel(t.key, t.label, lang),
     /** 左右を入れ替えた向きか／入れ替えられる形か（D-042） */
     mirrored: !!p.mirrored,
     canMirror: canMirror(c.cfg, p.type),
     image: existsSync(png) ? `/api/runs/${c.id}/pages/${n}.png?v=${mtime(png)}` : null,
     slots: textSlots(t).map((s) => ({
       name: s.name,
-      label: slotLabel(s.name),
+      label: slotLabel(s.name, lang),
       kind: s.kind,
       text: p.slots[s.name] ?? '',
       maxChars: s.maxChars ?? null,
@@ -135,44 +136,47 @@ function pageView(c: Ctx, n: number, p: Page) {
     })),
     photos: imageSlots(t).map((s) => {
       const f = p.photoFiles?.[s.name];
-      return { name: s.name, label: slotLabel(s.name), image: f ? `/api/runs/${c.id}/photos/${encodeURIComponent(f)}?v=${mtime(path.join(c.dir, 'photos', f))}` : null, aspect: s.aspect ?? null };
+      return { name: s.name, label: slotLabel(s.name, lang), image: f ? `/api/runs/${c.id}/photos/${encodeURIComponent(f)}?v=${mtime(path.join(c.dir, 'photos', f))}` : null, aspect: s.aspect ?? null };
     }),
   };
 }
 
 /** そのテンプレートで選べるページの形（いまの形と同じ役割のものを先に） */
-export function typeChoices(id: string, n: number) {
+export function typeChoices(id: string, n: number, lang: UiLang = currentLang()) {
   const c = load(id);
   const cur = typeOf(c, pageAt(c, n).type);
   return c.catalog.types
-    .map((t) => ({ key: t.key, label: t.label, sameRole: t.role.some((r) => cur.role.includes(r)), current: t.key === cur.key }))
+    .map((t) => ({ key: t.key, label: typeLabel(t.key, t.label, lang), sameRole: t.role.some((r) => cur.role.includes(r)), current: t.key === cur.key }))
     .sort((a, b) => Number(b.sameRole) - Number(a.sameRole));
 }
 
 // ---------------------------------------------------------------- 打ちながらの検査
 
 /** 書きかけの文言を測る（保存しない。打つたびに呼ばれる） */
-export function checkDraft(id: string, n: number, slots: Record<string, string>) {
+export function checkDraft(id: string, n: number, slots: Record<string, string>, lang: UiLang = currentLang()) {
   const c = load(id);
   const t = typeOf(c, pageAt(c, n).type);
   const fits = Object.fromEntries(
     textSlots(t).map((s) => {
       const text = slots[s.name] ?? '';
-      if (!s.style || !text.trim()) return [s.name, { ok: !!text.trim(), chars: [...text].length, maxChars: s.maxChars ?? null, lines: 0, maxLines: s.maxLines ?? null, reason: text.trim() ? null : '空です' }];
+      if (!s.style || !text.trim()) return [s.name, { ok: !!text.trim(), chars: [...text].length, maxChars: s.maxChars ?? null, lines: 0, maxLines: s.maxLines ?? null, reason: text.trim() ? null : fitReason('空です', { chars: 0, lines: 0, maxLines: null, perLine: null }, lang) }];
       const r = fitSlot(s, text, c.catalog.fit, resolveFile);
-      return [s.name, { ok: r.ok, chars: r.chars, maxChars: r.maxChars, lines: r.lineCount, maxLines: r.maxLines, reason: r.reason ?? null }];
+      return [s.name, { ok: r.ok, chars: r.chars, maxChars: r.maxChars, lines: r.lineCount, maxLines: r.maxLines, reason: fitReason(r.reason ?? null, { chars: r.chars, lines: r.lineCount, maxLines: r.maxLines, perLine: s.maxCharsPerLine ?? null }, lang) }];
     })
   );
-  return { fits, issues: presentIssues(checkPage(n, t, slots, c.check), []) };
+  return { fits, issues: presentIssues(checkPage(n, t, slots, c.check), [], lang) };
 }
 
 // ---------------------------------------------------------------- 直す（共通の手順）
 
-function snapshot(c: Ctx, label: string, page: number) {
+/** 版を残す。label は日本語（古い版との互換）、event は画面の言語で出し直すための種類と値 */
+function snapshot(c: Ctx, event: HistoryEvent) {
+  const label = historyLabel(event, 'ja');
+  const page = event.page;
   const vdir = path.join(c.dir, 'versions');
   mkdirSync(vdir, { recursive: true });
   const k = readdirSync(vdir).filter((f) => f.endsWith('.json')).length + 1;
-  writeJson(path.join(vdir, `${String(k).padStart(3, '0')}.json`), { at: new Date().toISOString(), label, page, plan: readJson(path.join(c.dir, 'deck-plan.json')) });
+  writeJson(path.join(vdir, `${String(k).padStart(3, '0')}.json`), { at: new Date().toISOString(), label, page, event, plan: readJson(path.join(c.dir, 'deck-plan.json')) });
 }
 
 function markEdited(c: Ctx, pages: number[]) {
@@ -229,7 +233,7 @@ function planArgs(c: Ctx): PlanArgs {
   };
 }
 
-const result = (c: Ctx, n: number) => ({ page: pageView(c, n, c.plan.pages[n - 1]) });
+const result = (c: Ctx, n: number) => ({ page: pageView(c, n, c.plan.pages[n - 1], currentLang()) });
 
 // ---------------------------------------------------------------- 文字を書き換える
 
@@ -240,7 +244,7 @@ export function saveText(id: string, n: number, slots: Record<string, string>) {
     const t = typeOf(c, p.type);
     const next: Record<string, string> = {};
     for (const s of textSlots(t)) next[s.name] = (slots[s.name] ?? p.slots[s.name] ?? '').replace(/\r\n?/g, '\n');
-    snapshot(c, `${n}ページ目の文字を直した`, n);
+    snapshot(c, { kind: 'text', page: n });
     c.plan.pages[n - 1] = { ...p, slots: next, trimmed: p.trimmed.filter((s) => next[s] === p.slots[s]) };
     await commit(c, [n]);
     return result(c, n);
@@ -250,7 +254,7 @@ export function saveText(id: string, n: number, slots: Record<string, string>) {
 // ---------------------------------------------------------------- AI に頼んで直す
 
 export function aiRevise(id: string, n: number, instruction: string) {
-  if (!instruction.trim()) throw new AppError('どう直してほしいかを書いてください');
+  if (!instruction.trim()) throw new AppError('emptyInstruction');
   checkBudget();
   return serial(id, async () => {
     const c = load(id);
@@ -261,7 +265,7 @@ export function aiRevise(id: string, n: number, instruction: string) {
       stage: 'E段',
       forced: [issue('VISUAL_REVIEW', `使う人からの依頼：${instruction.trim()}`, { page: n })],
     });
-    snapshot(c, `${n}ページ目をAIに直してもらった（${instruction.trim().slice(0, 30)}）`, n);
+    snapshot(c, { kind: 'ai', page: n, instruction: instruction.trim() });
     // 文言だけを直す（型は替えない）ので、写真・元の写真・切り抜きの記録は引き継ぐ
     c.plan.pages[n - 1] = { ...fixed, photoFiles: p.photoFiles, photoSources: p.photoSources, photoFit: p.photoFit, rewrites: p.rewrites + fixed.rewrites };
     await commit(c, [n]);
@@ -300,7 +304,7 @@ export function changeType(id: string, n: number, typeKey: string) {
       photoFit[s.name] = placed.fit;
       photoSources[s.name] = path.relative(c.dir, src);
     }
-    snapshot(c, `${n}ページ目の形を「${to.label}」に替えた`, n);
+    snapshot(c, { kind: 'type', page: n, typeKey: to.key, typeLabel: to.label });
     c.plan.pages[n - 1] = { ...fixed, photoFiles, photoSources, photoFit, retypedFrom: from.key, mirrored };
     await commit(c, [n]);
     return result(c, n);
@@ -334,7 +338,7 @@ async function visibilityOf(c: Ctx): Promise<VisibilityMap | null> {
 /** 写真を枠に合わせて加工し、photos/ に置く（名前に版を付けて、前の写真を上書きしない＝戻せる）。顔が図形に隠れない切り抜きを選ぶ */
 async function placePhoto(c: Ctx, n: number, t: CatalogType, slot: string, src: string, mirrored = !!c.plan.pages[n - 1]?.mirrored): Promise<{ name: string; fit: PhotoFit }> {
   const s = t.slots.find((x) => x.name === slot && x.kind === 'img');
-  if (!s?.aspect) throw new AppError('その写真の欄はありません');
+  if (!s?.aspect) throw new AppError('photoSlotMissing');
   const proc = s.process ?? { mono: true, multiply: null };
   const name = `p${pad(n)}-${slot.replace(/[^\w.-]/g, '_')}-${Date.now()}.jpg`;
   const grid = (await visibilityOf(c))?.[visKey({ type: t.key, mirrored })]?.[slot] ?? null;
@@ -350,7 +354,7 @@ export function replacePhoto(id: string, n: number, slot: string, upload: { name
     const p = pageAt(c, n);
     const t = typeOf(c, p.type);
     const ext = (path.extname(upload.name).toLowerCase().match(/^\.(jpe?g|png|webp)$/) ?? [null])[0];
-    if (!ext) throw new AppError('写真は JPEG・PNG・WebP のどれかにしてください');
+    if (!ext) throw new AppError('photoFormat');
     const up = path.join(c.dir, 'uploads');
     mkdirSync(up, { recursive: true });
     const src = path.join(up, `edit-p${pad(n)}-${Date.now()}${ext}`);
@@ -361,9 +365,9 @@ export function replacePhoto(id: string, n: number, slot: string, upload: { name
     } catch (e) {
       rmSync(src, { force: true });
       if (e instanceof AppError) throw e;
-      throw new AppError('この写真は読み込めませんでした。別の写真を選んでください');
+      throw new AppError('photoUnreadable');
     }
-    snapshot(c, `${n}ページ目の写真（${slotLabel(slot)}）を替えた`, n);
+    snapshot(c, { kind: 'photo', page: n, slot });
     c.plan.pages[n - 1] = {
       ...p,
       photoFiles: { ...p.photoFiles, [slot]: placed.name },
@@ -385,7 +389,7 @@ export function toggleMirror(id: string, n: number) {
   return serial(id, async () => {
     const c = load(id);
     const p = pageAt(c, n);
-    if (!canMirror(c.cfg, p.type)) throw new AppError('このページの形は、左右を入れ替えられません');
+    if (!canMirror(c.cfg, p.type)) throw new AppError('cannotMirror');
     const t = typeOf(c, p.type);
     const mirrored = !p.mirrored;
     const photoFiles = { ...p.photoFiles };
@@ -399,7 +403,7 @@ export function toggleMirror(id: string, n: number) {
       photoFit[s.name] = placed.fit;
       photoSources[s.name] = path.relative(c.dir, src);
     }
-    snapshot(c, `${n}ページ目の左右を入れ替えた`, n);
+    snapshot(c, { kind: 'mirror', page: n });
     c.plan.pages[n - 1] = { ...p, mirrored, photoFiles, photoSources, photoFit };
     await commit(c, [n]);
     return result(c, n);
@@ -408,7 +412,10 @@ export function toggleMirror(id: string, n: number) {
 
 // ---------------------------------------------------------------- 元に戻す
 
-export function versions(id: string) {
+/** 版の「何を直したか」を画面の言語で（種類の記録が無い古い版は、残っている日本語の文のまま） */
+const versionLabel = (v: { label: string; event?: HistoryEvent }, lang: UiLang) => (v.event ? historyLabel(v.event, lang) : v.label);
+
+export function versions(id: string, lang: UiLang = currentLang()) {
   const dir = runDir(id);
   const vdir = path.join(dir, 'versions');
   if (!existsSync(vdir)) return [];
@@ -417,24 +424,24 @@ export function versions(id: string) {
     .sort()
     .reverse()
     .map((f) => {
-      const v = readJson<{ at: string; label: string; page: number }>(path.join(vdir, f));
-      return { at: v.at, label: v.label, page: v.page };
+      const v = readJson<{ at: string; label: string; page: number; event?: HistoryEvent }>(path.join(vdir, f));
+      return { at: v.at, label: versionLabel(v, lang), page: v.page };
     });
 }
 
 /** いちばん最後の直しを取り消す */
-export function undo(id: string) {
+export function undo(id: string, lang: UiLang = currentLang()) {
   return serial(id, async () => {
     const c = load(id);
     const vdir = path.join(c.dir, 'versions');
     const last = existsSync(vdir) ? readdirSync(vdir).filter((f) => f.endsWith('.json')).sort().pop() : undefined;
-    if (!last) throw new AppError('戻せる直しがありません');
-    const v = readJson<{ plan: DeckPlan; label: string }>(path.join(vdir, last));
+    if (!last) throw new AppError('nothingToUndo');
+    const v = readJson<{ plan: DeckPlan; label: string; event?: HistoryEvent }>(path.join(vdir, last));
     const changed = v.plan.pages.map((pg, i) => (JSON.stringify(pg) !== JSON.stringify(c.plan.pages[i]) ? i + 1 : 0)).filter(Boolean);
     c.plan = v.plan;
     await commit(c, changed);
     rmSync(path.join(vdir, last));
-    return { undone: v.label, pages: changed };
+    return { undone: versionLabel(v, lang), pages: changed };
   });
 }
 

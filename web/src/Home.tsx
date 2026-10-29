@@ -2,40 +2,47 @@ import { useEffect, useState } from 'react';
 import { api, dateText, type RunView } from './api';
 import { IconAlert, IconCheckCircle, IconDoc } from './icons';
 import { Link } from './ui';
+import { useT } from './i18n';
 
 type Item = Omit<RunView, 'issues'>;
 
 export function StateBadge({ r, large }: { r: Pick<RunView, 'state' | 'percent' | 'errors' | 'warnings' | 'queuePosition'>; large?: boolean }) {
+  const t = useT();
   const lg = large ? ' badge-lg' : '';
-  if (r.state === 'running') return <span className={`badge badge-run${lg}`}>作成中 {r.percent}%</span>;
-  if (r.state === 'queued') return <span className={`badge badge-run${lg}`}>順番待ち</span>;
+  if (r.state === 'running') return <span className={`badge badge-run${lg}`}>{t.badgeRunning(r.percent)}</span>;
+  if (r.state === 'queued') return <span className={`badge badge-run${lg}`}>{t.badgeQueued}</span>;
   if (r.state === 'failed')
     return (
       <span className={`badge badge-err${lg}`}>
-        {large && <IconAlert />}作成できませんでした
+        {large && <IconAlert />}
+        {t.badgeFailed}
       </span>
     );
   if (r.state === 'stopped')
     return (
       <span className={`badge badge-err${lg}`}>
-        {large && <IconAlert />}途中で止まりました
+        {large && <IconAlert />}
+        {t.badgeStopped}
       </span>
     );
-  if (r.errors) return <span className={`badge badge-err${lg}`}>直すところ {r.errors}</span>;
+  if (r.errors) return <span className={`badge badge-err${lg}`}>{t.badgeErrors(r.errors)}</span>;
   if (r.warnings)
     return (
       <span className={`badge badge-ok${lg}`}>
-        {large && <IconCheckCircle />}完成・確認 {r.warnings}
+        {large && <IconCheckCircle />}
+        {t.badgeDoneWarn(r.warnings)}
       </span>
     );
   return (
     <span className={`badge badge-ok${lg}`}>
-      {large && <IconCheckCircle />}完成
+      {large && <IconCheckCircle />}
+      {t.badgeDone}
     </span>
   );
 }
 
 export function Home() {
+  const t = useT();
   const [runs, setRuns] = useState<Item[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -59,11 +66,11 @@ export function Home() {
     <div className="wrap">
       <div className="page-head">
         <div>
-          <h1>資料</h1>
-          <p className="muted">原稿を入れると、テンプレートに沿ったスライドを自動で作ります。</p>
+          <h1>{t.homeTitle}</h1>
+          <p className="muted">{t.homeLead}</p>
         </div>
         <Link to="/new" className="btn btn-primary btn-lg">
-          ＋ 新しく資料を作る
+          {t.newDeckBtn}
         </Link>
       </div>
       {err && <div className="notice notice-err">{err}</div>}
@@ -72,7 +79,7 @@ export function Home() {
         <div className="runs">
           {runs.map((r) => (
             <Link key={r.id} to={`/runs/${r.id}`} className="card run-card">
-              <div className="run-thumb">{r.cover ? <img src={r.cover} alt="" loading="lazy" /> : <span className="muted small">{r.state === 'done' ? '' : '作成中'}</span>}</div>
+              <div className="run-thumb">{r.cover ? <img src={r.cover} alt="" loading="lazy" /> : <span className="muted small">{r.state === 'done' ? '' : t.creating}</span>}</div>
               <div className="run-body">
                 <div className="run-title">{r.title}</div>
                 <StateBadge r={r} large />
@@ -85,7 +92,7 @@ export function Home() {
               <div className="run-meta">
                 <IconDoc />
                 <span className="nowrap">
-                  {r.slides ? `${r.slides}枚・` : ''}
+                  {r.slides ? t.slidesPrefix(r.slides) : ''}
                   {dateText(r.createdAt)}
                 </span>
               </div>
@@ -93,7 +100,7 @@ export function Home() {
           ))}
           <Link to="/new" className="card new-card">
             <span className="plus">＋</span>
-            新しく資料を作る
+            {t.newDeckCard}
           </Link>
         </div>
       )}
@@ -102,28 +109,29 @@ export function Home() {
 }
 
 function Empty() {
+  const t = useT();
   return (
     <div className="empty">
       <div className="card card-pad stack">
-        <h2>まだ資料がありません</h2>
-        <p className="muted">3つの手順で資料ができます。</p>
+        <h2>{t.emptyTitle}</h2>
+        <p className="muted">{t.emptyLead}</p>
         <div className="empty-steps">
           <div className="empty-step">
-            <b>1. 原稿を入れる</b>
-            伝えたいことを文章で書くか、Word のファイルを読み込みます。
+            <b>{t.emptyStep1}</b>
+            {t.emptyStep1Body}
           </div>
           <div className="empty-step">
-            <b>2. 待つ（5〜10分）</b>
-            AI がページ割り・文章・写真を用意し、テンプレートに流し込みます。
+            <b>{t.emptyStep2}</b>
+            {t.emptyStep2Body}
           </div>
           <div className="empty-step">
-            <b>3. 直してダウンロード</b>
-            気になるページだけ直して、PowerPoint か PDF で受け取ります。
+            <b>{t.emptyStep3}</b>
+            {t.emptyStep3Body}
           </div>
         </div>
         <div>
           <Link to="/new" className="btn btn-primary btn-lg">
-            最初の資料を作る
+            {t.emptyCta}
           </Link>
         </div>
       </div>

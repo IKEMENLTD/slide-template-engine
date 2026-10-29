@@ -1,15 +1,16 @@
 import { IconAlert, IconBack, IconDoc, IconDocCheck, IconDownload, IconNext, IconNote, IconShield, IconUndo } from './icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { api, type Fit, type Issue, type PageView, type RunView, type TypeChoice } from './api';
+import { api, langHeader, type Fit, type Issue, type PageView, type RunView, type TypeChoice } from './api';
 import { Link, useElapsed, useToast } from './ui';
+import { useLang, useT } from './i18n';
 
 type Tab = 'text' | 'ai' | 'type' | 'photo';
 type Busy = { label: string; about: string };
 
-const AI_CHIPS = ['もっと短く', 'わかりやすい言葉に', '見出しを言い切りの形に', '数字を目立たせて', '堅すぎない言い方に', '強調を外して'];
-
 export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => void }) {
   const toast = useToast();
+  const t = useT();
+  const uiLang = useLang();
   const [pages, setPages] = useState<PageView[] | null>(null);
   const [cur, setCur] = useState(() => Number(new URLSearchParams(location.search).get('p')) || 1);
   const [tab, setTab] = useState<Tab>('text');
@@ -32,11 +33,11 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
     api
       .templates()
       .then((ts) => {
-        const t = ts.find((x) => x.name === run.template) ?? ts[0];
-        setTplTypes(Object.fromEntries((t?.types ?? []).map((x) => [x.key, x.image])));
+        const tp = ts.find((x) => x.id === run.templateId) ?? ts.find((x) => x.name === run.template) ?? ts[0];
+        setTplTypes(Object.fromEntries((tp?.types ?? []).map((x) => [x.key, x.image])));
       })
       .catch(() => {});
-  }, [run.id, run.template, toast]);
+  }, [run.id, run.template, run.templateId, toast]);
 
   // ページを移ったら、書きかけを捨てて、そのページの文言を入れる
   useEffect(() => {
@@ -57,13 +58,13 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
       setDraftIssues(null);
       return;
     }
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       api
         .check(run.id, cur, draft)
         .then((r) => (setFits(r.fits), setDraftIssues(r.issues)))
         .catch(() => {});
     }, 350);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [draft, dirty, page, cur, run.id]);
 
   useEffect(() => {
@@ -73,10 +74,10 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
   const move = useCallback(
     (n: number) => {
       if (!pages || n < 1 || n > pages.length || n === cur) return;
-      if (dirty && !confirm('書きかけの文字は反映していません。捨ててほかのページへ移りますか？')) return;
+      if (dirty && !confirm(t.discardDraft)) return;
       setCur(n);
     },
-    [pages, cur, dirty]
+    [pages, cur, dirty, t]
   );
 
   useEffect(() => {
@@ -116,13 +117,13 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
   }
 
   async function undo() {
-    setBusy({ label: '元に戻しています', about: '約15秒' });
+    setBusy({ label: t.busyUndo, about: t.about15 });
     try {
       const r = await api.undo(run.id);
       setPages(await api.pages(run.id));
       onRun(await api.run(run.id));
       if (r.pages[0]) setCur(r.pages[0]);
-      toast(`戻しました：${r.undone}`);
+      toast(t.undone(r.undone));
     } catch (e) {
       toast((e as Error).message, true);
     } finally {
@@ -132,10 +133,10 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
 
   async function downloadPdf() {
     if (run.pdfReady) return void (location.href = `/api/runs/${run.id}/download.pdf`);
-    setBusy({ label: '直した内容で PDF を作っています', about: '約30秒〜1分' });
+    setBusy({ label: t.busyPdf, about: t.about30to60 });
     try {
-      const res = await fetch(`/api/runs/${run.id}/download.pdf`);
-      if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? 'PDF を作れませんでした');
+      const res = await fetch(`/api/runs/${run.id}/download.pdf`, { headers: langHeader() });
+      if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? t.pdfFailed);
       const blob = await res.blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -154,9 +155,9 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
   function emphasize() {
     const el = lastFocus.current;
     const name = el?.dataset.slot;
-    if (!el || !name) return toast('強調したい語を、文字の欄で選んでから押してください', true);
+    if (!el || !name) return toast(t.emphSelectField, true);
     const { selectionStart: a, selectionEnd: b, value } = el;
-    if (a === b) return toast('強調したい語を選んでから押してください', true);
+    if (a === b) return toast(t.emphSelectWord, true);
     setDraft((d) => ({ ...d, [name]: `${value.slice(0, a)}[[${value.slice(a, b)}]]${value.slice(b)}` }));
   }
 
@@ -176,44 +177,43 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
         <div style={{ flex: 1, minWidth: 260 }}>
           <Link to="/" className="backlink">
             <IconBack />
-            資料
+            {t.edBack}
           </Link>
           <h1>{run.title}</h1>
           <div className="ed-meta">
-            <span>
-              {run.slides}枚・{run.template}・費用 約{Math.max(1, run.costJpy).toLocaleString()}円
-            </span>
+            <span>{t.edMeta(run.slides, run.template, t.yen(Math.max(1, run.costJpy)))}</span>
+            {(run.language === 'en' || uiLang === 'en') && <span>{t.deckLanguageMeta(run.language)}</span>}
             {run.errors ? (
               <span className="err">
                 <IconAlert />
-                直すところ {run.errors}
+                {t.errorsCount(run.errors)}
               </span>
             ) : (
               <span className="ok">
                 <IconShield />
-                止める指摘なし
+                {t.noBlocking}
               </span>
             )}
             {run.warnings ? (
               <span className="warn">
                 <IconNote />
-                確認 {run.warnings}
+                {t.warningsCount(run.warnings)}
               </span>
             ) : null}
           </div>
         </div>
         <div className="actions">
-          <button type="button" className="btn" disabled={!run.canUndo || !!busy} onClick={undo} title="いちばん最後の直しを取り消します">
+          <button type="button" className="btn" disabled={!run.canUndo || !!busy} onClick={undo} title={t.undoTitle}>
             <IconUndo />
-            元に戻す
+            {t.undo}
           </button>
           <button type="button" className="btn" disabled={!!busy} onClick={downloadPdf}>
             <IconDoc />
-            PDF
+            {t.pdf}
           </button>
           <a className="btn btn-primary" href={`/api/runs/${run.id}/download.pptx`} aria-disabled={!!busy}>
             <IconDownload />
-            PowerPoint をダウンロード
+            {t.downloadPptx}
           </a>
         </div>
       </div>
@@ -221,13 +221,13 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
       {run.issues.length > 0 && (
         <details className="card all-issues" open={run.errors > 0}>
           <summary>
-            確認が要るところ（{run.issues.length}件）
-            <span className="muted small hide-sp">ページを押すと、そのページに移ります</span>
+            {t.allIssues(run.issues.length)}
+            <span className="muted small hide-sp">{t.allIssuesHint}</span>
           </summary>
           <div className="list">
             {run.issues.map((i, k) => (
               <button key={k} type="button" className="jump" onClick={() => i.page && move(i.page)}>
-                <span className={`badge ${i.level === 'error' ? 'badge-err' : 'badge-warn'}`}>{i.page ? `${i.page}ページ` : '全体'}</span>
+                <span className={`badge ${i.level === 'error' ? 'badge-err' : 'badge-warn'}`}>{i.page ? t.pageN(i.page) : t.wholeDeck}</span>
                 <span>
                   <b>{i.title}</b> <span className="muted small">{i.detail}</span>
                 </span>
@@ -237,15 +237,15 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
         </details>
       )}
 
-      {!pages && <p className="muted">読み込んでいます…</p>}
+      {!pages && <p className="muted">{t.loading}</p>}
       {pages && page && (
         <div className="ed">
-          <nav className="thumbs" aria-label="ページ">
+          <nav className="thumbs" aria-label={t.pagesNav}>
             {pages.map((p) => (
               <button key={p.n} type="button" className={`thumb${p.n === cur ? ' on' : ''}`} onClick={() => move(p.n)} aria-current={p.n === cur}>
                 <span className="thumb-n">{p.n}</span>
                 <span className="thumb-img">
-                  {p.image && <img src={p.image} alt={`${p.n}ページ`} loading="lazy" />}
+                  {p.image && <img src={p.image} alt={t.pageN(p.n)} loading="lazy" />}
                   {flags[p.n] && <span className={`thumb-flag ${flags[p.n] === 'error' ? 'flag-err' : 'flag-warn'}`} />}
                 </span>
               </button>
@@ -255,32 +255,30 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
           <div className="ed-center">
             <div className="stage">
               <div className="stage-wrap">
-                <div className="stage-img">{page.image && <img src={page.image} alt={`${cur}ページ目`} />}</div>
+                <div className="stage-img">{page.image && <img src={page.image} alt={t.pageAlt(cur)} />}</div>
               </div>
               {busy && <BusyCover busy={busy} elapsed={elapsed} />}
               <div className="stage-nav">
                 <button type="button" className="btn" disabled={cur <= 1} onClick={() => move(cur - 1)}>
                   <IconBack />
-                  前へ
+                  {t.prev}
                 </button>
-                <span>
-                  {cur} / {pages.length}ページ・{page.typeLabel}
-                </span>
+                <span>{t.pageOf(cur, pages.length, page.typeLabel)}</span>
                 <button type="button" className="btn btn-primary" disabled={cur >= pages.length} onClick={() => move(cur + 1)}>
-                  次へ
+                  {t.next}
                   <IconNext />
                 </button>
               </div>
             </div>
             <div className="issues">
-              {dirty && draftIssues && <p className="small muted">書きかけの文字で検査しています（まだ反映していません）</p>}
+              {dirty && draftIssues && <p className="small muted">{t.checkingDraft}</p>}
               {shownIssues.map((i, k) => (
                 <IssueCard key={k} i={i} />
               ))}
               {!shownIssues.length && (
                 <div className="notice notice-ok">
                   <IconDocCheck />
-                  このページに気になるところはありません。
+                  {t.pageClean}
                 </div>
               )}
               {deckIssues.map((i, k) => (
@@ -293,10 +291,10 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
             <div className="tabs" role="tablist">
               {(
                 [
-                  ['text', '文字'],
-                  ['ai', 'AIに頼む'],
-                  ['type', '形を替える'],
-                  ['photo', '写真'],
+                  ['text', t.tabText],
+                  ['ai', t.tabAi],
+                  ['type', t.tabType],
+                  ['photo', t.tabPhoto],
                 ] as Array<[Tab, string]>
               ).map(([k, l]) => (
                 <button key={k} type="button" role="tab" className={tab === k ? 'on' : ''} aria-selected={tab === k} onClick={() => setTab(k)}>
@@ -309,7 +307,9 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
               <>
                 <div className="panel-body">
                   <p className="hint">
-                    書き換えると、枠に収まるかをその場で測ります。<code>[[ ]]</code> で囲んだ語は強調（下線）になります（1ページ2か所まで）。
+                    {t.textHint1}
+                    <code>[[ ]]</code>
+                    {t.textHint2}
                   </p>
                   {page.slots.map((s) => {
                     const v = draft[s.name] ?? s.text;
@@ -322,9 +322,9 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
                             {s.label}
                           </label>
                           <span className={`count${bad ? ' bad' : ''}`}>
-                            {f ? `${f.chars}字` : `${[...v.replace(/\[\[|\]\]|\n/g, '')].length}字`}
-                            {s.maxChars ? ` / ${s.maxChars}字まで` : ''}
-                            {s.maxLines && s.maxLines > 1 ? `・${s.maxLines}行まで` : ''}
+                            {t.charsOf(f ? f.chars : [...v.replace(/\[\[|\]\]|\n/g, '')].length)}
+                            {s.maxChars ? t.maxChars(s.maxChars) : ''}
+                            {s.maxLines && s.maxLines > 1 ? t.maxLines(s.maxLines) : ''}
                           </span>
                         </div>
                         <textarea
@@ -344,22 +344,22 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
                 </div>
                 <div className="panel-foot">
                   <button type="button" className="btn btn-sm btn-ghost" onClick={emphasize} disabled={!!busy}>
-                    選んだ語を強調
+                    {t.emphasize}
                   </button>
                   <span style={{ flex: 1 }} />
                   <button type="button" className="btn" disabled={!dirty || !!busy} onClick={() => setDraft(Object.fromEntries(page.slots.map((s) => [s.name, s.text])))}>
-                    取り消し
+                    {t.cancel}
                   </button>
                   <button
                     type="button"
                     className="btn btn-primary"
                     disabled={!dirty || !!busy}
                     onClick={() => {
-                      if (draftBad && !confirm('枠に収まっていない欄があります。このまま反映しますか？（文字がはみ出して見えます）')) return;
-                      void act({ label: '文字を反映して、ページを描き直しています', about: '約15秒' }, () => api.saveText(run.id, cur, draft), `${cur}ページ目に反映しました`);
+                      if (draftBad && !confirm(t.overflowConfirm)) return;
+                      void act({ label: t.busySave, about: t.about15 }, () => api.saveText(run.id, cur, draft), t.savedPage(cur));
                     }}
                   >
-                    反映する
+                    {t.apply}
                   </button>
                 </div>
               </>
@@ -368,17 +368,17 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
             {tab === 'ai' && (
               <>
                 <div className="panel-body">
-                  <p className="hint">このページをどう直してほしいかを書いてください。AI が原稿の内容の範囲で書き直し、枠に収まるまで整えます（原稿に無い数字や名前は足しません）。</p>
+                  <p className="hint">{t.aiHint}</p>
                   <div className="chips">
-                    {AI_CHIPS.map((c) => (
-                      <button key={c} type="button" className="chip" onClick={() => setInstruction((x) => (x ? `${x}。${c}` : c))}>
+                    {t.aiChips.map((c) => (
+                      <button key={c} type="button" className="chip" onClick={() => setInstruction((x) => (x ? t.chipJoin(x, c) : c))}>
                         {c}
                       </button>
                     ))}
                   </div>
-                  <textarea className="textarea" rows={5} value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="例：見出しをもっと短く、言い切りの形に。2つ目の項目は「残業」の話にして。" disabled={!!busy} />
-                  {dirty && <div className="notice notice-warn small">「文字」で書きかけの内容は使われません（反映した文言をもとに直します）。</div>}
-                  <p className="hint">1回 約30秒〜1分・費用は約2〜5円です。気に入らなければ「元に戻す」で戻せます。</p>
+                  <textarea className="textarea" rows={5} value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder={t.aiPh} disabled={!!busy} />
+                  {dirty && <div className="notice notice-warn small">{t.aiDraftNote}</div>}
+                  <p className="hint">{t.aiCost}</p>
                 </div>
                 <div className="panel-foot">
                   <button
@@ -386,10 +386,10 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
                     className="btn btn-primary"
                     disabled={!instruction.trim() || !!busy}
                     onClick={async () => {
-                      if (await act({ label: 'AI がこのページを直しています', about: '約30秒〜1分' }, () => api.aiRevise(run.id, cur, instruction), `${cur}ページ目を AI が直しました`)) setInstruction('');
+                      if (await act({ label: t.busyAi, about: t.about30to60 }, () => api.aiRevise(run.id, cur, instruction), t.aiDone(cur))) setInstruction('');
                     }}
                   >
-                    AIに直してもらう
+                    {t.aiRun}
                   </button>
                 </div>
               </>
@@ -399,37 +399,35 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
               <div className="panel-body">
                 {page.canMirror && (
                   <div className="mirror">
-                    <p className="hint">
-                      写真と図形のかたまりを左右反対側に移します（いま：{page.mirrored ? '左右を入れ替えた向き' : '見本どおりの向き'}）。文字の並びと、左上のラベル・右下の三角の位置は変わりません。写真は、顔が図形に隠れないように切り抜き直します（約20秒）。
-                    </p>
+                    <p className="hint">{t.mirrorHint(page.mirrored)}</p>
                     <button
                       type="button"
                       className="btn"
                       disabled={!!busy}
-                      onClick={() => void act({ label: '左右を入れ替えています', about: '約20秒' }, () => api.toggleMirror(run.id, cur), `${cur}ページ目の左右を入れ替えました`)}
+                      onClick={() => void act({ label: t.busyMirror, about: t.about20 }, () => api.toggleMirror(run.id, cur), t.mirrorDone(cur))}
                     >
-                      左右を入れ替える
+                      {t.mirrorBtn}
                     </button>
                   </div>
                 )}
-                <p className="hint">ページの形（レイアウト）を替えます。文字は AI が新しい形に合わせて書き直します（約1分）。上のほうが、いまのページに合う形です。項目の少ない形を選ぶと、入りきらない内容は外れます（「元に戻す」で戻せます）。</p>
-                {!types && <p className="muted">読み込んでいます…</p>}
+                <p className="hint">{t.typeHint}</p>
+                {!types && <p className="muted">{t.loading}</p>}
                 <div className="types">
-                  {types?.map((t) => (
+                  {types?.map((ty) => (
                     <button
-                      key={t.key}
+                      key={ty.key}
                       type="button"
-                      className={`type${t.current ? ' on' : ''}`}
-                      disabled={t.current || !!busy}
+                      className={`type${ty.current ? ' on' : ''}`}
+                      disabled={ty.current || !!busy}
                       onClick={() => {
-                        if (!confirm(`このページを「${t.label}」の形に替えます。文字は AI が書き直します（約1分）。\n項目の数が減る場合、入りきらない内容は外れます。`)) return;
-                        void act({ label: `「${t.label}」の形に替えています`, about: '約1分' }, () => api.changeType(run.id, cur, t.key), `${cur}ページ目の形を替えました`).then(() => setTypes(null));
+                        if (!confirm(t.typeConfirm(ty.label))) return;
+                        void act({ label: t.busyType(ty.label), about: t.about1min }, () => api.changeType(run.id, cur, ty.key), t.typeDone(cur)).then(() => setTypes(null));
                       }}
                     >
-                      {tplTypes[t.key] ? <img src={tplTypes[t.key]!} alt="" loading="lazy" /> : <div style={{ aspectRatio: '16/9', background: '#eef1f6' }} />}
+                      {tplTypes[ty.key] ? <img src={tplTypes[ty.key]!} alt="" loading="lazy" /> : <div style={{ aspectRatio: '16/9', background: '#eef1f6' }} />}
                       <span>
-                        {t.current ? 'いまの形：' : t.sameRole ? 'おすすめ：' : ''}
-                        {t.label}
+                        {ty.current ? t.typeCurrent : ty.sameRole ? t.typeRecommended : ''}
+                        {ty.label}
                       </span>
                     </button>
                   ))}
@@ -439,16 +437,16 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
 
             {tab === 'photo' && (
               <div className="panel-body">
-                {page.photos.length === 0 && <p className="muted">このページには写真の欄がありません。写真を入れたいときは「形を替える」で写真のある形を選んでください。</p>}
-                {page.photos.length > 0 && <p className="hint">写真を選ぶと、白黒にして枠に合わせて切り抜き、差し替えます（約15秒）。人の顔が残るように切り抜きます。</p>}
+                {page.photos.length === 0 && <p className="muted">{t.noPhotoSlots}</p>}
+                {page.photos.length > 0 && <p className="hint">{t.photoHint}</p>}
                 {page.photos.map((ph) => (
                   <div key={ph.name} className="slot-photo">
                     {ph.image ? <img src={ph.image} alt={ph.label} /> : <div className="ph" />}
                     <div className="stack-sm">
                       <b>{ph.label}</b>
-                      <span className="hint">{ph.image ? '' : 'いまはテンプレートの見本の写真です'}</span>
+                      <span className="hint">{ph.image ? '' : t.photoIsSample}</span>
                       <label className="btn btn-sm" style={{ justifySelf: 'start' }} aria-disabled={!!busy}>
-                        写真を替える
+                        {t.replacePhoto}
                         <input
                           type="file"
                           accept="image/jpeg,image/png,image/webp"
@@ -457,7 +455,7 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
                           onChange={(e) => {
                             const f = e.target.files?.[0];
                             e.target.value = '';
-                            if (f) void act({ label: '写真を加工して差し替えています', about: '約15秒' }, () => api.replacePhoto(run.id, cur, ph.name, f), '写真を差し替えました');
+                            if (f) void act({ label: t.busyPhoto, about: t.about15 }, () => api.replacePhoto(run.id, cur, ph.name, f), t.photoReplaced);
                           }}
                         />
                       </label>
@@ -474,12 +472,13 @@ export function Editor({ run, onRun }: { run: RunView; onRun: (r: RunView) => vo
 }
 
 function IssueCard({ i }: { i: Issue }) {
+  const t = useT();
   return (
     <div className={`issue issue-${i.level}`}>
       <div className="issue-title">
         <span className={`badge ${i.level === 'error' ? 'badge-err' : 'badge-warn'}`}>{i.levelText}</span>
         {i.title}
-        {i.slotLabel && <span className="muted small">（{i.slotLabel}）</span>}
+        {i.slotLabel && <span className="muted small">{t.slotParen(i.slotLabel)}</span>}
       </div>
       <div className="issue-detail">{i.detail}</div>
       <div className="issue-action">{i.action}</div>
@@ -488,14 +487,13 @@ function IssueCard({ i }: { i: Issue }) {
 }
 
 function BusyCover({ busy, elapsed }: { busy: Busy; elapsed: number }) {
+  const t = useT();
   return (
     <div className="busy" role="status">
       <div>
         <div className="spinner" />
         <b>{busy.label}</b>
-        <div className="small muted">
-          {busy.about}かかります（{elapsed}秒経過）
-        </div>
+        <div className="small muted">{t.busyAbout(busy.about, elapsed)}</div>
       </div>
     </div>
   );

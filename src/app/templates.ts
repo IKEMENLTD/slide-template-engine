@@ -9,7 +9,7 @@ import { buildCatalog, type Catalog } from '../catalog/build-catalog.js';
 import { configExists, configPathFor, loadConfig, type TemplateConfig } from '../catalog/config.js';
 import { readTemplate } from '../catalog/read-template.js';
 import { renderDeck } from '../render/render.js';
-import { CACHE, ROOT } from './settings.js';
+import { AppError, CACHE, ROOT } from './settings.js';
 
 export const TEMPLATES = path.resolve(process.env.SLIDEGEN_TEMPLATES ?? path.join(ROOT, 'templates'));
 
@@ -67,9 +67,9 @@ export async function listTemplates(): Promise<TemplateEntry[]> {
 }
 
 export async function getTemplate(id: string): Promise<TemplateEntry> {
-  if (!/^[\w.-]+$/.test(id)) throw new Error('テンプレートの名前が正しくない');
+  if (!/^[\w.-]+$/.test(id)) throw new AppError('badTemplateName');
   const file = path.join(TEMPLATES, `${id}.pptx`);
-  if (!existsSync(file)) throw new Error(`テンプレート ${id} が無い`);
+  if (!existsSync(file)) throw new AppError('templateNotFound', 404, { id });
   return load(file);
 }
 

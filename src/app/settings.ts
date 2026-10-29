@@ -8,6 +8,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { AnthropicTransport, ClaudeCliTransport, type AiTransport } from '../ai/transport.js';
 import { openAiImageGenerator, openAiKey, type ImageGenerator } from '../photos/openai-image.js';
 import type { TemplateConfig } from '../catalog/config.js';
+import { errorText, type ErrorKey, type ErrorParams } from './errors.js';
+import type { UiLang } from './i18n.js';
 
 export const ROOT = path.resolve(import.meta.dirname, '../..');
 export const DATA = path.resolve(process.env.SLIDEGEN_DATA ?? path.join(ROOT, 'data'));
@@ -64,12 +66,20 @@ export function publicSettings() {
   };
 }
 
+/**
+ * 使う人に返す断り。文は errors.ts の表から引く（日本語と英語）。message は日本語（記録と試験に使う）。
+ * 画面に返すときは text(言語) で、その画面の言語の文にする。
+ */
 export class AppError extends Error {
   constructor(
-    message: string,
-    readonly status = 400
+    readonly key: ErrorKey,
+    readonly status = 400,
+    readonly params: ErrorParams = {}
   ) {
-    super(message);
+    super(errorText(key, 'ja', params));
+  }
+  text(lang: UiLang): string {
+    return errorText(this.key, lang, this.params);
   }
 }
 
@@ -78,7 +88,7 @@ export function aiTransport(): AiTransport {
   const s = readSettings();
   if (s.anthropicKey) return new AnthropicTransport({ refusalFallback: true }, new Anthropic({ apiKey: s.anthropicKey }));
   if (DEV_AI) return new ClaudeCliTransport();
-  throw new AppError('文章を作る AI（Claude）の鍵がまだ入っていません。「設定」で入れてください。', 409);
+  throw new AppError('noAiKey', 409);
 }
 
 /** 写真を作る口。鍵が無ければ null（足りない写真はテンプレートの見本のまま） */
