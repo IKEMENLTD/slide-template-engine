@@ -257,6 +257,23 @@ def cover(prs):
     notes(s, "type: cover\nrole: [cover]\nlabel: 表紙（写真＋要点3つ）")
 
 
+def cover_plain(prs):
+    """表紙の別案：要点の箱を置かない（D-044）。原稿に並べる要点が3つ無いとき、箱を埋めるために要点を作らせない"""
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ids = Ids(s)
+    # 要点の箱が無い分、写真を右端まで広げる（左上の白い三角だけを残す。白い面が大きく空かないように）
+    picture(s, ids, "img.hero", ASSETS / "cover.jpg", 0, 0, 960, 540,
+            pts=[(373, 0), (960, 0), (960, 540), (0, 540), (0, 373)], descr="表紙の写真")
+    poly(s, ids, "deco.headline-band", [(-8.5, 128.5), (513, 128.5), (428.5, 213), (-8.5, 213)], "tx1", alpha=85)
+    poly(s, ids, "deco.subtitle-plate", [(438.5, 213), (523, 129), (872, 129), (872, 213)], "bg1")
+    poly(s, ids, "deco.line-1", [(194.5, 158), (205, 158), (321.5, 41.5), (311, 41.5)], "accent1")
+    # 右下の三角はほかのページと同じ位置・大きさ（PDF の決まり）
+    poly(s, ids, "deco.end-triangle", [(939.5, 449), (939.5, 522.5), (866, 522.5)], "accent2")
+    text(s, ids, "txt.headline", 95.5, 131, 345, 80, "ダミー大見出し\nダミー大見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, color="bg1")
+    text(s, ids, "txt.subtitle", 525.5, 150, 432, 52, "ダミー副題\nダミー副題", ea=GOTHIC, latin=LATIN, size=15, bold=True, line=25.5)
+    notes(s, "type: cover\nvariant: \"plain\"\nrole: [cover]\nlabel: 表紙（写真＋見出しだけ）")
+
+
 # ---------------------------------------------------------------- 型：課題提示（PDF p2）
 def issues_frame(s, ids, eyebrow="Dummy Label"):
     poly(s, ids, "deco.corner", [(0, 0), (214, 0), (0, 214)], "accent1")
@@ -403,7 +420,7 @@ def collage(prs):
     # 見出しは PDF では2行（6字ずつ）。菱形にかからないよう、上の白い面に1行で置く
     text(s, ids, "txt.headline", 48, 22, 520, 56, "ダミー見出し", ea=MINCHO, latin=MINCHO, size=32.5, line=40, anchor="ctr")
     text(s, ids, "txt.subtitle", 50, 92, 196, 46, "ダミー副題", ea=GOTHIC, latin=LATIN, size=15, bold=True, line=21)
-    notes(s, "type: collage\nrole: [closing]\nlabel: 写真コラージュ（結び・表紙の別案）")
+    notes(s, "type: collage\nrole: [closing, cover]\nlabel: 写真コラージュ（結び・表紙の別案）")
 
 
 # ---------------------------------------------------------------- 型：目次（PDF p9）
@@ -480,6 +497,8 @@ def main(out: Path):
         toc(prs, n)
     photo_text_a(prs)
     photo_text_b(prs)
+    # 足した型は最後に置く（既存の型のスライド番号を変えない）
+    cover_plain(prs)
     prs.save(str(out))
     print(out)
 

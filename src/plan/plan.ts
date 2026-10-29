@@ -53,7 +53,7 @@ const RETYPE_FOR_NUMBERS = ['emphasis', 'photo-text'];
 const findType = (cat: Catalog, key: string) => cat.types.find((t) => t.key === key);
 
 /** 下書きの形の検査（型が無い・欄が足りない・ページ数が違う・同じ型が続く）。合っていなければ AI に返す理由 */
-export function draftProblems(pages: PlanPage[], expect: number, cat: Catalog, cfg: TemplateConfig, before: string[]): string | null {
+export function draftProblems(pages: PlanPage[], expect: number, cat: Catalog, cfg: TemplateConfig, before: string[], outlinePages?: Outline['pages']): string | null {
   const out: string[] = [];
   if (pages.length !== expect) out.push(`pages が ${pages.length} 件。${expect} 件にする`);
   pages.forEach((p, i) => {
@@ -61,6 +61,13 @@ export function draftProblems(pages: PlanPage[], expect: number, cat: Catalog, c
     if (!t) return out.push(`${i + 1}件目: 型 "${p.type}" は無い。<catalog> の key から選ぶ`);
     const missing = textSlots(t).filter((s) => !p.slots[s.name]?.trim()).map((s) => s.name);
     if (missing.length) out.push(`${i + 1}件目（${p.type}）: 欄 ${missing.join(', ')} が空`);
+    // 表紙の要点の箱は、原稿の要点がその数だけあるときだけ使う。箱を埋めるために要点を作らせない（D-044）
+    const o = outlinePages?.[i];
+    const boxes = t.slots.filter((s) => /^txt\.point\.\d+\.main$/.test(s.name)).length;
+    if (o?.role === 'cover' && boxes > (o.details?.length ?? 0)) {
+      const plain = cat.types.filter((x) => x.role.includes('cover') && !x.slots.some((s) => /^txt\.point\./.test(s.name))).map((x) => x.key);
+      if (plain.length) out.push(`${i + 1}件目（${p.type}）: 表紙の要点の箱が ${boxes} つあるが、ページ割りの要点（details）は ${o.details?.length ?? 0} つ。要点の箱の無い表紙（${plain.join(' か ')}）にする`);
+    }
   });
   const runs = checkTypeRuns([...before, ...pages.map((p) => p.type)], cfg.deck.maxSameTypeInRow);
   if (runs.length && pages.every((p) => findType(cat, p.type))) out.push(`同じ型ID を ${cfg.deck.maxSameTypeInRow} 枚より多く続けている。別の型を選ぶ`);
@@ -176,7 +183,7 @@ export async function planDeck(ctx: AiContext, a: PlanArgs): Promise<DeckPlan['p
         schema: PlanSchema,
         maxTokens: PLAN_MAX_OUTPUT_TOKENS,
         budgetMs: cfg.ai.callBudgetMs,
-        validate: (v) => draftProblems(v.pages, to - from + 1, catalog, cfg, before),
+        validate: (v) => draftProblems(v.pages, to - from + 1, catalog, cfg, before, outline.pages.slice(from - 1, to)),
       });
       chunk = res.pages;
       store.set(key, chunk);

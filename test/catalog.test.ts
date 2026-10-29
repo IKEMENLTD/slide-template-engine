@@ -24,10 +24,10 @@ async function mutate(fn: (z: JSZip) => Promise<void>) {
 const errors = (p: { level: string; message: string }[]) => p.filter((x) => x.level === 'error').map((x) => x.message);
 
 describe('型カタログ', () => {
-  it('仮テンプレートから15の型が出て、文字の欄すべてに最大字数と最大行数が入る', async () => {
+  it('仮テンプレートから16の型が出て、文字の欄すべてに最大字数と最大行数が入る', async () => {
     const { catalog, problems } = await build();
     expect(errors(problems)).toEqual([]);
-    expect(catalog.types.map((t) => t.key)).toEqual(['cover', 'issues/2', 'issues/3', 'issues/4', 'numbers/3', 'attention', 'section', 'steps/3', 'steps/4', 'collage', 'toc/3', 'toc/4', 'toc/5', 'photo-text/a', 'photo-text/b']);
+    expect(catalog.types.map((t) => t.key)).toEqual(['cover', 'issues/2', 'issues/3', 'issues/4', 'numbers/3', 'attention', 'section', 'steps/3', 'steps/4', 'collage', 'toc/3', 'toc/4', 'toc/5', 'photo-text/a', 'photo-text/b', 'cover/plain']);
     for (const t of catalog.types)
       for (const s of t.slots) {
         if (s.kind === 'img') expect(s.aspect).toBeGreaterThan(0);
