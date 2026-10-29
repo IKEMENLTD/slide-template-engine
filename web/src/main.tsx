@@ -7,13 +7,19 @@ import { RunPage } from './RunPage';
 import { Settings } from './Settings';
 import { IconFolder, IconGear, IconPlus } from './icons';
 import { Link, ToastHost, usePath } from './ui';
+import { setLang, useLang, useT, type UiLang } from './i18n';
 import './styles.css';
 
 function App() {
   const path = usePath();
+  const lang = useLang();
+  const t = useT();
   const [app, setApp] = useState<AppState | null>(null);
   const refresh = useCallback(() => void api.state().then(setApp).catch(() => {}), []);
   useEffect(refresh, [refresh, path]);
+  useEffect(() => {
+    document.title = t.appName;
+  }, [t]);
 
   const run = path.match(/^\/runs\/([\w.-]+)$/);
   let body;
@@ -28,20 +34,20 @@ function App() {
       <aside className="side">
         <Link to="/" className="brand">
           <span className="brand-mark" aria-hidden="true" />
-          <span>スライド自動生成</span>
+          <span>{t.appName}</span>
         </Link>
-        <nav className="nav" aria-label="メニュー">
-          <Link to="/" className={on('/')} title="資料">
+        <nav className="nav" aria-label={t.navMenu}>
+          <Link to="/" className={on('/')} title={t.navDecks}>
             <IconFolder />
-            <span>資料</span>
+            <span>{t.navDecks}</span>
           </Link>
-          <Link to="/new" className={on('/new')} title="新しく作る">
+          <Link to="/new" className={on('/new')} title={t.navNew}>
             <IconPlus />
-            <span>新しく作る</span>
+            <span>{t.navNew}</span>
           </Link>
-          <Link to="/settings" className={on('/settings')} title="設定">
+          <Link to="/settings" className={on('/settings')} title={t.navSettings}>
             <IconGear />
-            <span>設定</span>
+            <span>{t.navSettings}</span>
           </Link>
         </nav>
         <div className="side-art" aria-hidden="true" />
@@ -50,16 +56,29 @@ function App() {
         <div className="topline">
           {app && !app.settings.aiReady && (
             <Link to="/settings" className="badge badge-err">
-              鍵が未設定
+              {t.keyMissing}
             </Link>
           )}
           {app && (
             <span className="nowrap">
-              今月 <b>{yen(app.monthCostUsd, app.usdJpy)}</b>
+              {t.thisMonth} <b>{yen(app.monthCostUsd, app.usdJpy)}</b>
             </span>
           )}
+          <div className="langsw" role="group" aria-label={t.langLabel}>
+            {(
+              [
+                ['ja', '日本語'],
+                ['en', 'English'],
+              ] as Array<[UiLang, string]>
+            ).map(([k, label]) => (
+              <button key={k} type="button" lang={k} className={lang === k ? 'on' : ''} aria-pressed={lang === k} onClick={() => setLang(k)}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-        <main>{body}</main>
+        {/* 言語を替えたら画面を作り直す（サーバーが作る言葉も、新しい言語で読み直す） */}
+        <main key={lang}>{body}</main>
       </div>
     </div>
   );

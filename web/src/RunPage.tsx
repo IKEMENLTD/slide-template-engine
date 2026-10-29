@@ -3,20 +3,13 @@ import { api, minutes, type RunView } from './api';
 import { Editor } from './Editor';
 import { IconBack, IconCheck, IconHistory } from './icons';
 import { go, Link, useToast } from './ui';
+import { tNow, useT } from './i18n';
 
-// 文言は src/app/words.ts の STEP_WORDS と同じ（進み具合の画面で、いまの段がそのまま読めるように）
-const STEPS: Array<[string, string]> = [
-  ['outline', '原稿を読んで、ページ割りを考えています'],
-  ['plan', 'ページごとに文章を書き、枠に収まるかを測っています'],
-  ['photos', '写真を用意しています'],
-  ['assemble', 'PowerPoint に組み立てています'],
-  ['render', 'ページの画像を作っています'],
-  ['review', 'AIが見た目を確かめています'],
-  ['redo', '気になったページを直しています'],
-  ['check', '最後の検査をしています'],
-];
+// 段の並び（言葉は i18n.ts の steps。サーバーの src/app/words.ts の STEP_WORDS と同じ文言）
+const STEPS = ['outline', 'plan', 'photos', 'assemble', 'render', 'review', 'redo', 'check'] as const;
 
 export function RunPage({ id, onChanged }: { id: string; onChanged: () => void }) {
+  const t = useT();
   const [run, setRun] = useState<RunView | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -31,14 +24,17 @@ export function RunPage({ id, onChanged }: { id: string; onChanged: () => void }
           setRun(r);
           setErr(null);
           if (r.state === 'running' || r.state === 'queued') t = setTimeout(load, 2000);
-          else document.title = `${r.state === 'done' ? '完成' : '止まりました'}：${r.title} - スライド自動生成`;
+          else {
+            const w = tNow();
+            document.title = w.docTitleRun(r.state === 'done' ? w.runDone : w.runStopped, r.title, w.appName);
+          }
         })
         .catch((e: Error) => alive && setErr(e.message));
     void load();
     return () => {
       alive = false;
       clearTimeout(t);
-      document.title = 'スライド自動生成';
+      document.title = tNow().appName;
     };
   }, [id]);
 
@@ -47,36 +43,37 @@ export function RunPage({ id, onChanged }: { id: string; onChanged: () => void }
       <div className="wrap">
         <div className="notice notice-err">{err}</div>
         <p style={{ marginTop: 12 }}>
-          <Link to="/">資料の一覧へ戻る</Link>
+          <Link to="/">{t.backToList}</Link>
         </p>
       </div>
     );
-  if (!run) return <div className="wrap muted">読み込んでいます…</div>;
+  if (!run) return <div className="wrap muted">{t.loading}</div>;
   if (run.state === 'done') return <Editor run={run} onRun={(r) => (setRun(r), onChanged())} />;
   return <Progress run={run} />;
 }
 
 function Progress({ run }: { run: RunView }) {
   const toast = useToast();
+  const t = useT();
   const [log, setLog] = useState<string | null>(null);
-  const idx = STEPS.findIndex(([k]) => k === run.step);
+  const idx = STEPS.findIndex((k) => k === run.step);
   const stopped = run.state === 'failed' || run.state === 'stopped';
 
   useEffect(() => {
-    if (run.state === 'running') document.title = `${run.percent}% 作成中：${run.title}`;
-  }, [run.state, run.percent, run.title]);
+    if (run.state === 'running') document.title = t.docTitleProgress(run.percent, run.title);
+  }, [run.state, run.percent, run.title, t]);
 
   return (
     <div className="wrap">
       <div className="stack-sm" style={{ marginBottom: 22 }}>
         <Link to="/" className="backlink">
           <IconBack />
-          資料の一覧へ戻る
+          {t.backToList}
         </Link>
         <h1>{run.title}</h1>
         <div>
           <span className="meta-chip">
-            {run.slides ? `${run.slides}枚・` : ''}
+            {run.slides ? t.slidesPrefix(run.slides) : ''}
             {run.template}
           </span>
         </div>
@@ -85,7 +82,7 @@ function Progress({ run }: { run: RunView }) {
         <div className="card progress-card">
           {run.state === 'queued' && (
             <div className="progress-top">
-              <div className="notice notice-info">順番待ちです（前に {Math.max(0, (run.queuePosition ?? 1) - 1)} 件）。前の資料ができしだい始まります。</div>
+              <div className="notice notice-info">{t.queuedNotice(Math.max(0, (run.queuePosition ?? 1) - 1))}</div>
             </div>
           )}
           {!stopped && (
@@ -96,28 +93,28 @@ function Progress({ run }: { run: RunView }) {
                     {run.percent}
                     <small>%</small>
                   </b>
-                  <span>{run.remainingSeconds ? `残り ${minutes(run.remainingSeconds)}` : `経過 ${minutes(run.elapsedSeconds)}`}</span>
+                  <span>{run.remainingSeconds ? t.remaining(minutes(run.remainingSeconds)) : t.elapsed(minutes(run.elapsedSeconds))}</span>
                 </div>
                 <div className="bar">
                   <i style={{ width: `${Math.max(2, run.percent)}%` }} />
                 </div>
               </div>
               <ul className="steps">
-                {STEPS.map(([k, label], i) => (
+                {STEPS.map((k, i) => (
                   <li key={k} className={i < idx ? 'done' : i === idx ? 'now' : ''}>
                     <span className="dot">{i < idx ? <IconCheck /> : null}</span>
                     <span>
-                      {label}
-                      {i === idx && run.detail ? <span className="muted small" style={{ fontWeight: 500 }}>（{run.detail}）</span> : null}
+                      {t.steps[k]}
+                      {i === idx && run.detail ? <span className="muted small" style={{ fontWeight: 500 }}>{t.paren(run.detail)}</span> : null}
                     </span>
                   </li>
                 ))}
               </ul>
               <div className="progress-foot">
-                <span>このページを閉じても作成は続きます。できあがると「資料」の一覧に出ます。</span>
+                <span>{t.progressFoot}</span>
                 <button type="button" className="btn" onClick={async () => setLog(log === null ? await api.log(run.id) : null)}>
                   <IconHistory />
-                  {log === null ? '途中の記録を見る' : '記録を閉じる'}
+                  {log === null ? t.showLog : t.hideLog}
                 </button>
               </div>
             </>
@@ -125,10 +122,10 @@ function Progress({ run }: { run: RunView }) {
           {stopped && (
             <div className="stopped">
               <div className="notice notice-err">
-                <b>{run.state === 'failed' ? '作成の途中でうまくいきませんでした。' : '作成が途中で止まりました。'}</b>
+                <b>{run.state === 'failed' ? t.failedHead : t.stoppedHead}</b>
                 <div>{run.error}</div>
               </div>
-              <p>途中までの結果は残っています。「続きから再開」を押すと、止まったところから作り直します（最初からはやり直しません）。</p>
+              <p>{t.resumeHint}</p>
               <div className="row row-wrap">
                 <button
                   type="button"
@@ -142,26 +139,26 @@ function Progress({ run }: { run: RunView }) {
                     }
                   }}
                 >
-                  続きから再開
+                  {t.resume}
                 </button>
                 <button type="button" className="btn" onClick={async () => setLog(await api.log(run.id))}>
-                  くわしい記録を見る
+                  {t.showFullLog}
                 </button>
                 <button
                   type="button"
                   className="btn btn-ghost btn-danger"
                   onClick={async () => {
-                    if (!confirm('この資料を消します。よろしいですか？')) return;
+                    if (!confirm(t.deleteConfirm)) return;
                     await api.remove(run.id);
                     go('/');
                   }}
                 >
-                  この資料を消す
+                  {t.deleteDeck}
                 </button>
               </div>
             </div>
           )}
-          {log !== null && <pre className="log">{log || '記録はありません'}</pre>}
+          {log !== null && <pre className="log">{log || t.noLog}</pre>}
         </div>
         <div className="art-panel" aria-hidden="true">
           <img src="/art/slides.jpg" alt="" />

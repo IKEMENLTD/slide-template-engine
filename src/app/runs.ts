@@ -13,7 +13,9 @@ import { localeOf, type DeckLanguage, type PhotoPeople } from '../plan/locale.js
 import { build, readCalls, type BuildStep, type RunInfo } from '../run/build.js';
 import { AppError, aiTransport, CACHE, imageGenerator, readSettings, ROOT, RUNS } from './settings.js';
 import { getTemplate } from './templates.js';
-import { ISSUE_WORDS, LEVEL_WORDS, plainText, slotLabel, STEP_ORDER, STEP_WORDS } from './words.js';
+import { errorText, translateStored } from './errors.js';
+import { currentLang, type UiLang } from './i18n.js';
+import { ISSUE_WORDS, LEVEL_WORDS, plainText, slotLabel, STEP_ORDER, STEP_WORDS, stepDetail, stepLabel, templateName, UNTITLED } from './words.js';
 
 export type RunState = 'queued' | 'running' | 'done' | 'failed' | 'stopped';
 
@@ -34,9 +36,9 @@ export type Status = {
 
 const ID = /^[\w.-]+$/;
 export function runDir(id: string): string {
-  if (!ID.test(id)) throw new AppError('資料の ID が正しくありません', 404);
+  if (!ID.test(id)) throw new AppError('badRunId', 404);
   const d = path.join(RUNS, id);
-  if (!existsSync(path.join(d, 'status.json'))) throw new AppError('その資料は見つかりません', 404);
+  if (!existsSync(path.join(d, 'status.json'))) throw new AppError('runNotFound', 404);
   return d;
 }
 
@@ -91,7 +93,7 @@ function newId(title: string) {
 }
 
 export async function createRun(r: NewRun): Promise<string> {
-  if (!r.manuscript.trim()) throw new AppError('原稿が空です');
+  if (!r.manuscript.trim()) throw new AppError('emptyManuscript');
   aiTransport(); // 鍵が無ければここで止める（順番待ちに入れてから失敗させない）
   checkBudget();
   const tpl = await getTemplate(r.template);
@@ -114,7 +116,7 @@ export async function createRun(r: NewRun): Promise<string> {
   writeJson(path.join(dir, 'status.json'), {
     state: 'queued',
     step: null,
-    title: r.title.trim() || firstLine(r.manuscript),
+    title: r.title.trim() || firstLine(r.manuscript, localeOf(r).language === 'en' ? UNTITLED.en : UNTITLED.ja),
     template: tpl.name,
     targetSlides: r.targetSlides,
     createdAt: new Date().toISOString(),
@@ -123,7 +125,7 @@ export async function createRun(r: NewRun): Promise<string> {
   return id;
 }
 
-const firstLine = (s: string) => (s.split('\n').map((l) => l.replace(/^#+\s*/, '').trim()).find(Boolean) ?? '無題の資料').slice(0, 40);
+const firstLine = (s: string, untitled: string) => (s.split('\n').map((l) => l.replace(/^#+\s*/, '').trim()).find(Boolean) ?? untitled).slice(0, 40);
 
 function enqueue(id: string) {
   if (!queue.includes(id) && current !== id) queue.push(id);
@@ -185,14 +187,14 @@ export function recoverOnBoot() {
     const f = path.join(RUNS, id, 'status.json');
     if (!existsSync(f)) continue;
     const s = readJson<Status>(f);
-    if (s.state === 'running' || s.state === 'queued') patchStatus(path.join(RUNS, id), { state: 'stopped', error: 'アプリが止まったため、作成が途中で止まりました。' });
+    if (s.state === 'running' || s.state === 'queued') patchStatus(path.join(RUNS, id), { state: 'stopped', error: errorText('stoppedOnBoot') });
   }
 }
 
 export function resumeRun(id: string) {
   const dir = runDir(id);
   const s = readStatus(dir);
-  if (s.state !== 'failed' && s.state !== 'stopped') throw new AppError('この資料は再開できる状態ではありません');
+  if (s.state !== 'failed' && s.state !== 'stopped') throw new AppError('notResumable');
   aiTransport();
   checkBudget();
   patchStatus(dir, { state: 'queued', error: undefined });
@@ -201,7 +203,7 @@ export function resumeRun(id: string) {
 
 export function deleteRun(id: string) {
   const dir = runDir(id);
-  if (current === id) throw new AppError('作成中の資料は消せません。終わってから消してください');
+  if (current === id) throw new AppError('cannotDeleteRunning');
   const i = queue.indexOf(id);
   if (i >= 0) queue.splice(i, 1);
   rmSync(dir, { recursive: true, force: true });
@@ -237,7 +239,7 @@ export function monthCostUsd(now = new Date()): number {
 
 export function checkBudget() {
   const cap = readSettings().monthlyBudgetUsd ?? 0;
-  if (cap > 0 && monthCostUsd() >= cap) throw new AppError(`今月の費用が上限（$${cap}）に達しました。「設定」で上限を上げるか、来月までお待ちください。`, 409);
+  if (cap > 0 && monthCostUsd() >= cap) throw new AppError('budgetReached', 409, { cap });
 }
 
 // ---------------------------------------------------------------- 画面に返す形
@@ -259,31 +261,32 @@ export function editedPages(dir: string): number[] {
   return existsSync(f) ? readJson<number[]>(f) : [];
 }
 
-export function presentIssues(issues: Issue[], edited: number[]): PresentedIssue[] {
+export function presentIssues(issues: Issue[], edited: number[], lang: UiLang = currentLang()): PresentedIssue[] {
   return issues
     .filter((i) => !(i.code === 'VISUAL_REVIEW' && i.page && edited.includes(i.page)))
     .map((i) => ({
       level: i.level,
-      levelText: LEVEL_WORDS[i.level],
+      levelText: LEVEL_WORDS[lang][i.level],
       page: i.page ?? null,
       slot: i.slot ?? null,
-      slotLabel: i.slot ? slotLabel(i.slot) : null,
-      title: ISSUE_WORDS[i.code].title,
-      action: ISSUE_WORDS[i.code].action,
+      slotLabel: i.slot ? slotLabel(i.slot, lang) : null,
+      title: ISSUE_WORDS[lang][i.code].title,
+      action: ISSUE_WORDS[lang][i.code].action,
       // 欄の名前は slotLabel に出すので、文の頭の「欄の名前:」は外す
-      detail: plainText(i.message).replace(/^「[^」]+」\s*[:：]\s*/, ''),
+      detail: plainText(i.message, lang).replace(/^(?:「[^」]+」|"[^"]+")\s*[:：]\s*/, ''),
     }))
     .sort((a, b) => (a.level === b.level ? (a.page ?? 0) - (b.page ?? 0) : a.level === 'error' ? -1 : 1));
 }
 
 const mtime = (f: string) => (existsSync(f) ? statSync(f).mtimeMs : 0);
 
-export function runView(id: string) {
+export function runView(id: string, lang: UiLang = currentLang()) {
   const dir = runDir(id);
   const s = readStatus(dir);
+  const req = existsSync(path.join(dir, 'request.json')) ? readJson<{ template?: string; language?: string; people?: string }>(path.join(dir, 'request.json')) : null;
   const plan = existsSync(path.join(dir, 'deck-plan.json')) ? readJson<DeckPlan>(path.join(dir, 'deck-plan.json')) : null;
   const report = s.state === 'done' && existsSync(path.join(dir, 'report.json')) ? readJson<{ issues: Issue[]; slides: number }>(path.join(dir, 'report.json')) : null;
-  const issues = report ? presentIssues(report.issues, editedPages(dir)) : [];
+  const issues = report ? presentIssues(report.issues, editedPages(dir), lang) : [];
   const settings = readSettings();
   const slides = plan?.pages.length ?? s.targetSlides ?? null;
   // 進み具合：終わった段の重み＋いまの段の半分
@@ -302,14 +305,18 @@ export function runView(id: string) {
     title: plan?.deckTitle ?? s.title,
     state: s.state,
     step: s.step,
-    stepLabel: s.step && s.step !== 'done' ? STEP_WORDS[s.step].label : null,
-    detail: s.detail ?? null,
+    stepLabel: s.step && s.step !== 'done' ? stepLabel(s.step, lang) : null,
+    detail: s.detail ? stepDetail(s.detail, lang) : null,
     percent,
     elapsedSeconds: elapsed,
     remainingSeconds: s.state === 'running' ? Math.max(30, estimate - elapsed) : null,
     queuePosition: s.state === 'queued' ? queue.indexOf(id) + 1 + (current ? 1 : 0) : null,
-    error: s.error ?? null,
-    template: s.template,
+    error: s.error ? translateStored(s.error, lang) : null,
+    templateId: req?.template ?? null,
+    template: req?.template ? templateName(req.template, s.template, lang) : s.template,
+    /** 資料の言語（D-043）。作った後は設計図の言語、作る前は頼んだ言語 */
+    language: plan?.language ?? localeOf(req).language,
+    people: localeOf(req).people,
     createdAt: s.createdAt,
     slides,
     errors: issues.filter((i) => i.level === 'error').length,
@@ -323,14 +330,14 @@ export function runView(id: string) {
   };
 }
 
-export function listRuns() {
+export function listRuns(lang: UiLang = currentLang()) {
   if (!existsSync(RUNS)) return [];
   return readdirSync(RUNS)
     .filter((id) => existsSync(path.join(RUNS, id, 'status.json')))
     .sort()
     .reverse()
     .map((id) => {
-      const { issues: _omit, ...v } = runView(id);
+      const { issues: _omit, ...v } = runView(id, lang);
       return v;
     });
 }

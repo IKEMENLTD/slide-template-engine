@@ -83,6 +83,11 @@ p { margin: 0; }
 .main { min-width: 0; display: flex; flex-direction: column; }
 .topline { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 14px 24px 0; min-height: 44px; font-size: 14px; color: var(--ink-3); }
 .topline b { color: var(--ink); font-weight: 600; font-size: 16px; }
+.langsw { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.langsw button { min-height: 32px; padding: 0 12px; border: 0; background: transparent; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.langsw button + button { border-left: 1px solid var(--line-2); }
+.langsw button:hover { color: var(--ink); }
+.langsw button.on { background: var(--primary-soft); color: #fff; }
 
 /* 仕上げの画面ではメニューを細くたたむ */
 .shell:has(.ed) { --side-w: 80px; }
@@ -124,6 +129,8 @@ p { margin: 0; }
   padding: 11px 14px; outline: none; color: var(--ink);
 }
 .input::placeholder, .textarea::placeholder { color: #66758f; }
+.select { min-height: 46px; cursor: pointer; }
+.select option { background: #0f1724; color: var(--ink); }
 .textarea { resize: vertical; line-height: 1.75; }
 .input:focus, .textarea:focus, .select:focus { border-color: var(--primary-line); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22); }
 .textarea.bad, .input.bad { border-color: var(--error); }

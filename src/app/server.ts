@@ -16,6 +16,9 @@ import mammoth from 'mammoth';
 import { aiRevise, changeType, checkDraft, ensurePdf, pagesView, replacePhoto, saveText, toggleMirror, typeChoices, undo, versions } from './edit.js';
 import { createRun, deleteRun, estimateSeconds, estimateUsd, listRuns, monthCostUsd, recommendedSlides, recoverOnBoot, resumeRun, runDir, runView } from './runs.js';
 import { AppError, publicSettings, readSettings, ROOT, writeSettings } from './settings.js';
+import { errorText, type ErrorKey } from './errors.js';
+import { langFromHeader, runWithLang } from './i18n.js';
+import { templateName, typeLabel } from './words.js';
 import { ensureThumbs, getTemplate, listTemplates, typeThumb } from './templates.js';
 
 const app = new Hono();
@@ -31,15 +34,20 @@ if (!process.env.SLIDEGEN_PASSWORD && !['127.0.0.1', '::1', 'localhost'].include
 // 開いてよい宛先（Host）。この PC の名前と、公開するときに SLIDEGEN_HOSTS（カンマ区切り）で足した名前だけ。
 // ほかのサイトの画面から、この API を勝手に呼ばせない（DNS リバインディングと、別のサイトからの書き換えを断る）
 const allowedHosts = new Set(['127.0.0.1', 'localhost', '[::1]', ...(process.env.SLIDEGEN_HOSTS ?? '').split(',').map((h) => h.trim().toLowerCase()).filter(Boolean)]);
+// 画面の言語（X-UI-Lang）。その要求の間、画面に返す言葉をこの言語で作る
+const uiLang = (c: Context) => langFromHeader(c.req.header('x-ui-lang'));
+const fail = (c: Context, key: ErrorKey, status: 403 | 404 | 413 | 421 | 500, params?: Record<string, string>) => c.json({ error: errorText(key, uiLang(c), params) }, status);
+app.use('*', (c, next) => runWithLang(uiLang(c), next));
+
 app.use('*', async (c, next) => {
   const host = (c.req.header('host') ?? '').toLowerCase();
   const name = host.replace(/:\d+$/, '');
-  if (!allowedHosts.has(name)) return c.json({ error: 'この宛先からは開けません' }, 421);
+  if (!allowedHosts.has(name)) return fail(c, 'hostNotAllowed', 421);
   if (c.req.method !== 'GET' && c.req.method !== 'HEAD') {
     const site = c.req.header('sec-fetch-site');
     const origin = c.req.header('origin');
-    if (site && site !== 'same-origin' && site !== 'none') return c.json({ error: '別のサイトからの操作は受け付けません' }, 403);
-    if (origin && new URL(origin).host.toLowerCase() !== host) return c.json({ error: '別のサイトからの操作は受け付けません' }, 403);
+    if (site && site !== 'same-origin' && site !== 'none') return fail(c, 'crossSite', 403);
+    if (origin && new URL(origin).host.toLowerCase() !== host) return fail(c, 'crossSite', 403);
   }
   await next();
 });
@@ -51,25 +59,25 @@ if (process.env.SLIDEGEN_PASSWORD) {
 app.onError((e, c) => {
   // パスワードの確認で断ったとき（401）は、そのまま返す
   if (e instanceof HTTPException) return e.getResponse();
-  if (e instanceof AppError) return c.json({ error: e.message }, e.status as 400);
+  if (e instanceof AppError) return c.json({ error: e.text(uiLang(c)) }, e.status as 400);
   console.error(e);
-  return c.json({ error: `うまくいきませんでした：${e.message}` }, 500);
+  return fail(c, 'unexpected', 500, { message: e.message });
 });
 
 const num = (c: Context, k: string) => {
   const v = Number(c.req.param(k));
-  if (!Number.isInteger(v) || v < 1) throw new AppError('ページの番号が正しくありません');
+  if (!Number.isInteger(v) || v < 1) throw new AppError('badPageNumber');
   return v;
 };
 const MAX_UPLOAD = 25 * 1024 * 1024;
 async function fileBuf(f: unknown): Promise<{ name: string; data: Buffer } | null> {
   if (!(f instanceof File) || !f.size) return null;
-  if (f.size > MAX_UPLOAD) throw new AppError('ファイルが大きすぎます（25MB まで）');
+  if (f.size > MAX_UPLOAD) throw new AppError('fileTooLarge25');
   return { name: f.name, data: Buffer.from(await f.arrayBuffer()) };
 }
 
 // 読み込む前に大きさで断る（全部を読み込んでから断ると、その間にメモリを使い切る）
-const tooLarge = (c: Context) => c.json({ error: 'ファイルが大きすぎます' }, 413);
+const tooLarge = (c: Context) => fail(c, 'fileTooLarge', 413);
 app.use('/api/runs', bodyLimit({ maxSize: 200 * 1024 * 1024, onError: tooLarge }));
 app.use('/api/manuscript', bodyLimit({ maxSize: MAX_UPLOAD + 1024 * 1024, onError: tooLarge }));
 app.use('/api/runs/:id/pages/:n/photo', bodyLimit({ maxSize: MAX_UPLOAD + 1024 * 1024, onError: tooLarge }));
@@ -88,11 +96,11 @@ app.put('/api/settings', async (c) => {
   const b = await c.req.json<{ anthropicKey?: string; openaiKey?: string; monthlyBudgetUsd?: number; clear?: string[] }>();
   const patch: Record<string, unknown> = {};
   if (typeof b.anthropicKey === 'string' && b.anthropicKey.trim()) {
-    if (!b.anthropicKey.trim().startsWith('sk-ant-')) throw new AppError('Claude の鍵は「sk-ant-」で始まります。貼り付けた文字を確かめてください');
+    if (!b.anthropicKey.trim().startsWith('sk-ant-')) throw new AppError('badAnthropicKey');
     patch.anthropicKey = b.anthropicKey.trim();
   }
   if (typeof b.openaiKey === 'string' && b.openaiKey.trim()) {
-    if (!b.openaiKey.trim().startsWith('sk-')) throw new AppError('OpenAI の鍵は「sk-」で始まります。貼り付けた文字を確かめてください');
+    if (!b.openaiKey.trim().startsWith('sk-')) throw new AppError('badOpenaiKey');
     patch.openaiKey = b.openaiKey.trim();
   }
   if (typeof b.monthlyBudgetUsd === 'number' && b.monthlyBudgetUsd >= 0) patch.monthlyBudgetUsd = b.monthlyBudgetUsd;
@@ -109,12 +117,12 @@ app.get('/api/templates', async (c) => {
   return c.json(
     list.map((t) => ({
       id: t.id,
-      name: t.name,
+      name: templateName(t.id, t.name),
       ready: !!t.thumbs,
       cover: t.thumbs ? `/api/templates/${t.id}/types/${encodeURIComponent(t.catalog.types[0].key)}.png` : null,
       minSlides: t.cfg.deck.minSlides,
       maxSlides: t.cfg.deck.maxSlides,
-      types: t.catalog.types.map((x) => ({ key: x.key, label: x.label, image: t.thumbs ? `/api/templates/${t.id}/types/${encodeURIComponent(x.key)}.png` : null })),
+      types: t.catalog.types.map((x) => ({ key: x.key, label: typeLabel(x.key, x.label), image: t.thumbs ? `/api/templates/${t.id}/types/${encodeURIComponent(x.key)}.png` : null })),
     }))
   );
 });
@@ -131,12 +139,12 @@ app.get('/api/templates/:id/types/:key{.+\\.png}', async (c) => {
 app.post('/api/manuscript', async (c) => {
   const form = await c.req.formData();
   const f = await fileBuf(form.get('file'));
-  if (!f) throw new AppError('ファイルを選んでください');
+  if (!f) throw new AppError('chooseFile');
   const ext = path.extname(f.name).toLowerCase();
   let text: string;
   if (ext === '.docx') text = (await mammoth.extractRawText({ buffer: f.data })).value;
   else if (ext === '.md' || ext === '.txt') text = f.data.toString('utf8').replace(/^﻿/, '');
-  else throw new AppError('読み込めるのは Word（.docx）・テキスト（.txt）・マークダウン（.md）です');
+  else throw new AppError('manuscriptFormat');
   text = text.replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   return c.json({ text, title: path.basename(f.name, ext) });
 });
@@ -157,7 +165,7 @@ app.post('/api/runs', async (c) => {
   const form = await c.req.formData();
   const photos: Array<{ name: string; data: Buffer; description: string }> = [];
   const files = form.getAll('photos');
-  if (files.length > MAX_PHOTOS) throw new AppError(`写真は1回に${MAX_PHOTOS}枚までにしてください`);
+  if (files.length > MAX_PHOTOS) throw new AppError('tooManyPhotos', 400, { max: MAX_PHOTOS });
   const notes = form.getAll('photoNotes').map(String);
   for (const [i, f] of files.entries()) {
     const b = await fileBuf(f);
@@ -214,7 +222,7 @@ app.post('/api/runs/:id/pages/:n/mirror', async (c) => c.json(await toggleMirror
 app.post('/api/runs/:id/pages/:n/photo', async (c) => {
   const form = await c.req.formData();
   const f = await fileBuf(form.get('file'));
-  if (!f) throw new AppError('写真を選んでください');
+  if (!f) throw new AppError('choosePhoto');
   return c.json(await replacePhoto(c.req.param('id'), num(c, 'n'), String(form.get('slot') ?? ''), f));
 });
 app.get('/api/runs/:id/versions', (c) => c.json(versions(c.req.param('id'))));
@@ -246,11 +254,11 @@ function png(c: Context, f: string) {
 const TYPES: Record<string, string> = { '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 app.get('*', (c) => {
   const p = decodeURIComponent(new URL(c.req.url).pathname);
-  if (p.startsWith('/api/')) return c.json({ error: 'ありません' }, 404);
+  if (p.startsWith('/api/')) return fail(c, 'apiNotFound', 404);
   const f = path.join(WEB, path.normalize(p).replace(/^(\.\.[/\\])+/, ''));
   if (f.startsWith(WEB) && existsSync(f) && TYPES[path.extname(f)]) return c.body(readFileSync(f), 200, { 'content-type': TYPES[path.extname(f)], 'cache-control': p.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache' });
   const index = path.join(WEB, 'index.html');
-  if (!existsSync(index)) return c.text('画面がまだ組まれていません。npm run app:build を実行してください', 500);
+  if (!existsSync(index)) return c.text(errorText('webNotBuilt', uiLang(c)), 500);
   return c.html(readFileSync(index, 'utf8'));
 });
 

@@ -1,4 +1,5 @@
-/** サーバーの API。失敗したら、サーバーの日本語の理由をそのまま投げる */
+/** サーバーの API。失敗したら、サーバーの理由（画面の言語の文）をそのまま投げる。呼ぶたびに画面の言語を X-UI-Lang で伝える */
+import { getLang, tNow, type DeckLanguage, type PhotoPeople } from './i18n';
 
 export type Issue = {
   level: 'error' | 'warning';
@@ -34,6 +35,9 @@ export type RunView = {
   cover: string | null;
   pdfReady: boolean;
   canUndo: boolean;
+  templateId: string | null;
+  language: DeckLanguage;
+  people: PhotoPeople;
 };
 
 export type SlotView = { name: string; label: string; kind: string; text: string; maxChars: number | null; maxLines: number | null; perLine: number | null };
@@ -58,20 +62,21 @@ export type AppState = {
   usdJpy: number;
 };
 
-export type Estimate = { recommended: number; slides: number; seconds: number; usd: number; jpy: number; chars: number };
+export type Estimate = { recommended: number; slides: number; seconds: number; usd: number; jpy: number; chars: number; language: DeckLanguage };
 
 async function call<T>(method: string, url: string, body?: unknown): Promise<T> {
-  const init: RequestInit = { method };
+  const headers: Record<string, string> = { 'x-ui-lang': getLang() };
+  const init: RequestInit = { method, headers };
   if (body instanceof FormData) init.body = body;
   else if (body !== undefined) {
     init.body = JSON.stringify(body);
-    init.headers = { 'content-type': 'application/json' };
+    headers['content-type'] = 'application/json';
   }
   let res: Response;
   try {
     res = await fetch(url, init);
   } catch {
-    throw new Error('サーバーにつながりません。アプリが動いているかを確かめてください');
+    throw new Error(tNow().noServer);
   }
   const text = await res.text();
   let data: unknown = null;
@@ -80,7 +85,7 @@ async function call<T>(method: string, url: string, body?: unknown): Promise<T> 
   } catch {
     /* JSON でない */
   }
-  if (!res.ok) throw new Error((data as { error?: string } | null)?.error ?? `うまくいきませんでした（${res.status}）`);
+  if (!res.ok) throw new Error((data as { error?: string } | null)?.error ?? tNow().failedStatus(res.status));
   return data as T;
 }
 
@@ -99,7 +104,7 @@ export const api = {
   run: (id: string) => call<RunView>('GET', `/api/runs/${id}`),
   resume: (id: string) => call('POST', `/api/runs/${id}/resume`),
   remove: (id: string) => call('DELETE', `/api/runs/${id}`),
-  log: async (id: string) => (await fetch(`/api/runs/${id}/log`)).text(),
+  log: async (id: string) => (await fetch(`/api/runs/${id}/log`, { headers: langHeader() })).text(),
   pages: (id: string) => call<PageView[]>('GET', `/api/runs/${id}/pages`),
   types: (id: string, n: number) => call<TypeChoice[]>('GET', `/api/runs/${id}/pages/${n}/types`),
   check: (id: string, n: number, slots: Record<string, string>) => call<{ fits: Record<string, Fit>; issues: Issue[] }>('POST', `/api/runs/${id}/pages/${n}/check`, { slots }),
@@ -117,9 +122,12 @@ export const api = {
   undo: (id: string) => call<{ undone: string; pages: number[] }>('POST', `/api/runs/${id}/undo`),
 };
 
-export const yen = (usd: number, rate: number) => `約${Math.max(1, Math.round(usd * rate)).toLocaleString('ja-JP')}円`;
-export const minutes = (sec: number) => (sec < 90 ? `約${Math.max(10, Math.round(sec / 10) * 10)}秒` : `約${Math.round(sec / 60)}分`);
+/** fetch に付ける、画面の言語の見出し（API を直接 fetch するところでも付ける） */
+export const langHeader = () => ({ 'x-ui-lang': getLang() });
+
+export const yen = (usd: number, rate: number) => tNow().yen(Math.max(1, Math.round(usd * rate)));
+export const minutes = (sec: number) => (sec < 90 ? tNow().seconds(Math.max(10, Math.round(sec / 10) * 10)) : tNow().minutesText(Math.round(sec / 60)));
 export const dateText = (iso: string) => {
   const d = new Date(iso);
-  return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return tNow().date(d, `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
 };
