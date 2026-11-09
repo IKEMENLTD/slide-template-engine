@@ -27,8 +27,9 @@ const WEB = path.join(ROOT, 'web', 'dist');
 const port = Number(process.env.PORT ?? 8787);
 const hostname = process.env.HOST ?? '127.0.0.1';
 // この PC の中（127.0.0.1）以外に開くときは、パスワード無しでは起動しない（鍵の設定画面まで誰でも開けてしまうため）
-if (!process.env.SLIDEGEN_PASSWORD && !['127.0.0.1', '::1', 'localhost'].includes(hostname)) {
-  console.error(`HOST=${hostname} で開くときは SLIDEGEN_PASSWORD が必要です（パスワード無しでは起動しません）`);
+// パスワード無しで公開するのは、SLIDEGEN_NO_PASSWORD=1 を明示したときだけ（2026-10-27 ユーザー判断。サーバーに移しても同じ）
+if (!process.env.SLIDEGEN_PASSWORD && process.env.SLIDEGEN_NO_PASSWORD !== '1' && !['127.0.0.1', '::1', 'localhost'].includes(hostname)) {
+  console.error(`HOST=${hostname} で開くときは SLIDEGEN_PASSWORD が必要です（パスワード無しで開くなら SLIDEGEN_NO_PASSWORD=1 を明示）`);
   process.exit(1);
 }
 // 開いてよい宛先（Host）。この PC の名前と、公開するときに SLIDEGEN_HOSTS（カンマ区切り）で足した名前だけ。
@@ -51,6 +52,30 @@ app.use('*', async (c, next) => {
   }
   await next();
 });
+
+// 移し替えの入口（一度だけ使う）。SLIDEGEN_IMPORT_TOKEN を入れたときだけ有り、tar.gz をデータの置き場に展開する。使い終わったら環境変数を消す
+const importToken = process.env.SLIDEGEN_IMPORT_TOKEN ?? '';
+if (importToken.length >= 32) {
+  app.post('/api/_import', async (c) => {
+    const { timingSafeEqual } = await import('node:crypto');
+    const got = Buffer.from(c.req.header('x-import-token') ?? '');
+    const want = Buffer.from(importToken);
+    if (got.length !== want.length || !timingSafeEqual(got, want)) return c.json({ error: 'forbidden' }, 403);
+    const { spawn } = await import('node:child_process');
+    const { DATA } = await import('./settings.js');
+    // 本文はメモリに溜めずに tar へ流す（小さいサーバーでも落ちないように）
+    const { Readable } = await import('node:stream');
+    const { pipeline } = await import('node:stream/promises');
+    const { mkdirSync } = await import('node:fs');
+    mkdirSync(DATA, { recursive: true });
+    const p = spawn('tar', ['-xzf', '-', '-C', DATA, '--no-same-owner'], { stdio: ['pipe', 'inherit', 'inherit'] });
+    const done = new Promise<number>((resolve) => p.on('close', (n) => resolve(n ?? 1)));
+    if (c.req.raw.body) await pipeline(Readable.fromWeb(c.req.raw.body as never), p.stdin);
+    else p.stdin.end();
+    const code = await done;
+    return c.json({ ok: code === 0 }, code === 0 ? 200 : 500);
+  });
+}
 
 if (process.env.SLIDEGEN_PASSWORD) {
   app.use('*', basicAuth({ username: process.env.SLIDEGEN_USER ?? 'slidegen', password: process.env.SLIDEGEN_PASSWORD }));

@@ -25,5 +25,5 @@ RUN mkdir -p /data && chown node:node /data
 ENV SLIDEGEN_RENDER=local SLIDEGEN_DATA=/data HOST=0.0.0.0 PORT=8787 NODE_ENV=production ORT_DISABLE_TELEMETRY=1
 VOLUME /data
 EXPOSE 8787
-USER node
-CMD ["npx", "tsx", "src/app/server.ts"]
+# 置き場（/data）はサーバーが root の持ち物で付けることがある（Render のディスク）。起動時に node の持ち物にしてから、node に切り替えて動かす
+CMD ["sh", "-c", "mkdir -p /data && chown -R node:node /data && exec setpriv --reuid=node --regid=node --init-groups node --import tsx src/app/server.ts"]
